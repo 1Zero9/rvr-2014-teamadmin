@@ -87,4 +87,19 @@ export const auditLog = pgTable('audit_log', {
   index('idx_audit_log_created_at').on(table.createdAt),
 ]);
 
+export const photoAlbums = pgTable('photo_albums', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  shareUrl: text('share_url').notNull(),
+  coverUrl: text('cover_url').notNull(),
+  photoCount: integer('photo_count').notNull().default(0),
+  albumDate: text('album_date').notNull(),
+  photographer: text('photographer').notNull().default('Team Dad & Official Photographer'),
+  matchOpponent: text('match_opponent'),
+  createdAt: text('created_at').notNull(),
+}, (table) => [
+  index('idx_photo_albums_date').on(table.albumDate),
+  index('idx_photo_albums_created_at').on(table.createdAt),
+]);
+
 

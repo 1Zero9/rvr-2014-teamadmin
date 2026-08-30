@@ -2,208 +2,306 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { Camera, ChevronLeft, ChevronRight, Eye, Sparkles, X } from 'lucide-react';
+import {
+  Camera,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ExternalLink,
+  Eye,
+  Heart,
+  Image as ImageIcon,
+  Layers,
+  Plus,
+  Sparkles,
+  User,
+  X,
+} from 'lucide-react';
+import { PhotoAlbum } from '../lib/photos-data';
 
-interface Photo {
-  id: string;
-  title: string;
-  category: 'matches' | 'tournaments' | 'training' | 'socials';
-  date: string;
-  caption: string;
-  aspect: string;
-  bgColor: string;
-  accent: string;
+interface GallerySectionProps {
+  initialAlbums: PhotoAlbum[];
 }
 
-const PHOTOS: Photo[] = [
-  {
-    id: '1',
-    title: 'Saturday DDSL League Opener',
-    category: 'matches',
-    date: 'Rivervalley Park · Pitch 1',
-    caption: 'Great team press and quick transition play in the second half under the September sun.',
-    aspect: '3/2',
-    bgColor: 'linear-gradient(135deg, #071a33 0%, #153c70 100%)',
-    accent: '#3b82f6',
-  },
-  {
-    id: '2',
-    title: 'Fingal Cup Semi-Final Victory',
-    category: 'tournaments',
-    date: 'AUL Complex Dublin',
-    caption: 'Squad celebrating after a hard-fought 2-1 victory to advance into the Cup Final.',
-    aspect: '4/3',
-    bgColor: 'linear-gradient(135deg, #063428 0%, #0d5f47 100%)',
-    accent: '#10b981',
-  },
-  {
-    id: '3',
-    title: 'Tuesday Evening Agility & Shooting',
-    category: 'training',
-    date: 'Rivervalley Astro',
-    caption: 'High intensity 1v1 finishing drills focusing on inside-curl strikes into the corner netting.',
-    aspect: '1/1',
-    bgColor: 'linear-gradient(135deg, #2b1a4a 0%, #4a287e 100%)',
-    accent: '#8b5cf6',
-  },
-  {
-    id: '4',
-    title: 'End-of-Year Presentation & Awards',
-    category: 'socials',
-    date: 'Rivervalley Community Pavilion',
-    caption: 'Celebrating our players’ commitment, respect, and incredible team progress throughout the season.',
-    aspect: '3/2',
-    bgColor: 'linear-gradient(135deg, #422006 0%, #78350f 100%)',
-    accent: '#f59e0b',
-  },
-  {
-    id: '5',
-    title: 'Defensive Line Drill & High Press',
-    category: 'training',
-    date: 'Pitch 2 Training Area',
-    caption: 'Working on compact defensive shape and triggering the midfield trap when opponents play wide.',
-    aspect: '4/3',
-    bgColor: 'linear-gradient(135deg, #0b2942 0%, #1a4971 100%)',
-    accent: '#0ea5e9',
-  },
-  {
-    id: '6',
-    title: 'Swords Summer Blitz Trophy Lift',
-    category: 'tournaments',
-    date: 'ALSAA Sports Complex',
-    caption: 'Undefeated blitz run against 6 local squads — proud day for Rivervalley Rangers AFC!',
-    aspect: '3/2',
-    bgColor: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-    accent: '#6366f1',
-  },
-];
+export function GallerySection({ initialAlbums }: GallerySectionProps) {
+  const [albums, setAlbums] = useState<PhotoAlbum[]>(initialAlbums);
+  const [activeAlbum, setActiveAlbum] = useState<PhotoAlbum | null>(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newUrl, setNewUrl] = useState('');
+  const [newTitle, setNewTitle] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMsg, setSubmitMsg] = useState<string | null>(null);
 
-const CATEGORIES = [
-  { id: 'all', label: 'All Moments' },
-  { id: 'matches', label: 'Matchday Action' },
-  { id: 'tournaments', label: 'Cups & Blitzes' },
-  { id: 'training', label: 'Training Sessions' },
-  { id: 'socials', label: 'Team Socials' },
-];
+  const openViewer = (album: PhotoAlbum, startIndex: number = 0) => {
+    setActiveAlbum(album);
+    setActivePhotoIndex(startIndex);
+  };
 
-export function GallerySection() {
-  const [filter, setFilter] = useState<string>('all');
-  const [activePhoto, setActivePhoto] = useState<Photo | null>(null);
+  const closeViewer = () => {
+    setActiveAlbum(null);
+    setActivePhotoIndex(0);
+  };
 
-  const filteredPhotos =
-    filter === 'all'
-      ? PHOTOS
-      : PHOTOS.filter((p) => p.category === filter);
+  const handleNext = () => {
+    if (!activeAlbum || !activeAlbum.samplePhotos) return;
+    setActivePhotoIndex((prev) => (prev + 1) % activeAlbum.samplePhotos!.length);
+  };
+
+  const handlePrev = () => {
+    if (!activeAlbum || !activeAlbum.samplePhotos) return;
+    setActivePhotoIndex((prev) =>
+      prev === 0 ? activeAlbum.samplePhotos!.length - 1 : prev - 1
+    );
+  };
+
+  const handleAddAlbum = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUrl) return;
+
+    setIsSubmitting(true);
+    setSubmitMsg('Resolving Google Photos album...');
+    try {
+      const res = await fetch('/api/photos/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shareUrl: newUrl,
+          title: newTitle || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.album) {
+        setAlbums((prev) => [data.album, ...prev]);
+        setSubmitMsg('Album added successfully!');
+        setNewUrl('');
+        setNewTitle('');
+        setTimeout(() => {
+          setIsAdding(false);
+          setSubmitMsg(null);
+        }, 1500);
+      } else {
+        setSubmitMsg(`Error: ${data.error || 'Could not parse album'}`);
+      }
+    } catch {
+      setSubmitMsg('Failed to connect to album service.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <section className="public-section" id="photos">
+    <section className="public-section" id="photos-gallery">
       <div className="section-container">
         <div className="section-head">
           <div className="section-pill">
-            <Camera size={14} /> TEAM PHOTO GALLERY
+            <Camera size={14} /> OFFICIAL GOOGLE PHOTOS ALBUMS
           </div>
-          <h2>Matchday Memories & Highlights</h2>
+          <h2>Matchday Action & Squad Moments</h2>
           <p>
-            Action snapshots, tournament celebrations, training milestones, and squad camaraderie for RVR 2014.
+            High-resolution action shots and celebration galleries captured by our team photographer. Browse photos directly on the site or open in Google Photos for full raw downloads!
           </p>
         </div>
 
-        {/* Filter Buttons */}
-        <div className="filter-bar">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              className={`filter-tab ${filter === cat.id ? 'active' : ''}`}
-              onClick={() => setFilter(cat.id)}
-            >
-              {cat.label}
-            </button>
-          ))}
+        {/* Gallery Action Bar */}
+        <div className="gallery-action-bar">
+          <div className="gallery-stats-badge">
+            <ImageIcon size={15} />
+            <span>
+              <strong>{albums.length} Match Albums</strong> · Hosted on Google Photos Cloud
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="add-album-trigger-btn"
+            onClick={() => setIsAdding(!isAdding)}
+          >
+            <Plus size={15} />
+            <span>Add New Google Photos Album</span>
+          </button>
         </div>
 
-        {/* Gallery Grid */}
-        <div className="gallery-grid">
-          {filteredPhotos.map((photo) => (
-            <article
-              key={photo.id}
-              className="gallery-card"
-              onClick={() => setActivePhoto(photo)}
-            >
-              <div
-                className="gallery-image-box"
-                style={{ background: photo.bgColor }}
+        {/* Add Album Form Drawer */}
+        {isAdding && (
+          <div className="add-album-card">
+            <div className="add-album-head">
+              <h4>Add New Google Photos Shared Album</h4>
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="close-drawer-btn"
               >
-                <div className="gallery-badge-crest">
-                  <Image
-                    src="/rvr-white.png"
-                    width={40}
-                    height={40}
-                    alt="RVR badge"
-                  />
+                <X size={16} />
+              </button>
+            </div>
+            <p className="text-xs text-slate-500 mb-3">
+              Paste the Google Photos shared link (e.g. <code>https://photos.app.goo.gl/...</code>). The site will automatically fetch the title, photo count, and cover image.
+            </p>
+            <form onSubmit={handleAddAlbum} className="add-album-form">
+              <input
+                type="url"
+                placeholder="https://photos.app.goo.gl/..."
+                value={newUrl}
+                onChange={(e) => setNewUrl(e.target.value)}
+                required
+                className="album-url-input"
+              />
+              <input
+                type="text"
+                placeholder="Optional custom title (e.g. vs St Kevin's Boys)"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                className="album-title-input"
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="submit-album-btn"
+              >
+                {isSubmitting ? 'Parsing...' : 'Save & Publish Album'}
+              </button>
+            </form>
+            {submitMsg && <p className="submit-feedback-msg">{submitMsg}</p>}
+          </div>
+        )}
+
+        {/* Albums Grid */}
+        <div className="albums-grid">
+          {albums.map((album) => (
+            <article key={album.id} className="album-card">
+              <div
+                className="album-cover-wrap"
+                onClick={() => openViewer(album, 0)}
+              >
+                <img
+                  src={album.coverUrl}
+                  alt={album.title}
+                  className="album-cover-img"
+                  loading="lazy"
+                />
+                <div className="album-overlay-hover">
+                  <div className="view-badge">
+                    <Eye size={16} />
+                    <span>View {album.photoCount} Photos</span>
+                  </div>
                 </div>
-                <div className="gallery-hover-overlay">
-                  <Eye size={24} />
-                  <span>View Details</span>
-                </div>
+                <span className="album-count-badge">
+                  <Layers size={13} /> {album.photoCount} HD Photos
+                </span>
+                <span className="album-date-badge">{album.albumDate}</span>
               </div>
 
-              <div className="gallery-card-content">
-                <div className="gallery-card-top">
-                  <span className="gallery-cat-tag">{photo.category}</span>
-                  <small>{photo.date}</small>
+              <div className="album-info-body">
+                <h3 onClick={() => openViewer(album, 0)}>{album.title}</h3>
+                <div className="album-meta-row">
+                  <span className="photographer-credit">
+                    <Camera size={12} /> {album.photographer}
+                  </span>
                 </div>
-                <h3>{photo.title}</h3>
-                <p>{photo.caption}</p>
+
+                <div className="album-button-group">
+                  <button
+                    type="button"
+                    className="album-view-btn"
+                    onClick={() => openViewer(album, 0)}
+                  >
+                    <Eye size={14} />
+                    <span>Browse Photos</span>
+                  </button>
+
+                  <a
+                    href={album.shareUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="album-google-btn"
+                  >
+                    <span>Google Photos HD</span>
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
               </div>
             </article>
           ))}
         </div>
 
-        {/* Lightbox Modal */}
-        {activePhoto && (
-          <div className="modal-backdrop" onClick={() => setActivePhoto(null)}>
-            <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="gallery-modal-header">
+        {/* In-Site Lightbox Photo Viewer Modal */}
+        {activeAlbum && activeAlbum.samplePhotos && activeAlbum.samplePhotos.length > 0 && (
+          <div className="photo-lightbox-modal" onClick={closeViewer}>
+            <div
+              className="lightbox-content-box"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Lightbox Header */}
+              <div className="lightbox-topbar">
                 <div>
-                  <span className="modal-tag">{activePhoto.date}</span>
-                  <h3>{activePhoto.title}</h3>
+                  <h4>{activeAlbum.title}</h4>
+                  <small>
+                    Photo {activePhotoIndex + 1} of {activeAlbum.samplePhotos.length} · {activeAlbum.photographer}
+                  </small>
                 </div>
+                <div className="lightbox-actions">
+                  <a
+                    href={activeAlbum.shareUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="lightbox-ext-btn"
+                  >
+                    <Download size={13} />
+                    <span>Download Full Resolution on Google</span>
+                    <ExternalLink size={12} />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={closeViewer}
+                    className="lightbox-close-btn"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Photo Display */}
+              <div className="lightbox-main-stage">
                 <button
                   type="button"
-                  className="modal-close"
-                  onClick={() => setActivePhoto(null)}
+                  className="lightbox-nav-arrow left"
+                  onClick={handlePrev}
+                  aria-label="Previous photo"
                 >
-                  <X size={20} />
+                  <ChevronLeft size={28} />
+                </button>
+
+                <div className="lightbox-photo-wrap">
+                  <img
+                    src={activeAlbum.samplePhotos[activePhotoIndex]}
+                    alt={`${activeAlbum.title} photo ${activePhotoIndex + 1}`}
+                    className="lightbox-img"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className="lightbox-nav-arrow right"
+                  onClick={handleNext}
+                  aria-label="Next photo"
+                >
+                  <ChevronRight size={28} />
                 </button>
               </div>
 
-              <div
-                className="gallery-modal-preview"
-                style={{ background: activePhoto.bgColor }}
-              >
-                <Image
-                  src="/rvr-white.png"
-                  width={90}
-                  height={90}
-                  alt="RVR Crest"
-                  className="modal-crest-center"
-                />
-                <div className="preview-watermark">RVR 2014 SQUAD HIGHLIGHT</div>
-              </div>
-
-              <div className="gallery-modal-body">
-                <p>{activePhoto.caption}</p>
-                <div className="gallery-modal-footer">
-                  <span>Rivervalley Rangers AFC · 2026/27 Season</span>
+              {/* Thumbnail Scroller */}
+              <div className="lightbox-thumbs-rail">
+                {activeAlbum.samplePhotos.map((photo, idx) => (
                   <button
+                    key={idx}
                     type="button"
-                    className="gallery-close-btn"
-                    onClick={() => setActivePhoto(null)}
+                    className={`thumb-btn ${idx === activePhotoIndex ? 'active' : ''}`}
+                    onClick={() => setActivePhotoIndex(idx)}
                   >
-                    Close Preview
+                    <img src={photo} alt={`Thumb ${idx + 1}`} />
                   </button>
-                </div>
+                ))}
               </div>
             </div>
           </div>
