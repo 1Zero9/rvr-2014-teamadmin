@@ -25,8 +25,10 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
+import { MatchdayCountdown } from './components/matchday-countdown';
 import { PublicFooter } from './components/public-footer';
 import { PublicHeader } from './components/public-header';
+import { WeeklyChallenge } from './components/weekly-challenge';
 import { getCurrentMember } from './lib/authz';
 import { fetchLiveDdslLeagueData } from './lib/ddsl-live';
 
@@ -67,8 +69,8 @@ export default async function HomePage() {
     },
     {
       id: 'skills',
-      title: 'Skills & Video Drills',
-      badge: 'Masterclass',
+      title: 'Skills Vault & Video Drills',
+      badge: 'Video Masterclass',
       pillColor: 'cyan',
       icon: Play,
       desc: 'High-energy video tutorials for 1v1 moves, sharp turns, quick footwork, and top-corner finishing.',
@@ -172,12 +174,18 @@ export default async function HomePage() {
           </div>
 
           <h1 className="hero-title">
-            Rivervalley Rangers <span>U13 MAJOR 1</span>
+            Rivervalley Rangers
+            <span>U13 MAJOR 1</span>
           </h1>
 
           <p className="hero-subtitle">
             The official player development and matchday hub for the RVR 2014 squad. Skills drills, live DDSL scores, match preparation, and team directions.
           </p>
+
+          {/* Live Matchday Countdown Timer */}
+          <div className="flex justify-center mb-6">
+            <MatchdayCountdown opponent={nextFixture.opponent} venue={nextFixture.venue} />
+          </div>
 
           <div className="hero-cta-group">
             <Link href="/fixtures" className="hero-btn hero-btn-primary">
@@ -295,6 +303,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Interactive Weekly Skill Challenge (Youth Player-First Hub) */}
+      <WeeklyChallenge />
 
       {/* Hub Sections Directory */}
       <section className="public-section">
