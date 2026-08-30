@@ -52,6 +52,29 @@ export const ideas = pgTable('ideas', {
   index('idx_ideas_created_at').on(table.createdAt),
 ]);
 
+export const matches = pgTable('matches', {
+  id: text('id').primaryKey(),
+  opponent: text('opponent').notNull(),
+  competition: text('competition').notNull(),
+  matchDate: text('match_date').notNull(),
+  kickoffTime: text('kickoff_time').notNull(),
+  venue: text('venue').notNull(),
+  homeAway: text('home_away', { enum: ['home', 'away', 'neutral'] }).notNull().default('home'),
+  status: text('status', { enum: ['upcoming', 'completed', 'postponed'] }).notNull().default('upcoming'),
+  rvrGoals: integer('rvr_goals'),
+  opponentGoals: integer('opponent_goals'),
+  scorers: text('scorers'),
+  potm: text('potm'),
+  matchNotes: text('match_notes'),
+  ddslMatchId: text('ddsl_match_id'),
+  syncedAt: text('synced_at').notNull(),
+  createdAt: text('created_at').notNull(),
+}, (table) => [
+  index('idx_matches_match_date').on(table.matchDate),
+  index('idx_matches_status').on(table.status),
+  index('idx_matches_competition').on(table.competition),
+]);
+
 export const auditLog = pgTable('audit_log', {
   id: text('id').primaryKey(),
   actorId: text('actor_id').notNull(),
@@ -63,3 +86,5 @@ export const auditLog = pgTable('audit_log', {
 }, (table) => [
   index('idx_audit_log_created_at').on(table.createdAt),
 ]);
+
+

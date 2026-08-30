@@ -32,6 +32,7 @@ export function PublicFooter() {
           <div className="footer-links-col">
             <h4>Squad Sections</h4>
             <ul>
+              <li><Link href="/fixtures">Fixtures & Results</Link></li>
               <li><Link href="/skills">Skills & Drills Vault</Link></li>
               <li><Link href="/training">Training & Kit Guide</Link></li>
               <li><Link href="/sc">Strength & Conditioning</Link></li>

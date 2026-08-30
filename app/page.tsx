@@ -18,6 +18,7 @@ import {
   MapPin,
   Medal,
   Play,
+  RefreshCw,
   Shield,
   Sparkles,
   Trophy,
@@ -27,13 +28,29 @@ import {
 import { PublicFooter } from './components/public-footer';
 import { PublicHeader } from './components/public-header';
 import { getCurrentMember } from './lib/authz';
+import { getMatchesFromDb } from './lib/matches';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const currentMember = await getCurrentMember();
+  const allMatches = await getMatchesFromDb();
+
+  const latestResult = allMatches.find((m) => m.status === 'completed');
+  const nextFixture = allMatches.find((m) => m.status === 'upcoming');
 
   const HUB_SECTIONS = [
+    {
+      id: 'fixtures',
+      title: 'Fixtures & Results',
+      badge: 'Live DDSL Centre',
+      pillColor: 'amber',
+      icon: Trophy,
+      desc: 'Real-time DDSL match outcomes, goalscorers, upcoming kick-offs, and official division league table.',
+      highlights: ['Automated DDSL Match Sync', 'Full Division Standings & Form', 'Goalscorers & Player of Match'],
+      href: '/fixtures',
+      btnText: 'View Fixtures & Standings',
+    },
     {
       id: 'skills',
       title: 'Skills & Drills Vault',
@@ -94,7 +111,7 @@ export default async function HomePage() {
       title: 'Cups & Tournaments',
       badge: 'DDSL Central',
       pillColor: 'amber',
-      icon: Trophy,
+      icon: Medal,
       desc: 'Knockout cup format, extra time rules, penalty shootout protocols, blitzes, and squad travel preparation.',
       highlights: ['DDSL Cup Knockout Rules', 'Fingal Blitzes & Tours', 'Squad Travel Packing List'],
       href: '/tournaments',
@@ -149,11 +166,14 @@ export default async function HomePage() {
           </p>
 
           <div className="hero-cta-group">
-            <Link href="/skills" className="hero-btn hero-btn-primary">
-              <Play size={16} fill="currentColor" /> Explore Skills Vault
+            <Link href="/fixtures" className="hero-btn hero-btn-primary">
+              <Trophy size={16} /> Fixtures & Results
+            </Link>
+            <Link href="/skills" className="hero-btn hero-btn-secondary">
+              <Play size={16} fill="currentColor" /> Skills Vault
             </Link>
             <Link href="/venues" className="hero-btn hero-btn-secondary">
-              <Compass size={16} /> Pitch Venues & Directions
+              <Compass size={16} /> Pitch GPS
             </Link>
             <Link
               href={currentMember ? '/portal' : '/login'}
@@ -167,6 +187,16 @@ export default async function HomePage() {
 
           {/* Quick Highlights Bar */}
           <div className="hero-highlights-bar">
+            <div className="highlight-stat">
+              <div className="stat-icon amber">
+                <Trophy size={20} />
+              </div>
+              <div>
+                <strong>DDSL Results Live</strong>
+                <span>Division Table & Scores</span>
+              </div>
+            </div>
+
             <div className="highlight-stat">
               <div className="stat-icon blue">
                 <Play size={20} />
@@ -188,16 +218,6 @@ export default async function HomePage() {
             </div>
 
             <div className="highlight-stat">
-              <div className="stat-icon amber">
-                <Apple size={20} />
-              </div>
-              <div>
-                <strong>Matchday Fueling</strong>
-                <span>Pre-Match Timelines & Meals</span>
-              </div>
-            </div>
-
-            <div className="highlight-stat">
               <div className="stat-icon purple">
                 <MapPin size={20} />
               </div>
@@ -205,6 +225,64 @@ export default async function HomePage() {
                 <strong>Interactive Pitch GPS</strong>
                 <span>5 Venues with Directions</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Live Matchday Strip */}
+      <section className="matchday-live-strip">
+        <div className="section-container">
+          <div className="matchday-strip-inner">
+            {/* Latest Result Item */}
+            {latestResult && (
+              <div className="ticker-card result">
+                <div className="ticker-badge win">
+                  <span>LATEST RESULT</span>
+                </div>
+                <div className="ticker-content">
+                  <div className="ticker-scoreline">
+                    <strong>
+                      {latestResult.homeAway === 'home'
+                        ? `RVR AFC ${latestResult.rvrGoals} - ${latestResult.opponentGoals} ${latestResult.opponent}`
+                        : `${latestResult.opponent} ${latestResult.opponentGoals} - ${latestResult.rvrGoals} RVR AFC`}
+                    </strong>
+                    <span className="ticker-ft-tag">FT (WON)</span>
+                  </div>
+                  {latestResult.scorers && (
+                    <small className="ticker-scorers">
+                      ⚽ {latestResult.scorers}
+                    </small>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Next Fixture Item */}
+            {nextFixture && (
+              <div className="ticker-card fixture">
+                <div className="ticker-badge next">
+                  <span>NEXT FIXTURE</span>
+                </div>
+                <div className="ticker-content">
+                  <div className="ticker-scoreline">
+                    <strong>vs {nextFixture.opponent}</strong>
+                    <span className="ticker-time-tag">
+                      {nextFixture.matchDate} · {nextFixture.kickoffTime}
+                    </span>
+                  </div>
+                  <small className="ticker-venue">
+                    📍 {nextFixture.venue}
+                  </small>
+                </div>
+              </div>
+            )}
+
+            <div className="ticker-action-wrap">
+              <Link href="/fixtures" className="ticker-full-btn">
+                <span>All Fixtures & Table</span>
+                <ChevronRight size={15} />
+              </Link>
             </div>
           </div>
         </div>
@@ -271,11 +349,11 @@ export default async function HomePage() {
                 Make sure you have your hydration started 24 hours prior, your shin guards and boots packed, and check your pitch location arrival time.
               </p>
               <div className="spotlight-buttons">
-                <Link href="/training" className="spotlight-btn primary">
-                  <Calendar size={16} /> Check Kit Checklist
+                <Link href="/fixtures" className="spotlight-btn primary">
+                  <Trophy size={16} /> Check Fixture & Pitch
                 </Link>
-                <Link href="/nutrition" className="spotlight-btn secondary">
-                  <Apple size={16} /> View Pre-Match Meal Timeline
+                <Link href="/training" className="spotlight-btn secondary">
+                  <Calendar size={16} /> Check Kit Checklist
                 </Link>
               </div>
             </div>

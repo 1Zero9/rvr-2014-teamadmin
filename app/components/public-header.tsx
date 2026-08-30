@@ -18,6 +18,7 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
   }, []);
 
   const navLinks = [
+    { label: 'Fixtures & Results', href: '/fixtures' },
     { label: 'Skills & Drills', href: '/skills' },
     { label: 'Training & Kit', href: '/training' },
     { label: 'S & C', href: '/sc' },
