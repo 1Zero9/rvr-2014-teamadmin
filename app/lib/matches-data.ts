@@ -1,6 +1,10 @@
 export interface MatchRecord {
   id: string;
   opponent: string;
+  homeTeam?: string;
+  awayTeam?: string;
+  homeScore?: number | null;
+  awayScore?: number | null;
   competition: string;
   matchDate: string;
   kickoffTime: string;

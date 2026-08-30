@@ -261,11 +261,43 @@ export function FixturesSection({
           <div className="matches-grid">
             {displayedMatches.map((match) => {
               const isCompleted = match.status === 'completed';
-              const isWin = isCompleted && (match.rvrGoals ?? 0) > (match.opponentGoals ?? 0);
-              const isDraw = isCompleted && (match.rvrGoals ?? 0) === (match.opponentGoals ?? 0);
-              const isLoss = isCompleted && (match.rvrGoals ?? 0) < (match.opponentGoals ?? 0);
 
-              const isDirectRvr = match.homeAway === 'home' || match.homeAway === 'away';
+              let homeTeamName = match.homeTeam;
+              let awayTeamName = match.awayTeam;
+              let homeScoreVal = match.homeScore;
+              let awayScoreVal = match.awayScore;
+
+              if (!homeTeamName || !awayTeamName) {
+                if (match.homeAway === 'home') {
+                  homeTeamName = 'River Valley Rangers FC';
+                  awayTeamName = match.opponent;
+                  homeScoreVal = match.rvrGoals;
+                  awayScoreVal = match.opponentGoals;
+                } else if (match.homeAway === 'away') {
+                  homeTeamName = match.opponent;
+                  awayTeamName = 'River Valley Rangers FC';
+                  homeScoreVal = match.opponentGoals;
+                  awayScoreVal = match.rvrGoals;
+                } else {
+                  const parts = match.opponent.split(' vs ');
+                  homeTeamName = parts[0] || match.opponent;
+                  awayTeamName = parts[1] || 'Opponent';
+                  homeScoreVal = match.rvrGoals;
+                  awayScoreVal = match.opponentGoals;
+                }
+              }
+
+              const isHomeRvr = homeTeamName.toLowerCase().includes('river valley') || homeTeamName.toLowerCase().includes('rivervalley');
+              const isAwayRvr = awayTeamName.toLowerCase().includes('river valley') || awayTeamName.toLowerCase().includes('rivervalley');
+              const isDirectRvr = isHomeRvr || isAwayRvr;
+
+              const isWin = isCompleted && isDirectRvr && (
+                isHomeRvr
+                  ? (homeScoreVal ?? 0) > (awayScoreVal ?? 0)
+                  : (awayScoreVal ?? 0) > (homeScoreVal ?? 0)
+              );
+              const isDraw = isCompleted && isDirectRvr && (homeScoreVal ?? 0) === (awayScoreVal ?? 0);
+              const isLoss = isCompleted && isDirectRvr && !isWin && !isDraw;
 
               return (
                 <article
@@ -283,42 +315,21 @@ export function FixturesSection({
 
                   {/* Teams & Score Strip */}
                   <div className="match-teams-box">
-                    {isDirectRvr ? (
-                      <>
-                        <div className={`match-team-row ${match.homeAway === 'home' ? 'is-rvr' : ''}`}>
-                          <span className="team-role-tag">{match.homeAway === 'home' ? 'HOME' : 'AWAY'}</span>
-                          <strong className="team-name">
-                            {match.homeAway === 'home' ? 'River Valley Rangers FC' : match.opponent}
-                          </strong>
-                          {isCompleted && (
-                            <span className="team-score-box">
-                              {match.homeAway === 'home' ? match.rvrGoals : match.opponentGoals}
-                            </span>
-                          )}
-                        </div>
+                    <div className={`match-team-row ${isHomeRvr ? 'is-rvr' : ''}`}>
+                      <span className="team-role-tag">HOME</span>
+                      <strong className="team-name">{homeTeamName}</strong>
+                      {isCompleted && homeScoreVal !== null && homeScoreVal !== undefined && (
+                        <span className="team-score-box">{homeScoreVal}</span>
+                      )}
+                    </div>
 
-                        <div className={`match-team-row ${match.homeAway === 'away' ? 'is-rvr' : ''}`}>
-                          <span className="team-role-tag">{match.homeAway === 'away' ? 'HOME' : 'AWAY'}</span>
-                          <strong className="team-name">
-                            {match.homeAway === 'away' ? 'River Valley Rangers FC' : match.opponent}
-                          </strong>
-                          {isCompleted && (
-                            <span className="team-score-box">
-                              {match.homeAway === 'away' ? match.rvrGoals : match.opponentGoals}
-                            </span>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="match-team-row">
-                        <strong className="team-name">{match.opponent}</strong>
-                        {isCompleted && (
-                          <span className="team-score-box">
-                            {match.rvrGoals} - {match.opponentGoals}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    <div className={`match-team-row ${isAwayRvr ? 'is-rvr' : ''}`}>
+                      <span className="team-role-tag">AWAY</span>
+                      <strong className="team-name">{awayTeamName}</strong>
+                      {isCompleted && awayScoreVal !== null && awayScoreVal !== undefined && (
+                        <span className="team-score-box">{awayScoreVal}</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Match Info Strip */}

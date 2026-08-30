@@ -88,9 +88,16 @@ export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Prom
           }
         }
 
+        const parsedHomeScore = homescore !== '' ? parseInt(homescore, 10) : null;
+        const parsedAwayScore = awayscore !== '' ? parseInt(awayscore, 10) : null;
+
         parsedMatches.push({
           id: `ddsl-${leagueId}-${idx++}`,
           opponent: isRvrHome || isRvrAway ? opponent : `${hometeam} vs ${awayteam}`,
+          homeTeam: hometeam,
+          awayTeam: awayteam,
+          homeScore: parsedHomeScore,
+          awayScore: parsedAwayScore,
           competition: compname,
           matchDate: date,
           kickoffTime: time === '00:00' ? 'TBC' : time,

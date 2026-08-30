@@ -4131,8 +4131,8 @@ a {
 
 .match-teams-box {
   display: grid;
-  gap: 8px;
-  padding: 12px 14px;
+  gap: 6px;
+  padding: 10px 12px;
   border-radius: 10px;
   background: #f8fafc;
   border: 1px solid #f1f5f9;
@@ -4142,36 +4142,53 @@ a {
 .match-team-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.match-team-row.is-rvr {
+  background: #eff6ff;
+  border-radius: 6px;
+  padding: 2px 6px;
 }
 
 .match-team-row.is-rvr strong {
-  color: var(--blue);
+  color: #1d4ed8 !important;
 }
 
 .team-role-tag {
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
   background: #e2e8f0;
-  color: #64748b;
+  color: #475569;
   font-size: 9px;
   font-weight: 750;
-  width: 42px;
+  letter-spacing: 0.04em;
+  width: 44px;
   text-align: center;
+  flex-shrink: 0;
+}
+
+.match-team-row.is-rvr .team-role-tag {
+  background: #2563eb;
+  color: #ffffff;
 }
 
 .team-name {
   font-size: 13px;
   color: #0f172a;
   flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 650;
 }
 
 .team-score-box {
-  width: 24px;
+  min-width: 24px;
   height: 24px;
+  padding: 0 5px;
   border-radius: 6px;
   background: #071a33;
   color: #ffffff;
@@ -4179,6 +4196,7 @@ a {
   font-weight: 800;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
 }
 
 .match-meta-stack {
