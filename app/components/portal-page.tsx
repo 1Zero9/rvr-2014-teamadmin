@@ -58,8 +58,8 @@ export function PortalPage({
             alt="Rivervalley Rangers AFC crest"
           />
           <div>
-            <strong>RVR 2014</strong>
-            <span>Team Admin & Fund</span>
+            <strong>RVR U13 Major 1</strong>
+            <span>2014 Squad · Team Portal</span>
           </div>
         </Link>
         <nav aria-label="Portal main navigation">

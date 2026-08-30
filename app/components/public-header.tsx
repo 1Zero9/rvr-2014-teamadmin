@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Lock, Menu, X } from 'lucide-react';
+import { Lock, Menu, Trophy, X } from 'lucide-react';
 
 export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,20 +11,20 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 15);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navLinks = [
-    { label: 'Fixtures & Results', href: '/fixtures' },
-    { label: 'Skills & Drills', href: '/skills' },
+    { label: 'Fixtures & Table', href: '/fixtures' },
+    { label: 'Skills Vault', href: '/skills' },
     { label: 'Training & Kit', href: '/training' },
-    { label: 'S & C', href: '/sc' },
-    { label: 'Nutrition', href: '/nutrition' },
-    { label: 'Pitch Venues', href: '/venues' },
-    { label: 'Cups & Tournaments', href: '/tournaments' },
+    { label: 'Speed & S&C', href: '/sc' },
+    { label: 'Game Fuel', href: '/nutrition' },
+    { label: 'Pitch GPS', href: '/venues' },
+    { label: 'Cups & Blitzes', href: '/tournaments' },
     { label: 'Photos', href: '/photos' },
   ];
 
@@ -35,16 +35,16 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
           <div className="crest-box">
             <Image
               src="/rvr-white.png"
-              width={44}
-              height={44}
+              width={42}
+              height={42}
               alt="Rivervalley Rangers AFC crest"
               priority
             />
           </div>
           <div className="brand-text">
             <div className="brand-title">
-              <strong>RVR 2014</strong>
-              <span className="squad-tag">DDSL SQUAD</span>
+              <strong>RVR U13</strong>
+              <span className="squad-tag">MAJOR 1 · 2014</span>
             </div>
             <small>Rivervalley Rangers AFC · Swords</small>
           </div>
@@ -65,8 +65,8 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
             href={isAuthenticated ? '/portal' : '/login'}
             className="portal-cta-btn"
           >
-            <Lock size={15} />
-            <span>{isAuthenticated ? 'Open Team Portal' : 'Team Portal & Accounts'}</span>
+            <Lock size={14} />
+            <span>{isAuthenticated ? 'Team Portal' : 'Parent & Coach Portal'}</span>
           </Link>
 
           <button
@@ -99,8 +99,8 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
               className="mobile-portal-btn"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Lock size={16} />
-              <span>{isAuthenticated ? 'Team Portal Dashboard' : 'Team Portal & Accounts Login'}</span>
+              <Lock size={15} />
+              <span>{isAuthenticated ? 'Open Team Portal' : 'Parent & Coach Portal Login'}</span>
             </Link>
           </nav>
         </div>

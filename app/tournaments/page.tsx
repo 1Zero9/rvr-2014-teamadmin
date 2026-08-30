@@ -22,11 +22,11 @@ export default async function TournamentsPage() {
             <span>Cups & Tournaments</span>
           </div>
           <span className="section-pill">
-            <Trophy size={14} /> CUPS & TOURNAMENTS
+            <Trophy size={14} /> RVR U13 MAJOR 1 · CUPS & BLITZES
           </span>
-          <h1>DDSL Cup Central & Tournament Hub</h1>
+          <h1>DDSL Cup Central & Tournament Blitzes</h1>
           <p>
-            Knockout cup formats, extra time rules, penalty shootout protocols, regional blitzes, and squad travel preparation.
+            Knockout cup ties, extra time & penalty shootout protocols, regional summer blitzes, and squad travel preparation.
           </p>
         </div>
       </div>

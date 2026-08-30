@@ -22,11 +22,11 @@ export default async function PhotosPage() {
             <span>Photos & Highlights</span>
           </div>
           <span className="section-pill">
-            <Camera size={14} /> SQUAD MOMENTS
+            <Camera size={14} /> RVR U13 MAJOR 1 · SQUAD MOMENTS
           </span>
-          <h1>Matchday Action & Team Memories</h1>
+          <h1>Matchday Action & Squad Memories</h1>
           <p>
-            Action snapshots, tournament celebrations, training milestones, and squad camaraderie for RVR 2014.
+            Action snapshots, goal celebrations, tournament victories, and squad camaraderie for our U13 Major 1 boys.
           </p>
         </div>
       </div>

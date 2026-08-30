@@ -22,11 +22,11 @@ export default async function SkillsPage() {
             <span>Skills & Drills Vault</span>
           </div>
           <span className="section-pill">
-            <Sparkles size={14} /> FOOTBALL SKILLS VAULT
+            <Sparkles size={14} /> RVR U13 MAJOR 1 · SKILLS VAULT
           </span>
           <h1>Master Your Football Technique</h1>
           <p>
-            Curated football skills, footwork drills, and tactical habits specifically calibrated for 2014 youth development.
+            Pro 1v1 skills tutorials, explosive first-touch drills, and finishing techniques tailored for our U13 Major 1 squad.
           </p>
         </div>
       </div>

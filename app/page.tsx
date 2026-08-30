@@ -28,103 +28,117 @@ import {
 import { PublicFooter } from './components/public-footer';
 import { PublicHeader } from './components/public-header';
 import { getCurrentMember } from './lib/authz';
-import { getMatchesFromDb } from './lib/matches';
+import { fetchLiveDdslLeagueData } from './lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const currentMember = await getCurrentMember();
-  const allMatches = await getMatchesFromDb();
+  const liveDdslData = await fetchLiveDdslLeagueData('218148');
 
-  const latestResult = allMatches.find((m) => m.status === 'completed');
-  const nextFixture = allMatches.find((m) => m.status === 'upcoming');
+  const latestResult = liveDdslData.rvrMatches.find((m) => m.status === 'completed') || {
+    opponent: 'Greystones United AFC',
+    matchDate: '29 Aug 2026',
+    venue: 'Rivervalley Park',
+    homeAway: 'home' as const,
+    rvrGoals: 1,
+    opponentGoals: 0,
+    matchNotes: 'Opening Matchday Victory · Mick O\'Beirne (Ref)',
+  };
+
+  const nextFixture = liveDdslData.rvrMatches.find((m) => m.status === 'upcoming') || {
+    opponent: 'Rosemount Mulvey FC',
+    matchDate: 'Sat 5th Sept 2026',
+    kickoffTime: '10:30 AM',
+    venue: 'Rivervalley Park - Pitch 1',
+  };
 
   const HUB_SECTIONS = [
     {
       id: 'fixtures',
-      title: 'Fixtures & Results',
-      badge: 'Live DDSL Centre',
-      pillColor: 'amber',
+      title: 'Fixtures & League Table',
+      badge: 'Live DDSL 218148',
+      pillColor: 'gold',
       icon: Trophy,
-      desc: 'Real-time DDSL match outcomes, goalscorers, upcoming kick-offs, and official division league table.',
-      highlights: ['Automated DDSL Match Sync', 'Full Division Standings & Form', 'Goalscorers & Player of Match'],
+      desc: 'Official DDSL match outcomes, verified full-time scores, upcoming kick-offs, and live division standings.',
+      highlights: ['13 Major 1 Boys Sat Table', '1-0 Win vs Greystones United', 'Full Division Fixture List'],
       href: '/fixtures',
-      btnText: 'View Fixtures & Standings',
+      btnText: 'View Match Centre & Table',
     },
     {
       id: 'skills',
-      title: 'Skills & Drills Vault',
-      badge: 'Video Masterclass',
-      pillColor: 'blue',
+      title: 'Skills & Video Drills',
+      badge: 'Masterclass',
+      pillColor: 'cyan',
       icon: Play,
-      desc: 'Step-by-step video drills for ball mastery, 1v1 moves, sharp first touches, and precision finishing.',
-      highlights: ['8 Curated Video Drills', 'Coaching Cues & Key Points', 'Target Repetitions & Sets'],
+      desc: 'High-energy video tutorials for 1v1 moves, sharp turns, quick footwork, and top-corner finishing.',
+      highlights: ['8 Essential Youth Drills', 'Pro Coaching Cues & Steps', 'Repetition & Daily Challenges'],
       href: '/skills',
-      btnText: 'Explore Skills Vault',
+      btnText: 'Open Skills Vault',
     },
     {
       id: 'training',
-      title: 'Training & Kit Checklist',
-      badge: 'Weekly Protocols',
+      title: 'Training & Match Kit',
+      badge: 'Squad Protocols',
       pillColor: 'green',
       icon: Calendar,
-      desc: 'Session timetable, arrival expectations, live pitch weather status, and interactive gear checklist.',
-      highlights: ['Tuesday & Thursday Slots', 'Live Pitch & Weather Alert', 'Interactive Gear Checklist'],
+      desc: 'Weekly training timetable, pitch allocations, weather notifications, and interactive kit checklist.',
+      highlights: ['Tuesday & Thursday Slots', 'Arrival & Warmup Times', 'Interactive Gear Checklist'],
       href: '/training',
-      btnText: 'View Training Schedule',
+      btnText: 'Check Schedule & Kit',
     },
     {
       id: 'sc',
-      title: 'Strength & Conditioning',
-      badge: 'Youth Athletic Dev',
+      title: 'Speed, Agility & S&C',
+      badge: 'Athletic Dev',
       pillColor: 'purple',
       icon: Zap,
-      desc: 'Age-appropriate athletic training focusing on FIFA 11+ dynamic activation, speed mechanics, and core stability.',
-      highlights: ['FIFA 11+ Dynamic Warm-up', 'Acceleration & Agility Ladders', 'Injury Prevention & Recovery'],
+      desc: 'Youth athletic development: FIFA 11+ dynamic activation, speed ladder footwork, and core stability.',
+      highlights: ['FIFA 11+ Injury Prevention', 'Speed Ladder & Acceleration', 'Post-Match Recovery Routines'],
       href: '/sc',
-      btnText: 'Open S&C Program',
+      btnText: 'Start S&C Workout',
     },
     {
       id: 'nutrition',
-      title: 'Nutrition & Hydration',
-      badge: 'Matchday Fueling',
-      pillColor: 'amber',
+      title: 'Matchday Fuel & Food',
+      badge: 'Player Fuel',
+      pillColor: 'orange',
       icon: Apple,
-      desc: 'Sports nutrition blueprint: 3-hour pre-game meal ideas, hydration timelines, and half-time energy snacks.',
-      highlights: ['4-Phase Meal Timeline', 'Pre-Match Fuel Options', 'Matchday Do’s & Don’ts'],
+      desc: 'What to eat before kick-off, halftime energy boosters, hydration targets, and fast muscle recovery meals.',
+      highlights: ['3-Hour Pre-Match Meals', 'Halftime Energy Snacks', 'Hydration Targets & Rules'],
       href: '/nutrition',
-      btnText: 'Read Nutrition Guide',
+      btnText: 'Read Fueling Blueprint',
     },
     {
       id: 'venues',
       title: 'Pitch Venues & GPS',
-      badge: 'Interactive Directory',
+      badge: '1-Tap Navigation',
       pillColor: 'blue',
       icon: Compass,
-      desc: 'Directions, pitch surfaces, footwear recommendations, and 1-tap Google Maps navigation for all pitches.',
-      highlights: ['Rivervalley Park Pitches 1 & 2', 'ALSAA, AUL & Brookdale', 'One-Tap GPS Navigation'],
+      desc: 'Directions, pitch surfaces, footwear recommendations, and one-tap Google/Apple Maps for home and away pitches.',
+      highlights: ['Rivervalley Park Pitches 1 & 2', 'ALSAA, AUL & Brookdale', 'One-Tap Maps Directions'],
       href: '/venues',
-      btnText: 'Open Pitch Locations',
+      btnText: 'Open Pitch Directory',
     },
     {
       id: 'tournaments',
-      title: 'Cups & Tournaments',
-      badge: 'DDSL Central',
-      pillColor: 'amber',
+      title: 'Cups & Tournament Blitzes',
+      badge: 'Knockout Glory',
+      pillColor: 'gold',
       icon: Medal,
-      desc: 'Knockout cup format, extra time rules, penalty shootout protocols, blitzes, and squad travel preparation.',
-      highlights: ['DDSL Cup Knockout Rules', 'Fingal Blitzes & Tours', 'Squad Travel Packing List'],
+      desc: 'DDSL All-Dublin Cup knockout format, extra-time rules, summer blitzes, and squad tour packing lists.',
+      highlights: ['DDSL Cup Extra-Time Rules', 'Summer Blitz Schedules', 'Squad Travel Packing Guide'],
       href: '/tournaments',
-      btnText: 'Check Cup Schedules',
+      btnText: 'View Cup Info',
     },
     {
       id: 'photos',
-      title: 'Photos & Highlights',
-      badge: 'Squad Moments',
+      title: 'Squad Moments & Photos',
+      badge: 'Matchday Action',
       pillColor: 'green',
       icon: Camera,
-      desc: 'Matchday action shots, tournament victory celebrations, and team milestones from the 2026/27 season.',
-      highlights: ['Matchday Action Snaps', 'Trophy Presentations', 'Interactive Lightbox Viewer'],
+      desc: 'Match action photos, goal celebrations, tournament victories, and squad memories from the 2026/27 season.',
+      highlights: ['Matchday Action Snaps', 'Trophy & Blitz Celebrations', 'Interactive Photo Lightbox'],
       href: '/photos',
       btnText: 'View Photo Gallery',
     },
@@ -132,10 +146,10 @@ export default async function HomePage() {
 
   return (
     <div className="public-page-root">
-      {/* Sticky Top Header */}
+      {/* Top Header */}
       <PublicHeader isAuthenticated={Boolean(currentMember)} />
 
-      {/* Hero Section with Squad Image Background & Fade-out */}
+      {/* Hero Section with Vibrant Youth Sport Styling */}
       <section className="hero-section hero-with-bg">
         <div
           className="hero-bg-image"
@@ -147,29 +161,29 @@ export default async function HomePage() {
         <div className="hero-container">
           <div className="hero-badge-row">
             <span className="hero-pill season">
-              <Trophy size={13} /> DDSL 2026/27 SEASON
+              <Trophy size={13} /> 13 MAJOR 1 BOYS SAT
             </span>
             <span className="hero-pill location">
               <MapPin size={13} /> SWORDS, DUBLIN
             </span>
             <span className="hero-pill squad">
-              <Users size={13} /> 2014 SQUAD HUB
+              <Flame size={13} /> 2014 SQUAD
             </span>
           </div>
 
           <h1 className="hero-title">
-            Rivervalley Rangers <span>2014 Squad Hub</span>
+            Rivervalley Rangers <span>U13 MAJOR 1</span>
           </h1>
 
           <p className="hero-subtitle">
-            The dedicated platform for player development, matchday preparation, technical drills, nutrition guides, pitch navigation, and tournament updates.
+            The official player development and matchday hub for the RVR 2014 squad. Skills drills, live DDSL scores, match preparation, and team directions.
           </p>
 
           <div className="hero-cta-group">
             <Link href="/fixtures" className="hero-btn hero-btn-primary">
-              <Trophy size={16} /> Fixtures & Results
+              <Trophy size={16} /> Fixtures & Standings
             </Link>
-            <Link href="/skills" className="hero-btn hero-btn-secondary">
+            <Link href="/skills" className="hero-btn hero-btn-cyan">
               <Play size={16} fill="currentColor" /> Skills Vault
             </Link>
             <Link href="/venues" className="hero-btn hero-btn-secondary">
@@ -179,26 +193,26 @@ export default async function HomePage() {
               href={currentMember ? '/portal' : '/login'}
               className="hero-btn hero-btn-portal"
             >
-              <Lock size={15} />
-              <span>{currentMember ? 'Open Team Portal' : 'Team Portal & Accounts'}</span>
-              <ChevronRight size={16} />
+              <Lock size={14} />
+              <span>{currentMember ? 'Team Portal' : 'Parent & Coach Portal'}</span>
+              <ChevronRight size={15} />
             </Link>
           </div>
 
           {/* Quick Highlights Bar */}
           <div className="hero-highlights-bar">
-            <div className="highlight-stat">
-              <div className="stat-icon amber">
+            <div className="highlight-stat gold">
+              <div className="stat-icon gold">
                 <Trophy size={20} />
               </div>
               <div>
-                <strong>DDSL Results Live</strong>
-                <span>Division Table & Scores</span>
+                <strong>DDSL 13 Major 1</strong>
+                <span>Position 5 (3 pts · 1 Win)</span>
               </div>
             </div>
 
-            <div className="highlight-stat">
-              <div className="stat-icon blue">
+            <div className="highlight-stat cyan">
+              <div className="stat-icon cyan">
                 <Play size={20} />
               </div>
               <div>
@@ -207,23 +221,23 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="highlight-stat">
+            <div className="highlight-stat green">
               <div className="stat-icon green">
                 <Zap size={20} />
               </div>
               <div>
-                <strong>Youth S & C Program</strong>
-                <span>FIFA 11+ & Agility Training</span>
+                <strong>Speed & S&C Drills</strong>
+                <span>FIFA 11+ Warmup & Agility</span>
               </div>
             </div>
 
-            <div className="highlight-stat">
-              <div className="stat-icon purple">
-                <MapPin size={20} />
+            <div className="highlight-stat orange">
+              <div className="stat-icon orange">
+                <Apple size={20} />
               </div>
               <div>
-                <strong>Interactive Pitch GPS</strong>
-                <span>5 Venues with Directions</span>
+                <strong>Game Day Fuel</strong>
+                <span>Pre-Match Meals & Timeline</span>
               </div>
             </div>
           </div>
@@ -234,53 +248,47 @@ export default async function HomePage() {
       <section className="matchday-live-strip">
         <div className="section-container">
           <div className="matchday-strip-inner">
-            {/* Latest Result Item */}
-            {latestResult && (
-              <div className="ticker-card result">
-                <div className="ticker-badge win">
-                  <span>LATEST RESULT</span>
-                </div>
-                <div className="ticker-content">
-                  <div className="ticker-scoreline">
-                    <strong>
-                      {latestResult.homeAway === 'home'
-                        ? `RVR AFC ${latestResult.rvrGoals} - ${latestResult.opponentGoals} ${latestResult.opponent}`
-                        : `${latestResult.opponent} ${latestResult.opponentGoals} - ${latestResult.rvrGoals} RVR AFC`}
-                    </strong>
-                    <span className="ticker-ft-tag">FT (WON)</span>
-                  </div>
-                  {latestResult.scorers && (
-                    <small className="ticker-scorers">
-                      ⚽ {latestResult.scorers}
-                    </small>
-                  )}
-                </div>
+            {/* Latest Result */}
+            <div className="ticker-card result">
+              <div className="ticker-badge win">
+                <span>⚽ LATEST RESULT</span>
               </div>
-            )}
+              <div className="ticker-content">
+                <div className="ticker-scoreline">
+                  <strong>
+                    {latestResult.homeAway === 'home'
+                      ? `River Valley Rangers ${latestResult.rvrGoals} - ${latestResult.opponentGoals} ${latestResult.opponent}`
+                      : `${latestResult.opponent} ${latestResult.opponentGoals} - ${latestResult.rvrGoals} River Valley Rangers`}
+                  </strong>
+                  <span className="ticker-ft-tag">FT · WON 🏆</span>
+                </div>
+                <small className="ticker-scorers">
+                  📍 {latestResult.venue} · 29 Aug 2026
+                </small>
+              </div>
+            </div>
 
-            {/* Next Fixture Item */}
-            {nextFixture && (
-              <div className="ticker-card fixture">
-                <div className="ticker-badge next">
-                  <span>NEXT FIXTURE</span>
-                </div>
-                <div className="ticker-content">
-                  <div className="ticker-scoreline">
-                    <strong>vs {nextFixture.opponent}</strong>
-                    <span className="ticker-time-tag">
-                      {nextFixture.matchDate} · {nextFixture.kickoffTime}
-                    </span>
-                  </div>
-                  <small className="ticker-venue">
-                    📍 {nextFixture.venue}
-                  </small>
-                </div>
+            {/* Next Fixture */}
+            <div className="ticker-card fixture">
+              <div className="ticker-badge next">
+                <span>⚡ NEXT MATCH</span>
               </div>
-            )}
+              <div className="ticker-content">
+                <div className="ticker-scoreline">
+                  <strong>vs {nextFixture.opponent}</strong>
+                  <span className="ticker-time-tag">
+                    {nextFixture.matchDate}
+                  </span>
+                </div>
+                <small className="ticker-venue">
+                  📍 {nextFixture.venue}
+                </small>
+              </div>
+            </div>
 
             <div className="ticker-action-wrap">
               <Link href="/fixtures" className="ticker-full-btn">
-                <span>All Fixtures & Table</span>
+                <span>View Full League Table</span>
                 <ChevronRight size={15} />
               </Link>
             </div>
@@ -295,9 +303,9 @@ export default async function HomePage() {
             <div className="section-pill">
               <Sparkles size={14} /> SQUAD RESOURCE DIRECTORY
             </div>
-            <h2>Explore Everything for RVR 2014</h2>
+            <h2>Everything You Need for RVR U13</h2>
             <p>
-              Select any section below to access comprehensive training guides, video tutorials, nutrition plans, and matchday tools.
+              Matchday prep, video skills tutorials, nutrition guides, pitch navigation, and tournament updates for players, parents, and coaches.
             </p>
           </div>
 
@@ -305,7 +313,7 @@ export default async function HomePage() {
             {HUB_SECTIONS.map((sec) => {
               const IconComponent = sec.icon;
               return (
-                <article className="hub-feature-card" key={sec.id}>
+                <article className={`hub-feature-card ${sec.pillColor}`} key={sec.id}>
                   <div className="hub-card-header">
                     <div className={`hub-card-icon ${sec.pillColor}`}>
                       <IconComponent size={22} />
@@ -338,22 +346,25 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Matchday Spotlight Banner */}
+      {/* Matchday Locker Room Readiness Callout */}
       <section className="public-section alt-bg">
         <div className="section-container">
-          <div className="spotlight-banner">
+          <div className="spotlight-banner locker-room">
             <div className="spotlight-content">
-              <span className="spotlight-tag">MATCHDAY READINESS</span>
-              <h2>Are You Prepared for This Weekend?</h2>
+              <span className="spotlight-tag">⚡ MATCHDAY LOCKER ROOM</span>
+              <h2>Ready for Game Day?</h2>
               <p>
-                Make sure you have your hydration started 24 hours prior, your shin guards and boots packed, and check your pitch location arrival time.
+                Get hydrated the day before, pack your molded boots and shin guards, check your arrival time, and fuel up with complex carbs 3 hours prior to kickoff!
               </p>
               <div className="spotlight-buttons">
                 <Link href="/fixtures" className="spotlight-btn primary">
-                  <Trophy size={16} /> Check Fixture & Pitch
+                  <Trophy size={16} /> Check Next Fixture & Pitch
                 </Link>
                 <Link href="/training" className="spotlight-btn secondary">
-                  <Calendar size={16} /> Check Kit Checklist
+                  <Calendar size={16} /> Match Kit Checklist
+                </Link>
+                <Link href="/nutrition" className="spotlight-btn cyan">
+                  <Apple size={16} /> Pre-Match Fuel Plan
                 </Link>
               </div>
             </div>
@@ -365,25 +376,26 @@ export default async function HomePage() {
                   height={110}
                   alt="Rivervalley Rangers Crest"
                 />
-                <small>Rivervalley Rangers AFC · 2014 Squad</small>
+                <small className="font-bold text-slate-800">RVR U13 Major 1 · 2014 Boys</small>
+                <span className="text-[11px] text-blue-600 font-semibold block mt-1">Up the Valley! ⚽</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Private Portal Callout */}
+      {/* Private Portal Callout - Kept Clean & Serious for Parents/Coaches */}
       <section className="portal-callout-section">
         <div className="section-container">
           <div className="portal-callout-card">
             <div className="callout-icon-wrap">
-              <Lock size={32} />
+              <Lock size={30} />
             </div>
             <div className="callout-text">
-              <span className="callout-tag">RESTRICTED ACCESS FOR RVR FAMILIES</span>
-              <h3>Private Team Portal & Financial Accounts</h3>
+              <span className="callout-tag">RESTRICTED TEAM ACCESS</span>
+              <h3>Parent & Coach Financial Portal</h3>
               <p>
-                Are you an RVR 2014 coach, parent, or club administrator? Access the private squad fund ledger, record expenses, review season contributions, and vote on upcoming team outings.
+                Access private squad finances, track season player registration contributions, submit referee and coach expense claims, and review club admin reports.
               </p>
             </div>
             <div className="callout-actions">
@@ -391,9 +403,9 @@ export default async function HomePage() {
                 href={currentMember ? '/portal' : '/login'}
                 className="callout-btn"
               >
-                <Lock size={16} />
-                <span>{currentMember ? 'Go to Dashboard' : 'Log In to Team Portal'}</span>
-                <ChevronRight size={16} />
+                <Lock size={15} />
+                <span>{currentMember ? 'Open Portal Dashboard' : 'Log In to Team Portal'}</span>
+                <ChevronRight size={15} />
               </Link>
             </div>
           </div>

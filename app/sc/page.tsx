@@ -22,11 +22,11 @@ export default async function SCPage() {
             <span>Strength & Conditioning</span>
           </div>
           <span className="section-pill">
-            <Zap size={14} /> YOUTH S & C PROGRAM
+            <Zap size={14} /> RVR U13 MAJOR 1 · SPEED & AGILITY
           </span>
-          <h1>Strength, Speed & Athletic Conditioning</h1>
+          <h1>Speed, Agility & Athletic Conditioning</h1>
           <p>
-            Evidence-based youth athletic protocols focusing on speed mechanics, agility ladders, core strength, and injury prevention.
+            Dynamic FIFA 11+ activation, rapid footwork speed ladders, and core stability drills calibrated for our U13 athletes.
           </p>
         </div>
       </div>

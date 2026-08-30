@@ -30,11 +30,11 @@ export default async function LoginPage() {
             />
           </div>
           <span className="login-badge">
-            <Lock size={12} /> RESTRICTED ACCESS
+            <Lock size={12} /> RESTRICTED TEAM PORTAL
           </span>
-          <h1>RVR 2014 Team Portal</h1>
+          <h1>RVR U13 Major 1 Portal</h1>
           <p>
-            Private financial ledger, parent contribution tracking, expense approvals, and admin controls.
+            Private financial ledger, parent contribution tracking, referee & coaching expenses, and squad admin controls.
           </p>
         </div>
 

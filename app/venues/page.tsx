@@ -22,11 +22,11 @@ export default async function VenuesPage() {
             <span>Pitch Venues</span>
           </div>
           <span className="section-pill">
-            <Compass size={14} /> PITCH LOCATIONS & GPS
+            <Compass size={14} /> RVR U13 MAJOR 1 · PITCH LOCATIONS
           </span>
-          <h1>Match Locations & Pitch Directory</h1>
+          <h1>Pitch Venues & Matchday Navigation</h1>
           <p>
-            One-tap GPS directions, pitch surfaces, footwear recommendations, and parking tips for home and away fixtures.
+            One-tap Google & Apple Maps navigation, pitch surfaces, footwear advice, and parking guides for our home and away fixtures.
           </p>
         </div>
       </div>

@@ -22,11 +22,11 @@ export default async function TrainingPage() {
             <span>Training & Kit</span>
           </div>
           <span className="section-pill">
-            <Calendar size={14} /> SQUAD SESSIONS & GEAR
+            <Calendar size={14} /> RVR U13 MAJOR 1 · SESSIONS & GEAR
           </span>
-          <h1>Training Information & Match Preparation</h1>
+          <h1>Training Schedule & Matchday Readiness</h1>
           <p>
-            Standard session schedule, pitch allocations, weather notifications, and mandatory kit checklist for 2014 players.
+            Weekly pitch slots, arrival times, weather alerts, and the essential matchday gear checklist for RVR U13 Major 1.
           </p>
         </div>
       </div>

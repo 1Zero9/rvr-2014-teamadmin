@@ -22,11 +22,11 @@ export default async function NutritionPage() {
             <span>Nutrition & Hydration</span>
           </div>
           <span className="section-pill">
-            <Apple size={14} /> MATCHDAY FUELING
+            <Apple size={14} /> RVR U13 MAJOR 1 · PLAYER FUEL
           </span>
-          <h1>Player Nutrition & Hydration Blueprint</h1>
+          <h1>Matchday Fueling & Hydration Guide</h1>
           <p>
-            When to eat, what to drink, and how to recover fast — calibrated specifically for youth football performance.
+            Pre-match carbohydrate meals, halftime energy snacks, and optimal hydration targets for our U13 players.
           </p>
         </div>
       </div>

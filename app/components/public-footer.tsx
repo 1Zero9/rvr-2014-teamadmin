@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ExternalLink, Lock, MapPin } from 'lucide-react';
+import { ExternalLink, Lock, MapPin, Trophy } from 'lucide-react';
 
 export function PublicFooter() {
   return (
@@ -11,17 +11,17 @@ export function PublicFooter() {
             <div className="footer-brand">
               <Image
                 src="/rvr-white.png"
-                width={56}
-                height={56}
+                width={52}
+                height={52}
                 alt="Rivervalley Rangers AFC crest"
               />
               <div>
                 <strong>Rivervalley Rangers AFC</strong>
-                <span>2014 Boys & Girls Squad Hub</span>
+                <span className="text-amber-400 font-bold">U13 Major 1 (2014 Squad)</span>
               </div>
             </div>
             <p className="footer-desc">
-              Dedicated to youth football excellence, sportsmanship, player development, and community spirit in Swords, County Dublin.
+              Home of the RVR 2014 boys. Dedicated to skills, hard work, fair play, and matchday teamwork in Swords, Co. Dublin.
             </p>
             <div className="footer-location">
               <MapPin size={15} />
@@ -32,35 +32,29 @@ export function PublicFooter() {
           <div className="footer-links-col">
             <h4>Squad Sections</h4>
             <ul>
-              <li><Link href="/fixtures">Fixtures & Results</Link></li>
-              <li><Link href="/skills">Skills & Drills Vault</Link></li>
-              <li><Link href="/training">Training & Kit Guide</Link></li>
-              <li><Link href="/sc">Strength & Conditioning</Link></li>
-              <li><Link href="/nutrition">Matchday Nutrition</Link></li>
-              <li><Link href="/venues">Pitch Venues & GPS</Link></li>
-              <li><Link href="/tournaments">Cups & Tournaments</Link></li>
-              <li><Link href="/photos">Photo Gallery</Link></li>
+              <li><Link href="/fixtures">⚽ Fixtures & DDSL Standings</Link></li>
+              <li><Link href="/skills">🔥 Skills & Video Drills</Link></li>
+              <li><Link href="/training">🏃 Training & Kit Checklist</Link></li>
+              <li><Link href="/sc">⚡ Speed, Agility & S&C</Link></li>
+              <li><Link href="/nutrition">🍎 Game Day Fuel & Nutrition</Link></li>
+              <li><Link href="/venues">📍 Pitch Venues & GPS</Link></li>
+              <li><Link href="/tournaments">🏆 Cups & Blitzes</Link></li>
+              <li><Link href="/photos">📸 Squad Photo Gallery</Link></li>
             </ul>
           </div>
 
           <div className="footer-links-col">
-            <h4>Club & League Resources</h4>
+            <h4>Official Links</h4>
             <ul>
+              <li>
+                <a href="https://ddsl.ie/league/218148/" target="_blank" rel="noreferrer">
+                  <span>DDSL 13 Major 1 Table</span>
+                  <ExternalLink size={12} />
+                </a>
+              </li>
               <li>
                 <a href="https://www.rivervalleyrangers.ie/" target="_blank" rel="noreferrer">
                   <span>RVR Official Club Site</span>
-                  <ExternalLink size={12} />
-                </a>
-              </li>
-              <li>
-                <a href="https://ddsl.ie/" target="_blank" rel="noreferrer">
-                  <span>DDSL Official Portal</span>
-                  <ExternalLink size={12} />
-                </a>
-              </li>
-              <li>
-                <a href="https://www.rivervalleyrangers.ie/pitch-locations" target="_blank" rel="noreferrer">
-                  <span>Club Pitch Guide</span>
                   <ExternalLink size={12} />
                 </a>
               </li>
@@ -77,13 +71,13 @@ export function PublicFooter() {
             <div className="footer-portal-card">
               <div className="footer-portal-head">
                 <Lock size={18} />
-                <h4>Team Portal & Accounts</h4>
+                <h4>Parent & Coach Portal</h4>
               </div>
               <p>
-                Access private squad finances, season contributions, expense claims, and super admin controls.
+                Private squad funds, referee fees, season contributions, and coach expense claims.
               </p>
               <Link href="/login" className="footer-login-btn">
-                <Lock size={14} /> Log In to Team Portal
+                <Lock size={14} /> Open Private Team Portal
               </Link>
             </div>
           </div>
@@ -92,9 +86,9 @@ export function PublicFooter() {
 
       <div className="footer-bottom">
         <div className="footer-container">
-          <p>© {new Date().getFullYear()} Rivervalley Rangers AFC 2014 Squad. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Rivervalley Rangers AFC · U13 Major 1 (2014 Squad).</p>
           <p className="footer-motto">
-            Play with Passion · Play with Respect ⚽
+            Play with Passion · Play with Respect · Up the Valley! ⚽
           </p>
         </div>
       </div>
