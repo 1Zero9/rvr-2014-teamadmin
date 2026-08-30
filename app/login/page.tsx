@@ -1,17 +1,24 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, KeyRound, Lock, ShieldCheck, UserCheck, Users } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { AlertCircle, ArrowLeft, KeyRound, Lock, ShieldCheck } from 'lucide-react';
 import { loginAction } from '../actions';
 import { getCurrentMember } from '../lib/authz';
-import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-export default async function LoginPage() {
+interface LoginPageProps {
+  searchParams?: Promise<{ error?: string }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const current = await getCurrentMember();
   if (current) {
     redirect('/portal');
   }
+
+  const resolvedParams = searchParams ? await searchParams : {};
+  const errorCode = resolvedParams?.error;
 
   return (
     <main className="login-wrapper">
@@ -30,70 +37,38 @@ export default async function LoginPage() {
             />
           </div>
           <span className="login-badge">
-            <Lock size={12} /> RESTRICTED TEAM PORTAL
+            <Lock size={12} /> RESTRICTED TEAM ACCESS
           </span>
-          <h1>RVR U13 Major 1 Portal</h1>
+          <h1>Admin & Coach Portal</h1>
           <p>
-            Private financial ledger, parent contribution tracking, referee & coaching expenses, and squad admin controls.
+            Enter the admin password to access squad finances, player contribution tracking, referee fees, and management controls.
           </p>
         </div>
 
+        {errorCode && (
+          <div className="login-error-banner">
+            <AlertCircle size={16} />
+            <span>
+              {errorCode === 'missing'
+                ? 'Please enter the admin password.'
+                : 'Incorrect admin password. Please check your credentials.'}
+            </span>
+          </div>
+        )}
+
         <form action={loginAction} className="login-form">
           <div className="login-field">
-            <label htmlFor="passcode">Team Passcode or Member Email</label>
+            <label htmlFor="passcode">Admin Portal Password</label>
             <div className="input-icon-wrap">
               <KeyRound size={17} />
               <input
                 id="passcode"
                 name="passcode"
                 type="password"
-                placeholder="Enter team passcode (e.g. RVR2014Admin)"
+                placeholder="Enter password..."
+                required
                 autoFocus
               />
-            </div>
-          </div>
-
-          <div className="role-presets">
-            <p className="presets-title">Quick Access by Role:</p>
-            <div className="preset-grid">
-              <button
-                type="submit"
-                name="role"
-                value="parent"
-                className="preset-btn parent"
-              >
-                <Users size={16} />
-                <div>
-                  <strong>Parent View</strong>
-                  <small>Accounts & Dates</small>
-                </div>
-              </button>
-
-              <button
-                type="submit"
-                name="role"
-                value="coach"
-                className="preset-btn coach"
-              >
-                <UserCheck size={16} />
-                <div>
-                  <strong>Coach View</strong>
-                  <small>Expenses & Requests</small>
-                </div>
-              </button>
-
-              <button
-                type="submit"
-                name="role"
-                value="super_admin"
-                className="preset-btn admin"
-              >
-                <ShieldCheck size={16} />
-                <div>
-                  <strong>Admin View</strong>
-                  <small>Full Control & Ledger</small>
-                </div>
-              </button>
             </div>
           </div>
 
@@ -104,10 +79,10 @@ export default async function LoginPage() {
 
         <div className="login-footer">
           <p>
-            Rivervalley Rangers 2014 Boys & Girls · Swords, Dublin
+            Rivervalley Rangers 2014 Squad · Swords, Dublin
           </p>
           <small>
-            For access credentials, contact your squad coach or team administrator.
+            Protected by <code>ADMIN_PASSWORD</code> environment variable.
           </small>
         </div>
       </div>

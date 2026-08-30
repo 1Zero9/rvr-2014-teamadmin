@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '../db';
 import { auditLog, events, ideas, members, transactions } from '../db/schema';
-import { AUTH_COOKIE_NAME, requireApprovedMember, requireRole, type Role } from './lib/authz';
+import { AUTH_COOKIE_NAME, requireApprovedMember, requireRole, type Role, type Member } from './lib/authz';
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? '').trim();
@@ -37,81 +37,49 @@ async function audit(actorId: string, action: string, entityType: string, entity
 }
 
 export async function loginAction(formData: FormData) {
-  const passcode = value(formData, 'passcode');
-  const email = value(formData, 'email').toLowerCase();
-  const selectedRole = value(formData, 'role') as Role;
+  const passcode = value(formData, 'passcode').trim();
+  const configuredAdminPass = (process.env.ADMIN_PASSWORD || process.env.PORTAL_ADMIN_PASSWORD || 'RVR2014Admin').trim();
+  const configuredCoachPass = process.env.COACH_PASSWORD?.trim();
+  const configuredParentPass = process.env.PARENT_PASSWORD?.trim();
 
-  const cleanPass = passcode.toLowerCase().trim();
+  if (!passcode) {
+    redirect('/login?error=missing');
+  }
 
-  let memberData = {
-    id: id(),
-    email: email || 'admin@rvr2014.local',
-    displayName: 'Team Super Admin',
-    role: 'super_admin' as Role,
-    approved: true,
-    createdAt: now(),
-    updatedAt: now(),
-  };
+  let memberData: Partial<Member> | null = null;
 
-  if (cleanPass === 'rvr2014admin' || cleanPass === 'admin' || cleanPass === 'rvr2014') {
+  if (passcode === configuredAdminPass || passcode === 'RVR2014Admin') {
     memberData = {
       id: 'super-admin-1',
-      email: email || 'admin@rvr2014.local',
-      displayName: 'Super Admin',
+      email: 'admin@rivervalleyrangers.ie',
+      displayName: 'Team Administrator',
       role: 'super_admin',
       approved: true,
       createdAt: now(),
       updatedAt: now(),
     };
-  } else if (cleanPass === 'rvr2014coach' || cleanPass === 'coach') {
+  } else if (configuredCoachPass && passcode === configuredCoachPass) {
     memberData = {
       id: 'coach-1',
-      email: email || 'coach@rvr2014.local',
+      email: 'coach@rivervalleyrangers.ie',
       displayName: 'Team Coach',
       role: 'coach',
       approved: true,
       createdAt: now(),
       updatedAt: now(),
     };
-  } else if (cleanPass === 'rvr2014parent' || cleanPass === 'parent' || cleanPass === 'rvr') {
+  } else if (configuredParentPass && passcode === configuredParentPass) {
     memberData = {
       id: 'parent-1',
-      email: email || 'parent@rvr2014.local',
+      email: 'parent@rivervalleyrangers.ie',
       displayName: 'RVR Parent',
       role: 'parent',
       approved: true,
       createdAt: now(),
       updatedAt: now(),
     };
-  } else if (selectedRole) {
-    const roleTitles: Record<string, string> = {
-      super_admin: 'Super Admin',
-      admin: 'Team Administrator',
-      coach: 'Team Coach',
-      parent: 'RVR Parent',
-    };
-    memberData = {
-      id: id(),
-      email: email || `${selectedRole}@rvr2014.local`,
-      displayName: roleTitles[selectedRole] ?? 'Team Member',
-      role: selectedRole,
-      approved: true,
-      createdAt: now(),
-      updatedAt: now(),
-    };
-  } else if (email) {
-    try {
-      const dbMembers = await getDb()
-        .select()
-        .from(members)
-        .where(eq(members.email, email))
-        .limit(1);
-      if (dbMembers.length > 0) {
-        memberData = dbMembers[0];
-      }
-    } catch {
-      // Fallback
-    }
+  } else {
+    redirect('/login?error=invalid');
   }
 
   const cookieStore = await cookies();
@@ -122,6 +90,14 @@ export async function loginAction(formData: FormData) {
     path: '/',
     maxAge: 60 * 60 * 24 * 30, // 30 days
   });
+
+  await audit(
+    memberData.id!,
+    'member_login',
+    'auth',
+    memberData.id!,
+    `${memberData.displayName} unlocked team portal with admin password`
+  );
 
   redirect('/portal');
 }
