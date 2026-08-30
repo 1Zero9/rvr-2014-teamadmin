@@ -1,31 +1,28 @@
 import Link from 'next/link';
 import {
   AlertTriangle,
-  Award,
   BookOpen,
   Calendar,
-  CheckCircle2,
   Clock,
   ExternalLink,
   HeartPulse,
-  Mail,
-  MapPin,
-  Phone,
   Scale,
-  ShieldAlert,
   ShieldCheck,
-  Shirt,
   Trophy,
-  Users,
 } from 'lucide-react';
 import { AccessPending, PortalPage } from '../components/portal-page';
-import { requireApprovedMember } from '../lib/authz';
+import { StaffManager } from '../components/staff-manager';
+import { canManageAccounts, requireApprovedMember } from '../lib/authz';
+import { getCoachingStaffFromDb } from '../lib/staff-server';
 
 export const dynamic = 'force-dynamic';
 
 export default async function InformationPage() {
   const member = await requireApprovedMember();
   if (!member.approved) return <AccessPending member={member} />;
+
+  const staffList = await getCoachingStaffFromDb();
+  const canEdit = canManageAccounts(member.role);
 
   return (
     <PortalPage
@@ -35,61 +32,8 @@ export default async function InformationPage() {
       title="RVR U13 Major 1 Squad Information"
     >
       <div className="squad-handbook-grid">
-        {/* Coaching & Admin Staff Card */}
-        <section className="handbook-card full-width">
-          <div className="handbook-card-head">
-            <div className="head-icon blue">
-              <Users size={20} />
-            </div>
-            <div>
-              <h3>Coaching & Squad Management Staff</h3>
-              <p>Key contacts for matchday logistics, squad welfare, and team administration.</p>
-            </div>
-          </div>
-
-          <div className="staff-roster-grid">
-            <div className="staff-member-box">
-              <span className="staff-role-tag head">Lead Coach</span>
-              <h4>Stephen Cranfield</h4>
-              <p className="staff-meta">UEFA / FAI Certified Coach · Tactical & Player Development</p>
-              <div className="staff-contact-row">
-                <span>📍 Rivervalley Park</span>
-                <span className="text-blue-600 font-semibold">Matchday Team Lead</span>
-              </div>
-            </div>
-
-            <div className="staff-member-box">
-              <span className="staff-role-tag assistant">Assistant Coach</span>
-              <h4>Coaching Staff</h4>
-              <p className="staff-meta">Warm-Up, Agility, S&C & Goalkeeper Training</p>
-              <div className="staff-contact-row">
-                <span>⚡ FIFA 11+ Lead</span>
-                <span className="text-emerald-600 font-semibold">Active Coach</span>
-              </div>
-            </div>
-
-            <div className="staff-member-box">
-              <span className="staff-role-tag admin">Team Admin & Treasurer</span>
-              <h4>Squad Administration</h4>
-              <p className="staff-meta">Referee fees, tournament registration, and fund management</p>
-              <div className="staff-contact-row">
-                <span>💳 Squad Fund Portal</span>
-                <span className="text-amber-600 font-semibold">Finance Lead</span>
-              </div>
-            </div>
-
-            <div className="staff-member-box">
-              <span className="staff-role-tag welfare">Child Welfare Officer</span>
-              <h4>Club Safeguarding</h4>
-              <p className="staff-meta">Garda Vetting, FAI Child Welfare & Player Safety</p>
-              <div className="staff-contact-row">
-                <a href="https://www.rivervalleyrangers.ie/safeguarding" target="_blank" rel="noreferrer" className="text-blue-600 underline flex items-center gap-1 text-xs">
-                  Safeguarding Portal <ExternalLink size={11} />
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Dynamic & Editable Coaching / Staff Section */}
+        <StaffManager initialStaff={staffList} canEdit={canEdit} />
 
         {/* Matchday Protocols */}
         <section className="handbook-card">

@@ -102,4 +102,21 @@ export const photoAlbums = pgTable('photo_albums', {
   index('idx_photo_albums_created_at').on(table.createdAt),
 ]);
 
+export const coachingStaff = pgTable('coaching_staff', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  role: text('role').notNull(),
+  category: text('category', { enum: ['coach', 'admin', 'welfare', 'medic'] }).notNull().default('coach'),
+  credentials: text('credentials'),
+  phone: text('phone'),
+  email: text('email'),
+  notes: text('notes'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+}, (table) => [
+  index('idx_coaching_staff_order').on(table.sortOrder),
+  index('idx_coaching_staff_created').on(table.createdAt),
+]);
+
 

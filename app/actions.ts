@@ -208,3 +208,53 @@ export async function updateMember(formData: FormData) {
   await audit(actor.id, 'update', 'member', memberId, `Member changed to ${role}${approved ? '' : ' (pending)'}`);
   revalidatePath('/admin');
 }
+
+export async function saveStaffMemberAction(formData: FormData) {
+  const actor = await requireApprovedMember();
+  const staffId = value(formData, 'id') || undefined;
+  const name = value(formData, 'name');
+  const role = value(formData, 'role');
+  const category = (value(formData, 'category') || 'coach') as 'coach' | 'admin' | 'welfare' | 'medic';
+  const credentials = value(formData, 'credentials') || undefined;
+  const phone = value(formData, 'phone') || undefined;
+  const email = value(formData, 'email') || undefined;
+  const notes = value(formData, 'notes') || undefined;
+  const sortOrder = parseInt(value(formData, 'sortOrder') || '1', 10);
+
+  if (!name || !role) {
+    throw new Error('Staff name and role are required.');
+  }
+
+  const { upsertStaffMember } = await import('./lib/staff-server');
+  const saved = await upsertStaffMember({
+    id: staffId,
+    name,
+    role,
+    category,
+    credentials,
+    phone,
+    email,
+    notes,
+    sortOrder,
+  });
+
+  await audit(actor.id, 'save', 'coaching_staff', saved.id, `Saved staff profile: ${name} (${role})`);
+  revalidatePath('/information');
+  revalidatePath('/portal');
+}
+
+export async function deleteStaffMemberAction(formData: FormData) {
+  const actor = await requireApprovedMember();
+  const staffId = value(formData, 'id');
+
+  if (!staffId) {
+    throw new Error('Staff ID is required.');
+  }
+
+  const { deleteStaffMember } = await import('./lib/staff-server');
+  await deleteStaffMember(staffId);
+
+  await audit(actor.id, 'delete', 'coaching_staff', staffId, `Removed staff profile: ${staffId}`);
+  revalidatePath('/information');
+  revalidatePath('/portal');
+}
