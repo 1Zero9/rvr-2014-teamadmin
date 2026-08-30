@@ -149,15 +149,15 @@ export default async function HomePage() {
           </p>
 
           <div className="hero-cta-group">
-            <Link href="/skills" className="hero-btn primary">
+            <Link href="/skills" className="hero-btn hero-btn-primary">
               <Play size={16} fill="currentColor" /> Explore Skills Vault
             </Link>
-            <Link href="/venues" className="hero-btn secondary">
+            <Link href="/venues" className="hero-btn hero-btn-secondary">
               <Compass size={16} /> Pitch Venues & Directions
             </Link>
             <Link
               href={currentMember ? '/portal' : '/login'}
-              className="hero-btn portal-btn"
+              className="hero-btn hero-btn-portal"
             >
               <Lock size={15} />
               <span>{currentMember ? 'Open Team Portal' : 'Team Portal & Accounts'}</span>

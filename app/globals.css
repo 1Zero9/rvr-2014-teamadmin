@@ -226,11 +226,11 @@ a {
 }
 
 .hero-with-bg {
-  min-height: 520px;
+  min-height: 580px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 100px 24px 80px;
+  padding: 130px 24px 70px;
 }
 
 .hero-bg-image {
@@ -250,10 +250,10 @@ a {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(7, 26, 51, 0.6) 0%,
-    rgba(7, 26, 51, 0.28) 35%,
-    rgba(7, 26, 51, 0.42) 65%,
-    rgba(7, 26, 51, 0.82) 88%,
+    rgba(4, 14, 28, 0.65) 0%,
+    rgba(7, 26, 51, 0.22) 30%,
+    rgba(7, 26, 51, 0.35) 60%,
+    rgba(7, 26, 51, 0.85) 90%,
     #f8fafc 100%
   );
   pointer-events: none;
@@ -564,88 +564,98 @@ a {
 }
 
 .hero-title {
-  margin: 0 0 18px;
-  font-size: clamp(34px, 5.2vw, 56px);
-  line-height: 1.1;
-  font-weight: 850;
-  letter-spacing: -0.035em;
-  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.75), 0 8px 32px rgba(0, 0, 0, 0.6);
+  margin: 0 0 16px;
+  font-size: clamp(34px, 5.2vw, 54px);
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #ffffff !important;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
 .hero-title span {
   display: block;
-  background: linear-gradient(135deg, #93c5fd 0%, #bfdbfe 50%, #ffffff 100%);
+  margin-top: 4px;
+  color: #93c5fd;
+  background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 50%, #ffffff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.9));
 }
 
 .hero-subtitle {
-  max-width: 720px;
+  max-width: 700px;
   margin: 0 auto 34px;
-  color: #ffffff;
-  font-size: clamp(15px, 2vw, 18px);
+  color: #f1f5f9;
+  font-size: clamp(15px, 1.8vw, 17px);
   line-height: 1.6;
   font-weight: 500;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 4px 20px rgba(0, 0, 0, 0.65);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 1px 6px rgba(0, 0, 0, 0.9);
 }
 
 .hero-cta-group {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 14px;
-  margin-bottom: 50px;
+  margin-bottom: 52px;
 }
 
 .hero-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 9px;
+  width: auto !important;
+  max-width: max-content;
   padding: 13px 22px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 650;
+  white-space: nowrap;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-.hero-btn.primary {
+.hero-btn-primary {
   background: linear-gradient(135deg, #1769e0 0%, #1053b8 100%);
   color: #ffffff;
   box-shadow: 0 8px 24px rgba(23, 105, 224, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.hero-btn.primary:hover {
+.hero-btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(23, 105, 224, 0.7);
 }
 
-.hero-btn.secondary {
-  background: rgba(7, 26, 51, 0.75);
+.hero-btn-secondary {
+  background: rgba(7, 26, 51, 0.85);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
-.hero-btn.secondary:hover {
-  background: rgba(7, 26, 51, 0.9);
+.hero-btn-secondary:hover {
+  background: rgba(15, 38, 70, 0.95);
+  border-color: rgba(255, 255, 255, 0.45);
   transform: translateY(-2px);
 }
 
-.hero-btn.portal-btn {
-  background: rgba(7, 26, 51, 0.85);
+.hero-btn-portal {
+  background: rgba(7, 26, 51, 0.88);
   color: #93c5fd;
-  border: 1px solid rgba(147, 197, 253, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(147, 197, 253, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
-.hero-btn.portal-btn:hover {
+.hero-btn-portal:hover {
   background: rgba(23, 105, 224, 0.35);
   color: #ffffff;
   transform: translateY(-2px);
