@@ -1,61 +1,183 @@
 import Image from 'next/image';
-import { desc } from 'drizzle-orm';
-import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronRight, CircleHelp, ClipboardList, Home, Landmark, Lightbulb, MapPin, Plus, ReceiptText, Settings, ShieldCheck, WalletCards } from 'lucide-react';
-import { getDb } from '../db';
-import { transactions } from '../db/schema';
-import { AccessPending } from './components/portal-page';
+import Link from 'next/link';
+import {
+  Apple,
+  Award,
+  CalendarDays,
+  Camera,
+  CheckCircle2,
+  ChevronRight,
+  Compass,
+  Dumbbell,
+  Flame,
+  Globe,
+  Lock,
+  MapPin,
+  Play,
+  Shield,
+  Sparkles,
+  Trophy,
+  Users,
+  Zap,
+} from 'lucide-react';
+import { GallerySection } from './components/gallery-section';
+import { NutritionSection } from './components/nutrition-section';
+import { PublicFooter } from './components/public-footer';
+import { PublicHeader } from './components/public-header';
+import { SCSection } from './components/sc-section';
+import { SkillsSection } from './components/skills-section';
+import { TournamentsSection } from './components/tournaments-section';
+import { TrainingSection } from './components/training-section';
+import { VenuesSection } from './components/venues-section';
 import { getCurrentMember } from './lib/authz';
 
 export const dynamic = 'force-dynamic';
 
-const nav = [
-  ['Overview', Home], ['Team fund', WalletCards], ['Contributions', ArrowDownLeft],
-  ['Expenses', ReceiptText], ['Calendar', CalendarDays], ['Activity ideas', Lightbulb],
-  ['Team information', CircleHelp],
-] as const;
 export default async function HomePage() {
-  const member = await getCurrentMember();
-  if (!member.approved) return <AccessPending member={member} />;
-  const rows = await getDb().select().from(transactions).orderBy(desc(transactions.occurredOn));
-  const income = rows.filter((r) => r.type === 'income' && r.status !== 'rejected').reduce((sum, r) => sum + r.amountCents, 0);
-  const expense = rows.filter((r) => r.type === 'expense' && (r.status === 'approved' || r.status === 'paid')).reduce((sum, r) => sum + r.amountCents, 0);
-  const balance = income - expense;
-  const displayName = member.displayName.split(' ')[0];
-  return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <div className="brand"><Image src="/rvr-white.png" width={52} height={52} alt="Rivervalley Rangers AFC crest" priority /><div><strong>RVR 2014</strong><span>Team Admin</span></div></div>
-        <nav aria-label="Main navigation">
-          {nav.map(([label, Icon], index) => { const href = ['/', '/fund', '/contributions', '/expenses', '/calendar', '/ideas', '/information'][index]; return <a className={index === 0 ? 'nav-link active' : 'nav-link'} href={href} key={label}><Icon size={18} strokeWidth={1.8} /><span>{label}</span>{label === 'Expenses' && rows.some((r) => r.type === 'expense' && r.status === 'pending') && <em>{rows.filter((r) => r.type === 'expense' && r.status === 'pending').length}</em>}</a>; })}
-        </nav>
-        <div className="sidebar-bottom"><p>MANAGEMENT</p>{(member.role === 'super_admin' || member.role === 'admin') && <a className="nav-link" href="/admin"><ShieldCheck size={18} /><span>Admin portal</span></a>}<a className="nav-link" href="#settings"><Settings size={18} /><span>Settings</span></a><div className="user-card"><span>{member.displayName.split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase()}</span><div><strong>{member.displayName}</strong><small>{member.role.replace('_',' ')}</small></div><ChevronRight size={16} /></div></div>
-      </aside>
+  const currentMember = await getCurrentMember();
 
-      <section className="content" id="overview">
-        <header className="topbar"><div><p>2026/27 SEASON</p><h1>Good afternoon, {displayName}.</h1></div><button className="primary"><Plus size={17} /> Record transaction</button></header>
-        <div className="notice"><ShieldCheck size={18} /><span><strong>Private team space.</strong> Only approved RVR 2014 members can view this information.</span></div>
-        <div className="fund-grid">
-          <article className="balance-card">
-            <div className="card-label"><Landmark size={18} /> AVAILABLE TEAM FUND</div><div className="balance-row"><h2>€{(balance/100).toFixed(2)}</h2><span>{balance >= 0 ? 'Healthy' : 'Review'}</span></div>
-            <div className="fund-stats"><div><span>Money in</span><strong>€{(income/100).toFixed(2)}</strong><small><ArrowUpRight size={14} /> {rows.filter(r=>r.type==='income').length} contributions</small></div><div><span>Money out</span><strong>€{(expense/100).toFixed(2)}</strong><small><ArrowDownLeft size={14} /> {rows.filter(r=>r.type==='expense').length} expenses</small></div></div>
-            <div className="fund-progress"><span style={{ width: `${Math.min(100, income ? (income/190000)*100 : 0)}%` }} /></div><p>{Math.round((income/190000)*100)}% of €1,900 yearly target collected</p>
-          </article>
-          <article className="collection-card">
-            <div className="section-heading"><div><span>SEASON CONTRIBUTIONS</span><h3>{rows.filter(r=>r.type==='income').length} payments recorded</h3></div><a href="/contributions"><ChevronRight size={18} /></a></div>
-            <div className="ring-wrap"><div className="ring"><strong>{Math.min(100,Math.round((income/190000)*100))}%</strong><span>of target</span></div><div className="collection-notes"><p><i className="green-dot" /> Received <strong>€{(income/100).toFixed(0)}</strong></p><p><i className="amber-dot" /> Target <strong>€1,900</strong></p></div></div>
-            <button className="secondary">View contribution status</button>
-          </article>
-        </div>
-        <div className="dashboard-grid">
-          <article className="panel transactions" id="contributions"><div className="section-heading"><div><span>TEAM ACCOUNTS</span><h3>Recent activity</h3></div><a href="#team-fund">View all <ChevronRight size={15} /></a></div><div className="transaction-list">
-            {rows.slice(0,4).map((row) => { const positive=row.type==='income'; return <div className="transaction" key={row.id}><span className={positive ? 'transaction-icon in' : 'transaction-icon out'}>{positive ? <ArrowDownLeft size={17} /> : <ArrowUpRight size={17} />}</span><div><strong>{member.role==='parent'&&positive?'Family contribution':row.personName}</strong><small>{row.description} · {row.status}</small></div><time>{row.occurredOn.slice(5)}</time><b className={positive ? 'money-in' : 'money-out'}>{positive?'+':'−'}€{(row.amountCents/100).toFixed(2)}</b></div>;})}
-          </div></article>
-          <aside className="right-column">
-            <article className="panel upcoming" id="calendar"><div className="section-heading"><div><span>UP NEXT</span><h3>Important dates</h3></div><CalendarDays size={19} /></div><div className="date-item"><div><strong>05</strong><span>SEP</span></div><p><b>League season begins</b><small>Saturday · Fixture TBC</small></p></div><div className="date-item"><div><strong>12</strong><span>SEP</span></div><p><b>Parent fund deadline</b><small>€25 season contribution</small></p></div><a href="#calendar">Open team calendar <ChevronRight size={15} /></a></article>
-            <article className="quick-links"><a href="https://www.rivervalleyrangers.ie/pitch-locations" target="_blank" rel="noreferrer"><MapPin size={19} /><div><b>Pitch locations</b><span>Home & away directions</span></div><ChevronRight size={16} /></a><a href="https://ddsl.ie/" target="_blank" rel="noreferrer"><ClipboardList size={19} /><div><b>DDSL</b><span>Fixtures, results & tables</span></div><ChevronRight size={16} /></a><a href="#activity-ideas"><Lightbulb size={19} /><div><b>Activity ideas</b><span>3 ideas open for voting</span></div><ChevronRight size={16} /></a></article>
-          </aside>
+  return (
+    <div className="public-page-root">
+      {/* Sticky Top Navigation */}
+      <PublicHeader isAuthenticated={Boolean(currentMember)} />
+
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-overlay" />
+        <div className="hero-container">
+          <div className="hero-badge-row">
+            <span className="hero-pill season">
+              <Trophy size={13} /> DDSL 2026/27 SEASON
+            </span>
+            <span className="hero-pill location">
+              <MapPin size={13} /> SWORDS, DUBLIN
+            </span>
+            <span className="hero-pill squad">
+              <Users size={13} /> 2014 SQUAD HUB
+            </span>
+          </div>
+
+          <h1 className="hero-title">
+            Rivervalley Rangers <span>2014 Team Hub</span>
+          </h1>
+
+          <p className="hero-subtitle">
+            The dedicated platform for player development, matchday preparation, technical drills, nutrition guides, pitch navigation, and tournament updates.
+          </p>
+
+          <div className="hero-cta-group">
+            <a href="#skills" className="hero-btn primary">
+              <Play size={16} fill="currentColor" /> Explore Skills Vault
+            </a>
+            <a href="#venues" className="hero-btn secondary">
+              <Compass size={16} /> Pitch Venues & Directions
+            </a>
+            <Link
+              href={currentMember ? '/portal' : '/login'}
+              className="hero-btn portal-btn"
+            >
+              <Lock size={15} />
+              <span>{currentMember ? 'Open Team Portal' : 'Team Portal & Accounts'}</span>
+              <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          {/* Quick Stats / Highlights Bar */}
+          <div className="hero-highlights-bar">
+            <div className="highlight-stat">
+              <div className="stat-icon blue">
+                <Play size={20} />
+              </div>
+              <div>
+                <strong>Video Skills Library</strong>
+                <span>8 Master Drills with Coaching Cues</span>
+              </div>
+            </div>
+
+            <div className="highlight-stat">
+              <div className="stat-icon green">
+                <Zap size={20} />
+              </div>
+              <div>
+                <strong>Youth S & C Program</strong>
+                <span>FIFA 11+ Dynamic Activation & Agility</span>
+              </div>
+            </div>
+
+            <div className="highlight-stat">
+              <div className="stat-icon amber">
+                <Apple size={20} />
+              </div>
+              <div>
+                <strong>Matchday Fueling</strong>
+                <span>Pre-Match Timelines & Hydration Blueprint</span>
+              </div>
+            </div>
+
+            <div className="highlight-stat">
+              <div className="stat-icon purple">
+                <MapPin size={20} />
+              </div>
+              <div>
+                <strong>Interactive Pitch GPS</strong>
+                <span>5 Venues with Surface & Footwear Guides</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
-    </main>
+
+      {/* 1. Skills & Drills Vault */}
+      <SkillsSection />
+
+      {/* 2. Training Information & Kit Checklist */}
+      <TrainingSection />
+
+      {/* 3. Strength & Conditioning */}
+      <SCSection />
+
+      {/* 4. Matchday Nutrition & Hydration */}
+      <NutritionSection />
+
+      {/* 5. Pitch Venues & GPS Navigation */}
+      <VenuesSection />
+
+      {/* 6. Cups & Tournaments Central */}
+      <TournamentsSection />
+
+      {/* 7. Photo Gallery */}
+      <GallerySection />
+
+      {/* Portal Access Callout Banner */}
+      <section className="portal-callout-section">
+        <div className="section-container">
+          <div className="portal-callout-card">
+            <div className="callout-icon-wrap">
+              <Lock size={32} />
+            </div>
+            <div className="callout-text">
+              <span className="callout-tag">RESTRICTED ACCESS FOR RVR FAMILIES</span>
+              <h3>Private Team Portal & Financial Accounts</h3>
+              <p>
+                Are you an RVR 2014 coach, parent, or club administrator? Access the private squad fund ledger, record expenses, review season contributions, and vote on upcoming team outings.
+              </p>
+            </div>
+            <div className="callout-actions">
+              <Link
+                href={currentMember ? '/portal' : '/login'}
+                className="callout-btn"
+              >
+                <Lock size={16} />
+                <span>{currentMember ? 'Go to Dashboard' : 'Log In to Team Portal'}</span>
+                <ChevronRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Public Footer */}
+      <PublicFooter />
+    </div>
   );
 }

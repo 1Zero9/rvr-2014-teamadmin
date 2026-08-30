@@ -1,3 +1,80 @@
-import { asc } from 'drizzle-orm'; import { CalendarDays } from 'lucide-react'; import { getDb } from '../../db'; import { events } from '../../db/schema'; import { addEvent } from '../actions'; import { AccessPending, PortalPage } from '../components/portal-page'; import { getCurrentMember } from '../lib/authz';
-export const dynamic='force-dynamic';
-export default async function CalendarPage(){const member=await getCurrentMember();if(!member.approved)return <AccessPending member={member}/>;const rows=await getDb().select().from(events).orderBy(asc(events.eventDate));return <PortalPage member={member} active="/calendar" eyebrow="TEAM SCHEDULE" title="Important dates"><div className="page-grid"><article className="panel">{rows.length===0?<div className="empty-state"><CalendarDays/><strong>No dates added yet</strong><p>Add fixtures, deadlines, outings and parent reminders.</p></div>:<div className="idea-list">{rows.map(r=><div className="idea-card" key={r.id}><span className="badge">{r.eventDate}</span><h3>{r.title}</h3><p>{r.details||'No further details.'}</p><div className="idea-meta"><span>{r.location||'Location TBC'}</span></div></div>)}</div>}</article>{member.role!=='parent'&&<form className="form-card" action={addEvent}><h2>Add important date</h2><p>Visible to every approved team member.</p><div className="field-grid"><div className="field full"><label>Title</label><input name="title" required/></div><div className="field full"><label>Date & time</label><input name="eventDate" type="datetime-local" required/></div><div className="field full"><label>Location</label><input name="location"/></div><div className="field full"><label>Details</label><textarea name="details"/></div></div><button className="primary">Add to calendar</button></form>}</div></PortalPage>}
+import { asc } from 'drizzle-orm';
+import { CalendarDays } from 'lucide-react';
+import { getDb } from '../../db';
+import { events } from '../../db/schema';
+import { addEvent } from '../actions';
+import { AccessPending, PortalPage } from '../components/portal-page';
+import { requireApprovedMember } from '../lib/authz';
+
+export const dynamic = 'force-dynamic';
+
+export default async function CalendarPage() {
+  const member = await requireApprovedMember();
+  if (!member.approved) return <AccessPending member={member} />;
+
+  let rows: typeof events.$inferSelect[] = [];
+  try {
+    rows = await getDb().select().from(events).orderBy(asc(events.eventDate));
+  } catch (err) {
+    console.error('Error loading calendar events:', err);
+  }
+
+  return (
+    <PortalPage
+      member={member}
+      active="/calendar"
+      eyebrow="TEAM SCHEDULE"
+      title="Important dates"
+    >
+      <div className="page-grid">
+        <article className="panel">
+          {rows.length === 0 ? (
+            <div className="empty-state">
+              <CalendarDays />
+              <strong>No dates added yet</strong>
+              <p>Add fixtures, deadlines, outings and parent reminders.</p>
+            </div>
+          ) : (
+            <div className="idea-list">
+              {rows.map((r) => (
+                <div className="idea-card" key={r.id}>
+                  <span className="badge">{r.eventDate}</span>
+                  <h3>{r.title}</h3>
+                  <p>{r.details || 'No further details.'}</p>
+                  <div className="idea-meta">
+                    <span>{r.location || 'Location TBC'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </article>
+        {member.role !== 'parent' && (
+          <form className="form-card" action={addEvent}>
+            <h2>Add important date</h2>
+            <p>Visible to every approved team member.</p>
+            <div className="field-grid">
+              <div className="field full">
+                <label>Title</label>
+                <input name="title" required />
+              </div>
+              <div className="field full">
+                <label>Date & time</label>
+                <input name="eventDate" type="datetime-local" required />
+              </div>
+              <div className="field full">
+                <label>Location</label>
+                <input name="location" />
+              </div>
+              <div className="field full">
+                <label>Details</label>
+                <textarea name="details" />
+              </div>
+            </div>
+            <button className="primary">Add to calendar</button>
+          </form>
+        )}
+      </div>
+    </PortalPage>
+  );
+}

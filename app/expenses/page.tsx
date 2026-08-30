@@ -1,21 +1,31 @@
-import { desc } from "drizzle-orm";
-import { ReceiptText } from "lucide-react";
-import { getDb } from "../../db";
-import { transactions } from "../../db/schema";
-import { recordTransaction } from "../actions";
-import { AccessPending, PortalPage } from "../components/portal-page";
-import { getCurrentMember } from "../lib/authz";
-export const dynamic = "force-dynamic";
+import { desc } from 'drizzle-orm';
+import { ReceiptText } from 'lucide-react';
+import { getDb } from '../../db';
+import { transactions } from '../../db/schema';
+import { recordTransaction } from '../actions';
+import { AccessPending, PortalPage } from '../components/portal-page';
+import { requireApprovedMember } from '../lib/authz';
+
+export const dynamic = 'force-dynamic';
+
 export default async function ExpensesPage() {
-  const member = await getCurrentMember();
+  const member = await requireApprovedMember();
   if (!member.approved) return <AccessPending member={member} />;
-  const rows = (
-    await getDb()
-      .select()
-      .from(transactions)
-      .orderBy(desc(transactions.occurredOn))
-  ).filter((r) => r.type === "expense");
-  const canSubmit = member.role !== "parent";
+
+  let rows: typeof transactions.$inferSelect[] = [];
+  try {
+    rows = (
+      await getDb()
+        .select()
+        .from(transactions)
+        .orderBy(desc(transactions.occurredOn))
+    ).filter((r) => r.type === 'expense');
+  } catch (err) {
+    console.error('Error loading expenses:', err);
+  }
+
+  const canSubmit = member.role !== 'parent';
+
   return (
     <PortalPage
       member={member}
@@ -50,7 +60,7 @@ export default async function ExpensesPage() {
                         {r.category} · {r.occurredOn}
                       </small>
                     </td>
-                    <td>{member.role === "parent" ? "Team expense" : r.personName}</td>
+                    <td>{member.role === 'parent' ? 'Team expense' : r.personName}</td>
                     <td>
                       <span className={`badge ${r.status}`}>{r.status}</span>
                     </td>
@@ -67,9 +77,9 @@ export default async function ExpensesPage() {
           <form className="form-card" action={recordTransaction}>
             <input type="hidden" name="type" value="expense" />
             <h2>
-              {member.role === "coach"
-                ? "Request an expense"
-                : "Record an expense"}
+              {member.role === 'coach'
+                ? 'Request an expense'
+                : 'Record an expense'}
             </h2>
             <p>
               Coach submissions remain pending until an administrator approves
@@ -116,7 +126,7 @@ export default async function ExpensesPage() {
               </div>
             </div>
             <button className="primary">
-              {member.role === "coach" ? "Submit request" : "Save expense"}
+              {member.role === 'coach' ? 'Submit request' : 'Save expense'}
             </button>
           </form>
         )}

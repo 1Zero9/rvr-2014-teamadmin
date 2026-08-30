@@ -1,20 +1,29 @@
-import { desc } from "drizzle-orm";
-import { ArrowDownLeft } from "lucide-react";
-import { getDb } from "../../db";
-import { transactions } from "../../db/schema";
-import { recordTransaction } from "../actions";
-import { AccessPending, PortalPage } from "../components/portal-page";
-import { canManageAccounts, getCurrentMember } from "../lib/authz";
-export const dynamic = "force-dynamic";
+import { desc } from 'drizzle-orm';
+import { ArrowDownLeft } from 'lucide-react';
+import { getDb } from '../../db';
+import { transactions } from '../../db/schema';
+import { recordTransaction } from '../actions';
+import { AccessPending, PortalPage } from '../components/portal-page';
+import { canManageAccounts, requireApprovedMember } from '../lib/authz';
+
+export const dynamic = 'force-dynamic';
+
 export default async function ContributionsPage() {
-  const member = await getCurrentMember();
+  const member = await requireApprovedMember();
   if (!member.approved) return <AccessPending member={member} />;
-  const rows = (
-    await getDb()
-      .select()
-      .from(transactions)
-      .orderBy(desc(transactions.occurredOn))
-  ).filter((r) => r.type === "income");
+
+  let rows: typeof transactions.$inferSelect[] = [];
+  try {
+    rows = (
+      await getDb()
+        .select()
+        .from(transactions)
+        .orderBy(desc(transactions.occurredOn))
+    ).filter((r) => r.type === 'income');
+  } catch (err) {
+    console.error('Error fetching contributions:', err);
+  }
+
   return (
     <PortalPage
       member={member}
@@ -43,12 +52,16 @@ export default async function ContributionsPage() {
                 {rows.map((r) => (
                   <tr key={r.id}>
                     <td>
-                      {member.role === "parent" ? "Family contribution" : r.personName}
+                      {member.role === 'parent' ? 'Family contribution' : r.personName}
                       <small>{r.description}</small>
                     </td>
                     <td>
                       {r.occurredOn}
-                      <small>{member.role === "parent" ? "Payment recorded" : r.paymentMethod || "Not recorded"}</small>
+                      <small>
+                        {member.role === 'parent'
+                          ? 'Payment recorded'
+                          : r.paymentMethod || 'Not recorded'}
+                      </small>
                     </td>
                     <td className="money-in">
                       +€{(r.amountCents / 100).toFixed(2)}
