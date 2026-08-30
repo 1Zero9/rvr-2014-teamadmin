@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { logoutAction } from '../actions';
 import { roleLabel, type Member } from '../lib/authz';
+import { InactivityTracker } from './inactivity-tracker';
 
 const items = [
   ['Overview', '/portal', Home],
@@ -115,6 +116,7 @@ export function PortalPage({
         </header>
         {children}
       </section>
+      <InactivityTracker />
     </main>
   );
 }

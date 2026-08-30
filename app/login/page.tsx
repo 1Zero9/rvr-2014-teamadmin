@@ -46,10 +46,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
 
         {errorCode && (
-          <div className="login-error-banner">
+          <div className={`login-error-banner ${errorCode === 'timeout' ? 'timeout-banner' : ''}`}>
             <AlertCircle size={16} />
             <span>
-              {errorCode === 'missing'
+              {errorCode === 'timeout'
+                ? 'Session expired due to inactivity. Please enter your password to unlock the portal.'
+                : errorCode === 'missing'
                 ? 'Please enter the admin password.'
                 : 'Incorrect admin password. Please check your credentials.'}
             </span>

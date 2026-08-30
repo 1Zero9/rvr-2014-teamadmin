@@ -82,13 +82,18 @@ export async function loginAction(formData: FormData) {
     redirect('/login?error=invalid');
   }
 
+  const sessionPayload = {
+    ...memberData,
+    lastActiveAt: Date.now(),
+  };
+
   const cookieStore = await cookies();
-  cookieStore.set(AUTH_COOKIE_NAME, JSON.stringify(memberData), {
+  cookieStore.set(AUTH_COOKIE_NAME, JSON.stringify(sessionPayload), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+    maxAge: 60 * 60 * 24, // 1 day absolute maximum
   });
 
   await audit(
