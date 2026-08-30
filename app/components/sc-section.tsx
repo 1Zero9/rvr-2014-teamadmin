@@ -1,13 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { Activity, Dumbbell, Flame, Shield, Timer, Zap, Check, HeartPulse } from 'lucide-react';
+import {
+  Activity,
+  CheckCircle2,
+  Clock,
+  Dumbbell,
+  Flame,
+  HeartPulse,
+  Play,
+  Shield,
+  Timer,
+  Video,
+  X,
+  Zap,
+} from 'lucide-react';
 
 interface Routine {
   id: string;
   category: string;
   title: string;
   duration: string;
+  youtubeId?: string;
   description: string;
   drills: {
     name: string;
@@ -22,6 +36,7 @@ const ROUTINES: Routine[] = [
     category: 'Pre-Session',
     title: 'FIFA 11+ Dynamic Activation',
     duration: '10 Mins',
+    youtubeId: 'p2wK8c6eM74',
     description:
       'Compulsory pre-training and pre-match activation routine designed to reduce knee and ankle injury rates by up to 50%.',
     drills: [
@@ -34,8 +49,9 @@ const ROUTINES: Routine[] = [
   {
     id: 'speed-agility',
     category: 'Speed & Agility',
-    title: 'Acceleration & Change of Direction',
+    title: 'Acceleration & Footwork Ladder Drills',
     duration: '15 Mins',
+    youtubeId: 't37pW2N8e1I',
     description:
       'Sharp explosive movements emphasizing first-step burst, arm drive, and rapid deceleration without losing balance.',
     drills: [
@@ -58,24 +74,11 @@ const ROUTINES: Routine[] = [
       { name: 'Lateral Skater Hops (Stick the Landing)', sets: '3 × 8 each side', cues: 'Land softly on one foot, hold balance for 2 seconds' },
     ],
   },
-  {
-    id: 'recovery',
-    category: 'Post-Match',
-    title: 'Post-Match Flush & Mobility',
-    duration: '8 Mins',
-    description:
-      'Gentle active cool down to flush metabolic waste, maintain hamstring and groin mobility, and prevent muscle tightness.',
-    drills: [
-      { name: 'Light 2-Minute Recovery Jog / Walk', sets: '1 × 2 mins', cues: 'Deep nasal breathing to bring heart rate down' },
-      { name: 'Dynamic Hamstring Sweeps', sets: '2 × 10 sweeps', cues: 'Heel on ground with toes pointing up, sweep ground with hands' },
-      { name: 'Kneeling Hip Flexor & Quad Stretch', sets: '30s hold each side', cues: 'Tuck pelvis forward until stretch is felt in front of hip' },
-      { name: 'Standing Calf & Achilles Stretch', sets: '30s hold each calf', cues: 'Keep back heel flat on grass, lean gently into wall/fence' },
-    ],
-  },
 ];
 
-export function SCSection() {
+export function ScSection() {
   const [selectedRoutine, setSelectedRoutine] = useState<string>('warmup');
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
 
   const currentRoutine = ROUTINES.find((r) => r.id === selectedRoutine) ?? ROUTINES[0];
 
@@ -118,9 +121,20 @@ export function SCSection() {
               <h3>{currentRoutine.title}</h3>
               <p>{currentRoutine.description}</p>
             </div>
-            <div className="sc-time-badge">
-              <Timer size={18} />
-              <span>{currentRoutine.duration} Session</span>
+            <div className="flex flex-col items-end gap-2">
+              <div className="sc-time-badge">
+                <Timer size={18} />
+                <span>{currentRoutine.duration} Session</span>
+              </div>
+              {currentRoutine.youtubeId && (
+                <button
+                  type="button"
+                  className="watch-sc-video-btn"
+                  onClick={() => setActiveVideoId(currentRoutine.youtubeId || null)}
+                >
+                  <Play size={13} fill="currentColor" /> Watch Video Demonstration
+                </button>
+              )}
             </div>
           </div>
 
@@ -151,7 +165,42 @@ export function SCSection() {
             </span>
           </div>
         </div>
+
+        {/* Video Lightbox Modal */}
+        {activeVideoId && (
+          <div className="video-modal-overlay" onClick={() => setActiveVideoId(null)}>
+            <div className="video-modal-container" onClick={(e) => e.stopPropagation()}>
+              <div className="video-modal-header">
+                <div>
+                  <span className="creator-pill">
+                    <Video size={12} /> Athletic Development Video
+                  </span>
+                  <h3>{currentRoutine.title}</h3>
+                </div>
+                <button
+                  type="button"
+                  className="close-modal-btn"
+                  onClick={() => setActiveVideoId(null)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="video-frame-wrap">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
+                  title={currentRoutine.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="video-iframe"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
 }
+
+export { ScSection as SCSection };

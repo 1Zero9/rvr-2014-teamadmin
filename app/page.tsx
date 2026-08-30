@@ -74,7 +74,7 @@ export default async function HomePage() {
       pillColor: 'cyan',
       icon: Play,
       desc: 'High-energy video tutorials for 1v1 moves, sharp turns, quick footwork, and top-corner finishing.',
-      highlights: ['8 Essential Youth Drills', 'Pro Coaching Cues & Steps', 'Repetition & Daily Challenges'],
+      highlights: ['12 Free YouTube Drills', 'Unisport, 7mlc & Become Elite', 'Progress Practice Tracker'],
       href: '/skills',
       btnText: 'Open Skills Vault',
     },
