@@ -3878,7 +3878,8 @@ a {
 .sync-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .sync-msg {
@@ -3912,25 +3913,50 @@ a {
   cursor: not-allowed;
 }
 
-/* Fixtures Filter Row */
-.fixtures-filter-row {
-  display: flex;
+.sync-ext-btn {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 650;
+  transition: all 0.15s ease;
 }
 
-.comp-select-wrap select {
-  padding: 8px 12px;
+.sync-ext-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Scope Toggle Group */
+.scope-toggle-group {
+  display: flex;
+  background: #f1f5f9;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
+  padding: 3px;
+  border: 1px solid #e2e8f0;
+}
+
+.scope-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.scope-btn.active {
   background: #ffffff;
-  color: #334155;
-  font-size: 12px;
-  font-weight: 600;
-  outline: none;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Matches Grid */

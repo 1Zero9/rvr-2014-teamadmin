@@ -1,16 +1,16 @@
 import Link from 'next/link';
-import { ArrowLeft, RefreshCw, Trophy } from 'lucide-react';
+import { ArrowLeft, ExternalLink, RefreshCw, Trophy } from 'lucide-react';
 import { FixturesSection } from '../components/fixtures-section';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
 import { getCurrentMember } from '../lib/authz';
-import { getMatchesFromDb } from '../lib/matches';
+import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
 
 export default async function FixturesPage() {
   const currentMember = await getCurrentMember();
-  const initialMatches = await getMatchesFromDb();
+  const liveDdslData = await fetchLiveDdslLeagueData('218148');
 
   return (
     <div className="public-page-root">
@@ -24,16 +24,22 @@ export default async function FixturesPage() {
             <span>Fixtures & Results</span>
           </div>
           <span className="section-pill">
-            <Trophy size={14} /> DDSL MATCHDAY CENTRE
+            <Trophy size={14} /> DDSL OFFICIAL LEAGUE FEED · ID: 218148
           </span>
-          <h1>DDSL Fixtures, Latest Results & Standings</h1>
+          <h1>{liveDdslData.leagueName}</h1>
           <p>
-            Real-time match outcomes, goalscorers, upcoming kick-offs, pitch allocations, and official league table for RVR 2014.
+            Official match schedule, verified full-time results, goalscorers, upcoming kick-offs, and live division standings for River Valley Rangers FC.
           </p>
         </div>
       </div>
 
-      <FixturesSection initialMatches={initialMatches} />
+      <FixturesSection
+        initialMatches={liveDdslData.rvrMatches}
+        allDivisionMatches={liveDdslData.allDivisionMatches}
+        liveStandings={liveDdslData.standings}
+        leagueName={liveDdslData.leagueName}
+        leagueUrl={liveDdslData.leagueUrl}
+      />
       <PublicFooter />
     </div>
   );
