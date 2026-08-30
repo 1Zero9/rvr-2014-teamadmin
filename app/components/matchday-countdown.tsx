@@ -1,31 +1,58 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Clock, Flame, Zap } from 'lucide-react';
+import { Clock, MapPin } from 'lucide-react';
 
 interface MatchdayCountdownProps {
   opponent: string;
   matchDateStr?: string;
+  kickoffTime?: string;
   venue?: string;
 }
 
-export function MatchdayCountdown({ opponent, matchDateStr = 'Sat 5th Sept 2026', venue }: MatchdayCountdownProps) {
+export function MatchdayCountdown({
+  opponent,
+  matchDateStr = '05 Sep 2026',
+  kickoffTime = '11:00',
+  venue = 'Deerpark',
+}: MatchdayCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
     minutes: number;
     seconds: number;
-  }>({ days: 5, hours: 14, minutes: 22, seconds: 40 });
+  }>({ days: 5, hours: 14, minutes: 20, seconds: 0 });
 
   useEffect(() => {
-    // Target next Saturday 10:30 AM matchday
+    // Parse target fixture date & kickoff time
     const now = new Date();
-    const target = new Date();
-    // Next Saturday
-    const dayOfWeek = target.getDay(); // 0 is Sunday, 6 is Saturday
-    const daysUntilSaturday = (6 - dayOfWeek + 7) % 7 || 7;
-    target.setDate(now.getDate() + daysUntilSaturday);
-    target.setHours(10, 30, 0, 0);
+    let target = new Date();
+
+    if (matchDateStr && matchDateStr !== 'TBC') {
+      const parsedDate = new Date(matchDateStr);
+      if (!isNaN(parsedDate.getTime())) {
+        target = parsedDate;
+      } else {
+        // Find next Saturday
+        const dayOfWeek = now.getDay();
+        const daysUntilSaturday = (6 - dayOfWeek + 7) % 7 || 7;
+        target = new Date(now);
+        target.setDate(now.getDate() + daysUntilSaturday);
+      }
+    } else {
+      const dayOfWeek = now.getDay();
+      const daysUntilSaturday = (6 - dayOfWeek + 7) % 7 || 7;
+      target = new Date(now);
+      target.setDate(now.getDate() + daysUntilSaturday);
+    }
+
+    // Set kickoff time
+    if (kickoffTime && kickoffTime.includes(':')) {
+      const [h, m] = kickoffTime.split(':').map((n) => parseInt(n, 10));
+      target.setHours(h || 11, m || 0, 0, 0);
+    } else {
+      target.setHours(11, 0, 0, 0);
+    }
 
     const updateTimer = () => {
       const current = new Date().getTime();
@@ -47,7 +74,7 @@ export function MatchdayCountdown({ opponent, matchDateStr = 'Sat 5th Sept 2026'
     updateTimer();
     const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [matchDateStr, kickoffTime]);
 
   return (
     <div className="hero-countdown-wrap">
@@ -64,7 +91,9 @@ export function MatchdayCountdown({ opponent, matchDateStr = 'Sat 5th Sept 2026'
         <span>:</span>
         <span className="countdown-unit text-amber-300">{String(timeLeft.seconds).padStart(2, '0')}s</span>
       </div>
-      <span className="countdown-opponent-tag">vs {opponent}</span>
+      <span className="countdown-opponent-tag">
+        vs {opponent} ({kickoffTime || '11:00 AM'})
+      </span>
     </div>
   );
 }

@@ -184,7 +184,12 @@ export default async function HomePage() {
 
           {/* Live Matchday Countdown Timer */}
           <div className="flex justify-center mb-6">
-            <MatchdayCountdown opponent={nextFixture.opponent} venue={nextFixture.venue} />
+            <MatchdayCountdown
+              opponent={nextFixture.opponent}
+              matchDateStr={nextFixture.matchDate}
+              kickoffTime={nextFixture.kickoffTime}
+              venue={nextFixture.venue}
+            />
           </div>
 
           <div className="hero-cta-group">
