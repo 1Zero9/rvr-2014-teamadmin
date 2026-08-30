@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ExternalLink, Lock, ShieldCheck, Heart, MapPin, Trophy } from 'lucide-react';
+import { ExternalLink, Lock, MapPin } from 'lucide-react';
 
 export function PublicFooter() {
   return (
@@ -30,15 +30,15 @@ export function PublicFooter() {
           </div>
 
           <div className="footer-links-col">
-            <h4>Squad Quick Links</h4>
+            <h4>Squad Sections</h4>
             <ul>
-              <li><a href="#skills">Skills & Drills Vault</a></li>
-              <li><a href="#training">Training & Kit Guide</a></li>
-              <li><a href="#sc">Strength & Conditioning</a></li>
-              <li><a href="#nutrition">Matchday Nutrition</a></li>
-              <li><a href="#venues">Pitch Venues & GPS</a></li>
-              <li><a href="#tournaments">Cups & Tournaments</a></li>
-              <li><a href="#photos">Photo Gallery</a></li>
+              <li><Link href="/skills">Skills & Drills Vault</Link></li>
+              <li><Link href="/training">Training & Kit Guide</Link></li>
+              <li><Link href="/sc">Strength & Conditioning</Link></li>
+              <li><Link href="/nutrition">Matchday Nutrition</Link></li>
+              <li><Link href="/venues">Pitch Venues & GPS</Link></li>
+              <li><Link href="/tournaments">Cups & Tournaments</Link></li>
+              <li><Link href="/photos">Photo Gallery</Link></li>
             </ul>
           </div>
 

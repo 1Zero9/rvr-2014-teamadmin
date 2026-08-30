@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Lock, Menu, X, Trophy, Shield, Sparkles } from 'lucide-react';
+import { Lock, Menu, X } from 'lucide-react';
 
 export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,13 +18,13 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
   }, []);
 
   const navLinks = [
-    { label: 'Skills & Drills', href: '#skills' },
-    { label: 'Training & Kit', href: '#training' },
-    { label: 'S & C', href: '#sc' },
-    { label: 'Nutrition', href: '#nutrition' },
-    { label: 'Pitch Venues', href: '#venues' },
-    { label: 'Cups & Tournaments', href: '#tournaments' },
-    { label: 'Photos', href: '#photos' },
+    { label: 'Skills & Drills', href: '/skills' },
+    { label: 'Training & Kit', href: '/training' },
+    { label: 'S & C', href: '/sc' },
+    { label: 'Nutrition', href: '/nutrition' },
+    { label: 'Pitch Venues', href: '/venues' },
+    { label: 'Cups & Tournaments', href: '/tournaments' },
+    { label: 'Photos', href: '/photos' },
   ];
 
   return (
@@ -52,9 +52,9 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
         {/* Desktop Nav */}
         <nav className="desktop-nav" aria-label="Public navigation">
           {navLinks.map((link) => (
-            <a key={link.label} href={link.href} className="nav-item">
+            <Link key={link.label} href={link.href} className="nav-item">
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -84,14 +84,14 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
         <div className="mobile-drawer">
           <nav>
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="mobile-nav-item"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
             <Link
               href={isAuthenticated ? '/portal' : '/login'}
