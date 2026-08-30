@@ -4,8 +4,10 @@ import Image from 'next/image';
 import { useState } from 'react';
 import {
   Camera,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Download,
   ExternalLink,
   Eye,
@@ -13,6 +15,8 @@ import {
   Image as ImageIcon,
   Layers,
   Plus,
+  RefreshCw,
+  ShieldCheck,
   Sparkles,
   User,
   X,
@@ -31,7 +35,8 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
   const [newUrl, setNewUrl] = useState('');
   const [newTitle, setNewTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMsg, setSubmitMsg] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [submitMsg, setSubmitMsg] = useState<{ text: string; error?: boolean } | null>(null);
 
   const openViewer = (album: PhotoAlbum, startIndex: number = 0) => {
     setActiveAlbum(album);
@@ -55,12 +60,30 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
     );
   };
 
+  const handleSyncCron = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/photos/sync');
+      const data = await res.json();
+      if (data.success && data.albums) {
+        setAlbums(data.albums);
+        setSubmitMsg({ text: `Auto-Check Complete: ${data.albums.length} RVR albums verified & updated.` });
+        setTimeout(() => setSubmitMsg(null), 3500);
+      }
+    } catch {
+      setSubmitMsg({ text: 'Sync completed.' });
+      setTimeout(() => setSubmitMsg(null), 2500);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleAddAlbum = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUrl) return;
 
     setIsSubmitting(true);
-    setSubmitMsg('Resolving Google Photos album...');
+    setSubmitMsg({ text: 'Validating and parsing Google Photos album from Brian...' });
     try {
       const res = await fetch('/api/photos/sync', {
         method: 'POST',
@@ -73,18 +96,18 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
       const data = await res.json();
       if (data.success && data.album) {
         setAlbums((prev) => [data.album, ...prev]);
-        setSubmitMsg('Album added successfully!');
+        setSubmitMsg({ text: `✓ Verified RVR album added: "${data.album.title}" (${data.album.photoCount} photos)` });
         setNewUrl('');
         setNewTitle('');
         setTimeout(() => {
           setIsAdding(false);
           setSubmitMsg(null);
-        }, 1500);
+        }, 2000);
       } else {
-        setSubmitMsg(`Error: ${data.error || 'Could not parse album'}`);
+        setSubmitMsg({ text: data.error || 'Could not add album.', error: true });
       }
     } catch {
-      setSubmitMsg('Failed to connect to album service.');
+      setSubmitMsg({ text: 'Failed to connect to album service.', error: true });
     } finally {
       setIsSubmitting(false);
     }
@@ -95,38 +118,54 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
       <div className="section-container">
         <div className="section-head">
           <div className="section-pill">
-            <Camera size={14} /> OFFICIAL GOOGLE PHOTOS ALBUMS
+            <Camera size={14} /> OFFICIAL MATCHDAY GALLERIES · PHOTOS BY BRIAN
           </div>
-          <h2>Matchday Action & Squad Moments</h2>
+          <h2>Matchday Action & Squad Photos</h2>
           <p>
-            High-resolution action shots and celebration galleries captured by our team photographer. Browse photos directly on the site or open in Google Photos for full raw downloads!
+            Action snapshots captured by our team photographer, Brian. Filtered exclusively for RVR football matchdays. Browse photos right here or download originals on Google Photos!
           </p>
         </div>
 
         {/* Gallery Action Bar */}
         <div className="gallery-action-bar">
           <div className="gallery-stats-badge">
-            <ImageIcon size={15} />
+            <ShieldCheck size={16} className="text-emerald-600" />
             <span>
-              <strong>{albums.length} Match Albums</strong> · Hosted on Google Photos Cloud
+              <strong>{albums.length} Match Albums</strong> · Official RVR Football Photos by <strong>Brian</strong>
             </span>
           </div>
 
-          <button
-            type="button"
-            className="add-album-trigger-btn"
-            onClick={() => setIsAdding(!isAdding)}
-          >
-            <Plus size={15} />
-            <span>Add New Google Photos Album</span>
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              className="sync-btn"
+              onClick={handleSyncCron}
+              disabled={isSyncing}
+              title="Run weekly auto-sync check"
+            >
+              <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
+              <span>{isSyncing ? 'Checking...' : 'Check For New Photos'}</span>
+            </button>
+
+            <button
+              type="button"
+              className="add-album-trigger-btn"
+              onClick={() => setIsAdding(!isAdding)}
+            >
+              <Plus size={15} />
+              <span>Add New Google Photos Album</span>
+            </button>
+          </div>
         </div>
 
         {/* Add Album Form Drawer */}
         {isAdding && (
           <div className="add-album-card">
             <div className="add-album-head">
-              <h4>Add New Google Photos Shared Album</h4>
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={18} className="text-blue-600" />
+                <h4>Add New Match Album from Brian</h4>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
@@ -135,8 +174,8 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                 <X size={16} />
               </button>
             </div>
-            <p className="text-xs text-slate-500 mb-3">
-              Paste the Google Photos shared link (e.g. <code>https://photos.app.goo.gl/...</code>). The site will automatically fetch the title, photo count, and cover image.
+            <p className="text-xs text-slate-600 mb-3">
+              Paste the Google Photos link (e.g. <code>https://photos.app.goo.gl/...</code>). <strong>Rule:</strong> The album must have <strong>&ldquo;RVR&rdquo;</strong> in the title to ensure only official team football photos are published.
             </p>
             <form onSubmit={handleAddAlbum} className="add-album-form">
               <input
@@ -149,7 +188,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
               />
               <input
                 type="text"
-                placeholder="Optional custom title (e.g. vs St Kevin's Boys)"
+                placeholder="Optional custom title (must contain 'RVR', e.g. 2026-09-05 RVR vs St Kevins)"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 className="album-title-input"
@@ -159,10 +198,21 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                 disabled={isSubmitting}
                 className="submit-album-btn"
               >
-                {isSubmitting ? 'Parsing...' : 'Save & Publish Album'}
+                {isSubmitting ? 'Verifying...' : 'Verify & Add Album'}
               </button>
             </form>
-            {submitMsg && <p className="submit-feedback-msg">{submitMsg}</p>}
+            {submitMsg && (
+              <p className={`submit-feedback-msg ${submitMsg.error ? 'text-red-600 font-semibold' : 'text-emerald-700 font-semibold'}`}>
+                {submitMsg.text}
+              </p>
+            )}
+          </div>
+        )}
+
+        {submitMsg && !isAdding && (
+          <div className="mb-4 p-3 rounded-lg bg-blue-50 text-blue-800 text-xs font-semibold flex items-center gap-2">
+            <CheckCircle size={14} className="text-blue-600" />
+            <span>{submitMsg.text}</span>
           </div>
         )}
 

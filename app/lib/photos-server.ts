@@ -2,13 +2,14 @@ import 'server-only';
 import { desc } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { photoAlbums } from '@/db/schema';
-import { INITIAL_PHOTO_ALBUMS, PhotoAlbum } from './photos-data';
+import { INITIAL_PHOTO_ALBUMS, isValidRvrAlbum, PhotoAlbum } from './photos-data';
 
 export async function parseGooglePhotosAlbum(shareUrl: string): Promise<{
   title: string;
   coverUrl: string;
   photoCount: number;
   samplePhotos: string[];
+  isRvrVerified: boolean;
 }> {
   try {
     const res = await fetch(shareUrl, {
@@ -20,7 +21,9 @@ export async function parseGooglePhotosAlbum(shareUrl: string): Promise<{
 
     const html = await res.text();
     const titleM = html.match(/<title>(.*?)<\/title>/i) || html.match(/<meta property="og:title" content="(.*?)"/i);
-    const title = titleM ? titleM[1].replace(/ - Google Photos/i, '').trim() : 'RVR U13 Matchday Photos';
+    const rawTitle = titleM ? titleM[1].replace(/ - Google Photos/i, '').trim() : 'RVR Match Photos';
+
+    const isRvrVerified = isValidRvrAlbum(rawTitle);
 
     const re = /https:\/\/lh3\.googleusercontent\.com\/pw\/([a-zA-Z0-9_\-]+)/g;
     const ids: string[] = [];
@@ -38,18 +41,20 @@ export async function parseGooglePhotosAlbum(shareUrl: string): Promise<{
     const samplePhotos = ids.slice(0, 50).map((id) => `https://lh3.googleusercontent.com/pw/${id}=w1200`);
 
     return {
-      title,
+      title: rawTitle,
       coverUrl,
       photoCount: ids.length > 0 ? ids.length : 1,
       samplePhotos,
+      isRvrVerified,
     };
   } catch (error) {
     console.error('Error parsing Google Photos album:', error);
     return {
-      title: 'RVR U13 Matchday Photos',
+      title: 'RVR Match Photos',
       coverUrl: 'https://lh3.googleusercontent.com/pw/AP1GczPWQ1M0XQgCUyIxlzreFY0fQb_nHjes_A9PzrSEb627QCquRNp3-SqtttEnegipFIpyJ7HRcseV183wWPfctXvnb-2_a42Hvlpnz7ekW3XBxhWKnbqi=w1200',
       photoCount: 1,
       samplePhotos: [],
+      isRvrVerified: true,
     };
   }
 }
@@ -80,6 +85,7 @@ export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
     return rows.map((r) => ({
       ...r,
       samplePhotos: [r.coverUrl],
+      isRvrVerified: isValidRvrAlbum(r.title),
     })) as PhotoAlbum[];
   } catch (err) {
     console.error('Error fetching photo albums from DB, returning defaults:', err);

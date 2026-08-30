@@ -8,7 +8,13 @@ export interface PhotoAlbum {
   photographer: string;
   matchOpponent?: string | null;
   samplePhotos?: string[];
+  isRvrVerified?: boolean;
   createdAt: string;
+}
+
+export function isValidRvrAlbum(title: string): boolean {
+  const upper = title.toUpperCase();
+  return upper.includes('RVR') || upper.includes('RIVERVALLEY') || upper.includes('RIVER VALLEY');
 }
 
 export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
@@ -19,7 +25,7 @@ export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
     coverUrl: 'https://lh3.googleusercontent.com/pw/AP1GczPWQ1M0XQgCUyIxlzreFY0fQb_nHjes_A9PzrSEb627QCquRNp3-SqtttEnegipFIpyJ7HRcseV183wWPfctXvnb-2_a42Hvlpnz7ekW3XBxhWKnbqi=w1200',
     photoCount: 57,
     albumDate: '29 Aug 2026',
-    photographer: 'Team Dad & Official Photographer',
+    photographer: 'Brian (Official Team Photographer)',
     matchOpponent: 'Greystones United AFC',
     samplePhotos: [
       'https://lh3.googleusercontent.com/pw/AP1GczPWQ1M0XQgCUyIxlzreFY0fQb_nHjes_A9PzrSEb627QCquRNp3-SqtttEnegipFIpyJ7HRcseV183wWPfctXvnb-2_a42Hvlpnz7ekW3XBxhWKnbqi=w1200',
@@ -27,6 +33,7 @@ export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
       'https://lh3.googleusercontent.com/pw/AP1GczONa8JDuCdpsCBl2paC9dQIC472CHlcpAlwYEK-6-zr0IpC5PmrtygfGrAKwz619uwS2u4dExBCRqtNj4fCnftMBjjoE2emPhWr9BfH5v-CDLqF5kav=w1200',
       'https://lh3.googleusercontent.com/pw/AP1GczPSgZb6zIwpwjMDKfMLE7kC3ZNDGpfc3MxExDN9R9M7prlQvTO1FcchyuuFYTu_59xW0CgHa3hRhqKf5wCpnGd3MW84NGmjcaCm1-AHtScBy4VTNj4C=w1200',
     ],
+    isRvrVerified: true,
     createdAt: '2026-08-29T18:00:00.000Z',
   },
   {
@@ -36,11 +43,12 @@ export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
     coverUrl: 'https://lh3.googleusercontent.com/pw/AP1GczPpMlX6fWQ1oJmGnQRmj3vF_Cfd3BHX_3kSSjqt5COg08EBGv9Ahywd7yzaZE9dRbD70lw3C57tZPAFlYBw_1g_XolszgWNqY_0vg79eUcMcGGQIh-a=w1200',
     photoCount: 44,
     albumDate: '25 Aug 2026',
-    photographer: 'Team Dad & Official Photographer',
+    photographer: 'Brian (Official Team Photographer)',
     matchOpponent: 'Pre-Season Home Tournament',
     samplePhotos: [
       'https://lh3.googleusercontent.com/pw/AP1GczPpMlX6fWQ1oJmGnQRmj3vF_Cfd3BHX_3kSSjqt5COg08EBGv9Ahywd7yzaZE9dRbD70lw3C57tZPAFlYBw_1g_XolszgWNqY_0vg79eUcMcGGQIh-a=w1200',
     ],
+    isRvrVerified: true,
     createdAt: '2026-08-25T18:00:00.000Z',
   },
 ];
