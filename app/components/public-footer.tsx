@@ -71,13 +71,13 @@ export function PublicFooter() {
             <div className="footer-portal-card">
               <div className="footer-portal-head">
                 <Lock size={18} />
-                <h4>Parent & Coach Portal</h4>
+                <h4>Admin Portal</h4>
               </div>
               <p>
                 Private squad funds, referee fees, season contributions, and coach expense claims.
               </p>
               <Link href="/login" className="footer-login-btn">
-                <Lock size={14} /> Open Private Team Portal
+                <Lock size={14} /> Open Admin Portal
               </Link>
             </div>
           </div>

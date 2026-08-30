@@ -66,7 +66,7 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
             className="portal-cta-btn"
           >
             <Lock size={14} />
-            <span>{isAuthenticated ? 'Team Portal' : 'Parent & Coach Portal'}</span>
+            <span>Admin Portal</span>
           </Link>
 
           <button
@@ -100,7 +100,7 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
               onClick={() => setMobileMenuOpen(false)}
             >
               <Lock size={15} />
-              <span>{isAuthenticated ? 'Open Team Portal' : 'Parent & Coach Portal Login'}</span>
+              <span>{isAuthenticated ? 'Open Admin Portal' : 'Admin Portal Login'}</span>
             </Link>
           </nav>
         </div>

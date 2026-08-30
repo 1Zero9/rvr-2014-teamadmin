@@ -202,7 +202,7 @@ export default async function HomePage() {
               className="hero-btn hero-btn-portal"
             >
               <Lock size={14} />
-              <span>{currentMember ? 'Team Portal' : 'Parent & Coach Portal'}</span>
+              <span>Admin Portal</span>
               <ChevronRight size={15} />
             </Link>
           </div>
@@ -404,7 +404,7 @@ export default async function HomePage() {
             </div>
             <div className="callout-text">
               <span className="callout-tag">RESTRICTED TEAM ACCESS</span>
-              <h3>Parent & Coach Financial Portal</h3>
+              <h3>Admin & Financial Portal</h3>
               <p>
                 Access private squad finances, track season player registration contributions, submit referee and coach expense claims, and review club admin reports.
               </p>
@@ -415,7 +415,7 @@ export default async function HomePage() {
                 className="callout-btn"
               >
                 <Lock size={15} />
-                <span>{currentMember ? 'Open Portal Dashboard' : 'Log In to Team Portal'}</span>
+                <span>{currentMember ? 'Open Admin Portal' : 'Log In to Admin Portal'}</span>
                 <ChevronRight size={15} />
               </Link>
             </div>
