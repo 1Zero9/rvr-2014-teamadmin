@@ -1,24 +1,31 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { AlertTriangle, Clock, LogOut, ShieldAlert } from 'lucide-react';
+import { Clock, LogOut } from 'lucide-react';
 
 interface InactivityTrackerProps {
   timeoutMinutes?: number;
 }
 
-export function InactivityTracker({ timeoutMinutes = 15 }: InactivityTrackerProps) {
-  const router = useRouter();
+export function InactivityTracker({ timeoutMinutes = 20 }: InactivityTrackerProps) {
   const [showWarning, setShowWarning] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(60);
 
   const timeoutMs = timeoutMinutes * 60 * 1000;
-  const warningMs = Math.max(timeoutMs - 60 * 1000, 30 * 1000); // 1 minute before timeout
+  const warningMs = Math.max(timeoutMs - 60 * 1000, 30 * 1000);
 
   const lastActivityRef = useRef<number>(Date.now());
+  const lastHeartbeatRef = useRef<number>(Date.now());
   const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const sendHeartbeat = async () => {
+    try {
+      await fetch('/api/auth/heartbeat', { method: 'POST' });
+    } catch {
+      // Ignore network hiccup
+    }
+  };
 
   const resetTimer = () => {
     lastActivityRef.current = Date.now();
@@ -34,6 +41,12 @@ export function InactivityTracker({ timeoutMinutes = 15 }: InactivityTrackerProp
       clearTimeout(warningTimerRef.current);
     }
 
+    // Trigger heartbeat to update server session timestamp
+    if (Date.now() - lastHeartbeatRef.current > 30000) {
+      lastHeartbeatRef.current = Date.now();
+      sendHeartbeat();
+    }
+
     warningTimerRef.current = setTimeout(() => {
       setShowWarning(true);
       setSecondsRemaining(60);
@@ -42,7 +55,6 @@ export function InactivityTracker({ timeoutMinutes = 15 }: InactivityTrackerProp
         setSecondsRemaining((prev) => {
           if (prev <= 1) {
             if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-            // Inactivity reached -> Redirect to login with timeout
             window.location.href = '/login?error=timeout';
             return 0;
           }
@@ -56,10 +68,8 @@ export function InactivityTracker({ timeoutMinutes = 15 }: InactivityTrackerProp
     const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
 
     const handleUserActivity = () => {
-      // If warning is not visible, reset
       if (!showWarning) {
-        // Throttle activity resets to every 5 seconds
-        if (Date.now() - lastActivityRef.current > 5000) {
+        if (Date.now() - lastActivityRef.current > 10000) {
           resetTimer();
         }
       }

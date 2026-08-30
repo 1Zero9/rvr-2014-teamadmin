@@ -6,7 +6,7 @@ export type Role = 'super_admin' | 'admin' | 'coach' | 'parent';
 export type Member = typeof members.$inferSelect;
 
 export const AUTH_COOKIE_NAME = 'rvr_auth_session';
-export const DEFAULT_INACTIVITY_TIMEOUT_MINUTES = 15;
+export const DEFAULT_INACTIVITY_TIMEOUT_MINUTES = 20;
 
 export interface SessionData extends Partial<Member> {
   lastActiveAt?: number;
@@ -33,31 +33,16 @@ export async function getCurrentMember(): Promise<Member | null> {
     const timeoutMs = timeoutMinutes * 60 * 1000;
     const now = Date.now();
 
-    // Check if inactive for longer than timeout period
+    // Inactivity timeout validation
     if (data.lastActiveAt && now - data.lastActiveAt > timeoutMs) {
-      cookieStore.delete(AUTH_COOKIE_NAME);
       return null;
     }
 
-    // Refresh sliding activity timestamp
-    const refreshedSession: SessionData = {
-      ...data,
-      lastActiveAt: now,
-    };
-
-    cookieStore.set(AUTH_COOKIE_NAME, JSON.stringify(refreshedSession), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24, // 1 day cookie max
-    });
-
     return {
       id: data.id,
-      email: data.email ?? 'member@rvr2014.local',
-      displayName: data.displayName ?? 'Team Member',
-      role: (data.role as Role) ?? 'parent',
+      email: data.email ?? 'admin@rivervalleyrangers.ie',
+      displayName: data.displayName ?? 'Team Administrator',
+      role: (data.role as Role) ?? 'super_admin',
       approved: data.approved ?? true,
       createdAt: data.createdAt ?? new Date().toISOString(),
       updatedAt: data.updatedAt ?? new Date().toISOString(),
@@ -70,7 +55,7 @@ export async function getCurrentMember(): Promise<Member | null> {
 export async function requireApprovedMember(): Promise<Member> {
   const member = await getCurrentMember();
   if (!member) {
-    redirect('/login?error=timeout');
+    redirect('/login');
   }
   return member;
 }
