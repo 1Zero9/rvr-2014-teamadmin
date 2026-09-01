@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Camera,
   CheckCircle,
@@ -11,6 +11,7 @@ import {
   Download,
   ExternalLink,
   Eye,
+  Grid,
   Heart,
   Image as ImageIcon,
   Layers,
@@ -31,21 +32,25 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
   const [albums, setAlbums] = useState<PhotoAlbum[]>(initialAlbums);
   const [activeAlbum, setActiveAlbum] = useState<PhotoAlbum | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
+  const [viewMode, setViewMode] = useState<'single' | 'grid'>('single');
   const [isAdding, setIsAdding] = useState(false);
   const [newUrl, setNewUrl] = useState('');
   const [newTitle, setNewTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ text: string; error?: boolean } | null>(null);
+  const thumbnailRailRef = useRef<HTMLDivElement | null>(null);
 
   const openViewer = (album: PhotoAlbum, startIndex: number = 0) => {
     setActiveAlbum(album);
     setActivePhotoIndex(startIndex);
+    setViewMode('single');
   };
 
   const closeViewer = () => {
     setActiveAlbum(null);
     setActivePhotoIndex(0);
+    setViewMode('single');
   };
 
   const handleNext = () => {
@@ -59,6 +64,28 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
       prev === 0 ? activeAlbum.samplePhotos!.length - 1 : prev - 1
     );
   };
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!activeAlbum) return;
+      if (e.key === 'Escape') closeViewer();
+      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowLeft') handlePrev();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeAlbum]);
+
+  // Scroll active thumbnail into view
+  useEffect(() => {
+    if (thumbnailRailRef.current && activeAlbum) {
+      const activeBtn = thumbnailRailRef.current.querySelector(`.thumb-btn.active`) as HTMLElement;
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }, [activePhotoIndex, activeAlbum]);
 
   const handleSyncCron = async () => {
     setIsSyncing(true);
@@ -122,7 +149,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
           </div>
           <h2>Matchday Action & Squad Photos</h2>
           <p>
-            Action snapshots captured by our team photographer, Brian. Filtered exclusively for RVR football matchdays. Browse photos right here or download originals on Google Photos!
+            Action snapshots captured by our team photographer, Brian. Filtered exclusively for RVR football matchdays. Browse high-resolution photos right here or download originals on Google Photos!
           </p>
         </div>
 
@@ -218,61 +245,67 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
 
         {/* Albums Grid */}
         <div className="albums-grid">
-          {albums.map((album) => (
-            <article key={album.id} className="album-card">
-              <div
-                className="album-cover-wrap"
-                onClick={() => openViewer(album, 0)}
-              >
-                <img
-                  src={album.coverUrl}
-                  alt={album.title}
-                  className="album-cover-img"
-                  loading="lazy"
-                />
-                <div className="album-overlay-hover">
-                  <div className="view-badge">
-                    <Eye size={16} />
-                    <span>View {album.photoCount} Photos</span>
+          {albums.map((album) => {
+            const count = album.samplePhotos && album.samplePhotos.length > 1
+              ? album.samplePhotos.length
+              : album.photoCount;
+
+            return (
+              <article key={album.id} className="album-card">
+                <div
+                  className="album-cover-wrap"
+                  onClick={() => openViewer(album, 0)}
+                >
+                  <img
+                    src={album.coverUrl}
+                    alt={album.title}
+                    className="album-cover-img"
+                    loading="lazy"
+                  />
+                  <div className="album-overlay-hover">
+                    <div className="view-badge">
+                      <Eye size={16} />
+                      <span>View All {count} Photos</span>
+                    </div>
+                  </div>
+                  <span className="album-count-badge">
+                    <Layers size={13} /> {count} HD Photos
+                  </span>
+                  <span className="album-date-badge">{album.albumDate}</span>
+                </div>
+
+                <div className="album-info-body">
+                  <h3 onClick={() => openViewer(album, 0)}>{album.title}</h3>
+                  <div className="album-meta-row">
+                    <span className="photographer-credit">
+                      <Camera size={12} /> {album.photographer}
+                    </span>
+                  </div>
+
+                  <div className="album-button-group">
+                    <button
+                      type="button"
+                      className="album-view-btn"
+                      onClick={() => openViewer(album, 0)}
+                    >
+                      <Eye size={14} />
+                      <span>Browse {count} Photos</span>
+                    </button>
+
+                    <a
+                      href={album.shareUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="album-google-btn"
+                    >
+                      <span>Google Photos</span>
+                      <ExternalLink size={13} />
+                    </a>
                   </div>
                 </div>
-                <span className="album-count-badge">
-                  <Layers size={13} /> {album.photoCount} HD Photos
-                </span>
-                <span className="album-date-badge">{album.albumDate}</span>
-              </div>
-
-              <div className="album-info-body">
-                <h3 onClick={() => openViewer(album, 0)}>{album.title}</h3>
-                <div className="album-meta-row">
-                  <span className="photographer-credit">
-                    <Camera size={12} /> {album.photographer}
-                  </span>
-                </div>
-
-                <div className="album-button-group">
-                  <button
-                    type="button"
-                    className="album-view-btn"
-                    onClick={() => openViewer(album, 0)}
-                  >
-                    <Eye size={14} />
-                    <span>Browse Photos</span>
-                  </button>
-
-                  <a
-                    href={album.shareUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="album-google-btn"
-                  >
-                    <span>Google Photos HD</span>
-                    <ExternalLink size={13} />
-                  </a>
-                </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
 
         {/* In-Site Lightbox Photo Viewer Modal */}
@@ -291,6 +324,16 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                   </small>
                 </div>
                 <div className="lightbox-actions">
+                  <button
+                    type="button"
+                    className="lightbox-grid-toggle-btn"
+                    onClick={() => setViewMode(viewMode === 'single' ? 'grid' : 'single')}
+                    title={viewMode === 'single' ? 'View photo grid' : 'View single photo'}
+                  >
+                    {viewMode === 'single' ? <Grid size={15} /> : <Eye size={15} />}
+                    <span>{viewMode === 'single' ? 'Grid View' : 'Single Photo'}</span>
+                  </button>
+
                   <a
                     href={activeAlbum.shareUrl}
                     target="_blank"
@@ -298,61 +341,86 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                     className="lightbox-ext-btn"
                   >
                     <Download size={13} />
-                    <span>Download Full Resolution on Google</span>
+                    <span>Download on Google</span>
                     <ExternalLink size={12} />
                   </a>
                   <button
                     type="button"
                     onClick={closeViewer}
                     className="lightbox-close-btn"
+                    aria-label="Close viewer"
                   >
                     <X size={20} />
                   </button>
                 </div>
               </div>
 
-              {/* Main Photo Display */}
-              <div className="lightbox-main-stage">
-                <button
-                  type="button"
-                  className="lightbox-nav-arrow left"
-                  onClick={handlePrev}
-                  aria-label="Previous photo"
-                >
-                  <ChevronLeft size={28} />
-                </button>
+              {/* View Mode: Single vs Grid */}
+              {viewMode === 'single' ? (
+                <>
+                  {/* Main Photo Display */}
+                  <div className="lightbox-main-stage">
+                    <button
+                      type="button"
+                      className="lightbox-nav-arrow left"
+                      onClick={handlePrev}
+                      aria-label="Previous photo"
+                    >
+                      <ChevronLeft size={28} />
+                    </button>
 
-                <div className="lightbox-photo-wrap">
-                  <img
-                    src={activeAlbum.samplePhotos[activePhotoIndex]}
-                    alt={`${activeAlbum.title} photo ${activePhotoIndex + 1}`}
-                    className="lightbox-img"
-                  />
+                    <div className="lightbox-photo-wrap">
+                      <img
+                        src={activeAlbum.samplePhotos[activePhotoIndex]}
+                        alt={`${activeAlbum.title} photo ${activePhotoIndex + 1}`}
+                        className="lightbox-img"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      className="lightbox-nav-arrow right"
+                      onClick={handleNext}
+                      aria-label="Next photo"
+                    >
+                      <ChevronRight size={28} />
+                    </button>
+                  </div>
+
+                  {/* Thumbnail Scroller */}
+                  <div className="lightbox-thumbs-rail" ref={thumbnailRailRef}>
+                    {activeAlbum.samplePhotos.map((photo, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        className={`thumb-btn ${idx === activePhotoIndex ? 'active' : ''}`}
+                        onClick={() => setActivePhotoIndex(idx)}
+                      >
+                        <img src={photo} alt={`Thumb ${idx + 1}`} loading="lazy" />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                /* Grid View of all photos in the album */
+                <div className="lightbox-grid-view">
+                  <div className="lightbox-grid-container">
+                    {activeAlbum.samplePhotos.map((photo, idx) => (
+                      <div
+                        key={idx}
+                        className={`grid-photo-item ${idx === activePhotoIndex ? 'active-grid-item' : ''}`}
+                        onClick={() => {
+                          setActivePhotoIndex(idx);
+                          setViewMode('single');
+                        }}
+                      >
+                        <img src={photo} alt={`${activeAlbum.title} ${idx + 1}`} loading="lazy" />
+                        <span className="grid-photo-number">{idx + 1}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-
-                <button
-                  type="button"
-                  className="lightbox-nav-arrow right"
-                  onClick={handleNext}
-                  aria-label="Next photo"
-                >
-                  <ChevronRight size={28} />
-                </button>
-              </div>
-
-              {/* Thumbnail Scroller */}
-              <div className="lightbox-thumbs-rail">
-                {activeAlbum.samplePhotos.map((photo, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={`thumb-btn ${idx === activePhotoIndex ? 'active' : ''}`}
-                    onClick={() => setActivePhotoIndex(idx)}
-                  >
-                    <img src={photo} alt={`Thumb ${idx + 1}`} />
-                  </button>
-                ))}
-              </div>
+              )}
             </div>
           </div>
         )}
