@@ -40,9 +40,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <Lock size={12} /> RESTRICTED SQUAD & ADMIN ACCESS
           </span>
           <h1>Team Admin Portal</h1>
-          <p>
-            Enter your team passcode to access DDSL fixtures, skills drills, training schedule, squad finances, and management controls.
-          </p>
         </div>
 
         {errorCode && (
@@ -83,9 +80,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <p>
             Rivervalley Rangers 2014 Squad · Swords, Dublin
           </p>
-          <small>
-            Protected by <code>ADMIN_PASSWORD</code> environment variable.
-          </small>
         </div>
       </div>
     </main>
