@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Lock, Menu, Trophy, X } from 'lucide-react';
+import { Camera, Lock, Menu, ShieldCheck, Sparkles, Trophy, X } from 'lucide-react';
 
 export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -16,17 +16,6 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const navLinks = [
-    { label: 'Fixtures & Table', href: '/fixtures' },
-    { label: 'Skills Vault', href: '/skills' },
-    { label: 'Training & Kit', href: '/training' },
-    { label: 'Speed & S&C', href: '/sc' },
-    { label: 'Game Fuel', href: '/nutrition' },
-    { label: 'Pitch GPS', href: '/venues' },
-    { label: 'Cups & Blitzes', href: '/tournaments' },
-    { label: 'Photos', href: '/photos' },
-  ];
 
   return (
     <header className={`public-header ${isScrolled ? 'scrolled' : ''}`}>
@@ -52,11 +41,16 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
 
         {/* Desktop Nav */}
         <nav className="desktop-nav" aria-label="Public navigation">
-          {navLinks.map((link) => (
-            <Link key={link.label} href={link.href} className="nav-item">
-              {link.label}
+          <Link href="/" className="nav-item">
+            <Camera size={15} />
+            <span>Squad Photos</span>
+          </Link>
+          {isAuthenticated && (
+            <Link href="/portal" className="nav-item portal-nav-highlight">
+              <ShieldCheck size={15} />
+              <span>Team Portal (Active)</span>
             </Link>
-          ))}
+          )}
         </nav>
 
         {/* Action Button */}
@@ -65,8 +59,8 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
             href={isAuthenticated ? '/portal' : '/login'}
             className="portal-cta-btn"
           >
-            <Lock size={14} />
-            <span>Admin Portal</span>
+            {isAuthenticated ? <ShieldCheck size={15} /> : <Lock size={14} />}
+            <span>{isAuthenticated ? 'Open Portal' : 'Admin Portal'}</span>
           </Link>
 
           <button
@@ -84,23 +78,31 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
       {mobileMenuOpen && (
         <div className="mobile-drawer">
           <nav>
-            {navLinks.map((link) => (
+            <Link
+              href="/"
+              className="mobile-nav-item"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Camera size={16} />
+              <span>Squad Photos Gallery</span>
+            </Link>
+            {isAuthenticated && (
               <Link
-                key={link.label}
-                href={link.href}
+                href="/portal"
                 className="mobile-nav-item"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {link.label}
+                <ShieldCheck size={16} />
+                <span>Team Portal Dashboard</span>
               </Link>
-            ))}
+            )}
             <Link
               href={isAuthenticated ? '/portal' : '/login'}
               className="mobile-portal-btn"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Lock size={15} />
-              <span>{isAuthenticated ? 'Open Admin Portal' : 'Admin Portal Login'}</span>
+              {isAuthenticated ? <ShieldCheck size={16} /> : <Lock size={15} />}
+              <span>{isAuthenticated ? 'Open Team Portal' : 'Admin Portal Login'}</span>
             </Link>
           </nav>
         </div>

@@ -1,23 +1,42 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {
+  Apple,
   ArrowDownLeft,
+  Calendar,
   CalendarDays,
+  Camera,
   CircleHelp,
+  Compass,
   Globe,
   Home,
   Lightbulb,
   LogOut,
+  Medal,
+  Play,
   ReceiptText,
   ShieldCheck,
+  Trophy,
   WalletCards,
+  Zap,
 } from 'lucide-react';
 import { logoutAction } from '../actions';
 import { roleLabel, type Member } from '../lib/authz';
 import { InactivityTracker } from './inactivity-tracker';
 
-const items = [
-  ['Overview', '/portal', Home],
+const squadNavItems = [
+  ['Fixtures & Standings', '/fixtures', Trophy],
+  ['Skills Vault', '/skills', Play],
+  ['Training & Kit', '/training', Calendar],
+  ['Speed & S&C', '/sc', Zap],
+  ['Game Day Fuel', '/nutrition', Apple],
+  ['Pitch Venues & GPS', '/venues', Compass],
+  ['Cups & Blitzes', '/tournaments', Medal],
+  ['Squad Photos', '/photos', Camera],
+] as const;
+
+const adminNavItems = [
+  ['Portal Overview', '/portal', Home],
   ['Team fund', '/fund', WalletCards],
   ['Contributions', '/contributions', ArrowDownLeft],
   ['Expenses', '/expenses', ReceiptText],
@@ -54,8 +73,8 @@ export function PortalPage({
         <Link className="brand" href="/portal">
           <Image
             src="/rvr-white.png"
-            width={50}
-            height={50}
+            width={48}
+            height={48}
             alt="Rivervalley Rangers AFC crest"
           />
           <div>
@@ -63,18 +82,33 @@ export function PortalPage({
             <span>2014 Squad · Team Portal</span>
           </div>
         </Link>
-        <nav aria-label="Portal main navigation">
-          {items.map(([label, href, Icon]) => (
+
+        <nav className="sidebar-nav-scroll" aria-label="Portal main navigation">
+          <p className="sidebar-nav-heading">Squad & Match Hub</p>
+          {squadNavItems.map(([label, href, Icon]) => (
             <Link
               className={active === href ? 'nav-link active' : 'nav-link'}
               href={href}
               key={href}
             >
-              <Icon size={18} />
+              <Icon size={17} />
+              <span>{label}</span>
+            </Link>
+          ))}
+
+          <p className="sidebar-nav-heading">Team Admin & Fund</p>
+          {adminNavItems.map(([label, href, Icon]) => (
+            <Link
+              className={active === href ? 'nav-link active' : 'nav-link'}
+              href={href}
+              key={href}
+            >
+              <Icon size={17} />
               <span>{label}</span>
             </Link>
           ))}
         </nav>
+
         <div className="sidebar-bottom">
           <p>MANAGEMENT</p>
           {(member.role === 'super_admin' || member.role === 'admin') && (
@@ -88,8 +122,8 @@ export function PortalPage({
           )}
 
           <Link className="nav-link public-hub-link" href="/">
-            <Globe size={18} />
-            <span>Public Team Hub</span>
+            <Camera size={17} />
+            <span>Public Photos Gallery</span>
           </Link>
 
           <div className="user-card">
@@ -135,7 +169,7 @@ export function AccessPending({ member }: { member: Member }) {
       <span>
         Your account ({member.email}) is awaiting approval from a Team Super Admin.
       </span>
-      <Link href="/">Return to Public Hub</Link>
+      <Link href="/">Return to Public Gallery</Link>
     </main>
   );
 }

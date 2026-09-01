@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import { ArrowLeft, Calendar, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Calendar } from 'lucide-react';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
 import { TrainingSection } from '../components/training-section';
-import { getCurrentMember } from '../lib/authz';
+import { requireApprovedMember } from '../lib/authz';
 
 export const dynamic = 'force-dynamic';
 
 export default async function TrainingPage() {
-  const currentMember = await getCurrentMember();
+  const currentMember = await requireApprovedMember();
 
   return (
     <div className="public-page-root">
@@ -17,7 +17,7 @@ export default async function TrainingPage() {
       <div className="page-hero-banner">
         <div className="section-container">
           <div className="breadcrumb">
-            <Link href="/"><ArrowLeft size={14} /> Back to Hub</Link>
+            <Link href="/portal"><ArrowLeft size={14} /> Back to Portal</Link>
             <span>/</span>
             <span>Training & Kit</span>
           </div>

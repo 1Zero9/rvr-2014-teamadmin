@@ -2,30 +2,53 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { desc } from 'drizzle-orm';
 import {
+  Apple,
   ArrowDownLeft,
+  ArrowRight,
   ArrowUpRight,
+  Calendar,
   CalendarDays,
+  Camera,
   ChevronRight,
   CircleHelp,
+  Compass,
   Globe,
   Home,
   Landmark,
   Lightbulb,
   LogOut,
+  Medal,
+  Play,
   Plus,
   ReceiptText,
   ShieldCheck,
+  Sparkles,
+  Trophy,
   WalletCards,
+  Zap,
 } from 'lucide-react';
 import { getDb } from '../../db';
 import { transactions } from '../../db/schema';
 import { logoutAction } from '../actions';
+import { MatchdayCountdown } from '../components/matchday-countdown';
 import { AccessPending } from '../components/portal-page';
 import { requireApprovedMember, roleLabel } from '../lib/authz';
+import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
 
-const nav = [
+const squadNavItems = [
+  ['Fixtures & Standings', '/fixtures', Trophy],
+  ['Skills Vault', '/skills', Play],
+  ['Training & Kit', '/training', Calendar],
+  ['Speed & S&C', '/sc', Zap],
+  ['Game Day Fuel', '/nutrition', Apple],
+  ['Pitch Venues & GPS', '/venues', Compass],
+  ['Cups & Blitzes', '/tournaments', Medal],
+  ['Squad Photos', '/photos', Camera],
+] as const;
+
+const adminNavItems = [
   ['Portal Overview', '/portal', Home],
   ['Team fund', '/fund', WalletCards],
   ['Contributions', '/contributions', ArrowDownLeft],
@@ -34,6 +57,81 @@ const nav = [
   ['Activity ideas', '/ideas', Lightbulb],
   ['Team information', '/information', CircleHelp],
 ] as const;
+
+const SQUAD_HUB_CARDS = [
+  {
+    id: 'fixtures',
+    title: 'Fixtures & League Table',
+    badge: 'Live DDSL',
+    color: 'gold',
+    icon: Trophy,
+    desc: 'Official DDSL match outcomes, verified full-time scores, upcoming kick-offs, and division standings.',
+    href: '/fixtures',
+  },
+  {
+    id: 'skills',
+    title: 'Skills Vault & Drills',
+    badge: 'Video Drills',
+    color: 'cyan',
+    icon: Play,
+    desc: 'High-energy video masterclasses for 1v1 moves, sharp turns, quick footwork, and top-corner finishing.',
+    href: '/skills',
+  },
+  {
+    id: 'training',
+    title: 'Training & Match Kit',
+    badge: 'Sessions',
+    color: 'green',
+    icon: Calendar,
+    desc: 'Weekly training timetable, pitch allocations, weather notifications, and interactive kit checklist.',
+    href: '/training',
+  },
+  {
+    id: 'sc',
+    title: 'Speed, Agility & S&C',
+    badge: 'Athletic Dev',
+    color: 'purple',
+    icon: Zap,
+    desc: 'Youth athletic development: FIFA 11+ dynamic activation, speed ladder footwork, and core stability.',
+    href: '/sc',
+  },
+  {
+    id: 'nutrition',
+    title: 'Matchday Fuel & Food',
+    badge: 'Player Fuel',
+    color: 'orange',
+    icon: Apple,
+    desc: 'What to eat before kick-off, halftime energy boosters, hydration targets, and fast muscle recovery meals.',
+    href: '/nutrition',
+  },
+  {
+    id: 'venues',
+    title: 'Pitch Venues & GPS',
+    badge: '1-Tap Maps',
+    color: 'blue',
+    icon: Compass,
+    desc: 'Directions, pitch surfaces, footwear recommendations, and one-tap Google/Apple Maps for all grounds.',
+    href: '/venues',
+  },
+  {
+    id: 'tournaments',
+    title: 'Cups & Blitzes',
+    badge: 'Knockout',
+    color: 'gold',
+    icon: Medal,
+    desc: 'DDSL All-Dublin Cup knockout format, extra-time rules, summer blitzes, and squad tour packing lists.',
+    href: '/tournaments',
+  },
+  {
+    id: 'photos',
+    title: 'Squad Photo Gallery',
+    badge: 'HD Gallery',
+    color: 'green',
+    icon: Camera,
+    desc: 'Match action photos, goal celebrations, tournament victories, and squad memories from the season.',
+    href: '/photos',
+  },
+];
 
 export default async function PortalDashboardPage() {
   const member = await requireApprovedMember();
@@ -45,6 +143,14 @@ export default async function PortalDashboardPage() {
   } catch (err) {
     console.error('Error fetching transactions:', err);
   }
+
+  const liveDdslData = await fetchLiveDdslLeagueData('218148');
+  const nextFixture = liveDdslData.rvrMatches.find((m) => m.status === 'upcoming') || {
+    opponent: 'Rosemount Mulvey FC',
+    matchDate: 'Sat 5th Sept 2026',
+    kickoffTime: '10:30 AM',
+    venue: 'Rivervalley Park - Pitch 1',
+  };
 
   const income = rows
     .filter((r) => r.type === 'income' && r.status !== 'rejected')
@@ -58,39 +164,46 @@ export default async function PortalDashboardPage() {
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <Link className="brand" href="/">
+        <Link className="brand" href="/portal">
           <Image
             src="/rvr-white.png"
-            width={50}
-            height={50}
+            width={48}
+            height={48}
             alt="Rivervalley Rangers AFC crest"
             priority
           />
           <div>
-            <strong>RVR 2014</strong>
-            <span>Team Admin & Fund</span>
+            <strong>RVR U13 Major 1</strong>
+            <span>2014 Squad · Team Portal</span>
           </div>
         </Link>
 
-        <nav aria-label="Portal navigation">
-          {nav.map(([label, href, Icon], index) => {
-            return (
-              <Link
-                className={index === 0 ? 'nav-link active' : 'nav-link'}
-                href={href}
-                key={label}
-              >
-                <Icon size={18} strokeWidth={1.8} />
-                <span>{label}</span>
-                {label === 'Expenses' &&
-                  rows.some((r) => r.type === 'expense' && r.status === 'pending') && (
-                    <em>
-                      {rows.filter((r) => r.type === 'expense' && r.status === 'pending').length}
-                    </em>
-                  )}
-              </Link>
-            );
-          })}
+        <nav className="sidebar-nav-scroll" aria-label="Portal navigation">
+          <p className="sidebar-nav-heading">Squad & Match Hub</p>
+          {squadNavItems.map(([label, href, Icon]) => (
+            <Link className="nav-link" href={href} key={label}>
+              <Icon size={17} strokeWidth={1.8} />
+              <span>{label}</span>
+            </Link>
+          ))}
+
+          <p className="sidebar-nav-heading">Team Admin & Fund</p>
+          {adminNavItems.map(([label, href, Icon], index) => (
+            <Link
+              className={index === 0 ? 'nav-link active' : 'nav-link'}
+              href={href}
+              key={label}
+            >
+              <Icon size={17} strokeWidth={1.8} />
+              <span>{label}</span>
+              {label === 'Expenses' &&
+                rows.some((r) => r.type === 'expense' && r.status === 'pending') && (
+                  <em>
+                    {rows.filter((r) => r.type === 'expense' && r.status === 'pending').length}
+                  </em>
+                )}
+            </Link>
+          ))}
         </nav>
 
         <div className="sidebar-bottom">
@@ -103,8 +216,8 @@ export default async function PortalDashboardPage() {
           )}
 
           <Link className="nav-link public-hub-link" href="/">
-            <Globe size={18} />
-            <span>Public Team Hub</span>
+            <Camera size={17} />
+            <span>Public Photos Gallery</span>
           </Link>
 
           <div className="user-card">
@@ -133,7 +246,7 @@ export default async function PortalDashboardPage() {
         <header className="topbar">
           <div>
             <p>2026/27 SEASON · PRIVATE TEAM PORTAL</p>
-            <h1>Good afternoon, {displayName}.</h1>
+            <h1>Welcome back, {displayName}.</h1>
           </div>
           {member.role !== 'parent' && (
             <Link href="/expenses" className="primary">
@@ -145,10 +258,66 @@ export default async function PortalDashboardPage() {
         <div className="notice">
           <ShieldCheck size={18} />
           <span>
-            <strong>Private team space.</strong> Only verified RVR 2014 coaches, parents, and administrators can view this information.
+            <strong>Private team space.</strong> Only verified RVR 2014 coaches, parents, and administrators can access these squad tools and financial records.
           </span>
         </div>
 
+        {/* Live Matchday Countdown Banner */}
+        <div style={{ margin: '20px 0' }}>
+          <MatchdayCountdown
+            opponent={nextFixture.opponent}
+            matchDateStr={nextFixture.matchDate}
+            kickoffTime={nextFixture.kickoffTime}
+            venue={nextFixture.venue}
+          />
+        </div>
+
+        {/* Squad & Player Operations Hub Grid */}
+        <div className="portal-section-header">
+          <h2>
+            <Trophy size={20} className="text-amber-500" />
+            Squad & Match Operations Hub
+          </h2>
+          <span className="portal-hub-badge">8 Modules Active</span>
+        </div>
+
+        <div className="portal-squad-grid">
+          {SQUAD_HUB_CARDS.map((card) => {
+            const Icon = card.icon;
+            return (
+              <Link key={card.id} href={card.href} className="portal-hub-card">
+                <div>
+                  <div className="portal-hub-card-top">
+                    <div className={`portal-hub-icon-wrap ${card.color}`}>
+                      <Icon size={20} />
+                    </div>
+                    <span className="portal-hub-badge">{card.badge}</span>
+                  </div>
+                  <h3>{card.title}</h3>
+                  <p>{card.desc}</p>
+                </div>
+                <div className="portal-hub-card-link">
+                  <span>Open module</span>
+                  <ArrowRight size={14} />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Financial Overview Header */}
+        <div className="portal-section-header">
+          <h2>
+            <WalletCards size={20} className="text-blue-500" />
+            Team Accounts & Fund Administration
+          </h2>
+          <Link href="/fund" className="portal-hub-card-link">
+            <span>Detailed Ledger</span>
+            <ChevronRight size={15} />
+          </Link>
+        </div>
+
+        {/* Fund Balance & Contribution Progress */}
         <div className="fund-grid">
           <article className="balance-card">
             <div className="card-label">
@@ -214,6 +383,7 @@ export default async function PortalDashboardPage() {
           </article>
         </div>
 
+        {/* Dashboard Bottom Grid: Transactions & Upcoming Dates */}
         <div className="dashboard-grid">
           <article className="panel transactions" id="contributions">
             <div className="section-heading">
@@ -280,8 +450,8 @@ export default async function PortalDashboardPage() {
                   <span>SEP</span>
                 </div>
                 <p>
-                  <b>League season begins</b>
-                  <small>Saturday · Fixture TBC</small>
+                  <b>League season kick-off</b>
+                  <small>Saturday · Rosemount Mulvey FC</small>
                 </p>
               </div>
               <div className="date-item">
@@ -317,10 +487,10 @@ export default async function PortalDashboardPage() {
                 <ChevronRight size={16} />
               </Link>
               <Link href="/">
-                <Globe size={19} />
+                <Camera size={19} />
                 <div>
-                  <b>Public Team Hub</b>
-                  <span>Skills, Nutrition, S&C, Venues</span>
+                  <b>Public Photos Gallery</b>
+                  <span>Matchday action & albums</span>
                 </div>
                 <ChevronRight size={16} />
               </Link>

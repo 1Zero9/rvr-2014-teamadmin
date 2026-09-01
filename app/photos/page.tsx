@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Camera, Sparkles } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { GallerySection } from '../components/gallery-section';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
@@ -18,17 +18,12 @@ export default async function PhotosPage() {
 
       <div className="page-hero-banner">
         <div className="section-container">
-          <div className="breadcrumb">
-            <Link href="/"><ArrowLeft size={14} /> Back to Hub</Link>
-            <span>/</span>
-            <span>Google Photos Gallery</span>
-          </div>
           <span className="section-pill">
-            <Camera size={14} /> RVR U13 MAJOR 1 · SQUAD MOMENTS
+            <Camera size={14} /> RIVERVALLEY RANGERS AFC · U13 MAJOR 1 (2014 SQUAD)
           </span>
-          <h1>Matchday Action & Squad Memories</h1>
+          <h1>Matchday Action & Squad Gallery</h1>
           <p>
-            Official Google Photos shared albums captured by our team photographer. Browse HD photos right here or open in Google Photos for full high-resolution downloads.
+            Official matchday action shots, tournament blitzes, and squad memories captured by our team photographer. Browse HD albums directly or open in Google Photos for full high-resolution downloads.
           </p>
         </div>
       </div>

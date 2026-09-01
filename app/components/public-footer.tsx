@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ExternalLink, Lock, MapPin, Trophy } from 'lucide-react';
+import { Camera, ExternalLink, Lock, MapPin, ShieldCheck, Trophy } from 'lucide-react';
 
 export function PublicFooter() {
   return (
@@ -30,16 +30,15 @@ export function PublicFooter() {
           </div>
 
           <div className="footer-links-col">
-            <h4>Squad Sections</h4>
+            <h4>Squad Media</h4>
             <ul>
-              <li><Link href="/fixtures">⚽ Fixtures & DDSL Standings</Link></li>
-              <li><Link href="/skills">🔥 Skills & Video Drills</Link></li>
-              <li><Link href="/training">🏃 Training & Kit Checklist</Link></li>
-              <li><Link href="/sc">⚡ Speed, Agility & S&C</Link></li>
-              <li><Link href="/nutrition">🍎 Game Day Fuel & Nutrition</Link></li>
-              <li><Link href="/venues">📍 Pitch Venues & GPS</Link></li>
-              <li><Link href="/tournaments">🏆 Cups & Blitzes</Link></li>
-              <li><Link href="/photos">📸 Squad Photo Gallery</Link></li>
+              <li><Link href="/">📸 Matchday Action Gallery</Link></li>
+              <li>
+                <a href="https://photos.app.goo.gl/q3t72c7XbC7bA8uG6" target="_blank" rel="noreferrer">
+                  <span>Google Photos Shared Albums</span>
+                  <ExternalLink size={12} />
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -71,13 +70,13 @@ export function PublicFooter() {
             <div className="footer-portal-card">
               <div className="footer-portal-head">
                 <Lock size={18} />
-                <h4>Admin Portal</h4>
+                <h4>Team Admin Portal</h4>
               </div>
               <p>
-                Private squad funds, referee fees, season contributions, and coach expense claims.
+                Private squad hub: DDSL fixtures, skills drills, training schedule, matchday fuel, team fund, and referee fees.
               </p>
               <Link href="/login" className="footer-login-btn">
-                <Lock size={14} /> Open Admin Portal
+                <Lock size={14} /> Log In to Team Portal
               </Link>
             </div>
           </div>

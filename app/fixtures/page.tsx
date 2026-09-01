@@ -3,13 +3,13 @@ import { ArrowLeft, ExternalLink, RefreshCw, Trophy } from 'lucide-react';
 import { FixturesSection } from '../components/fixtures-section';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
-import { getCurrentMember } from '../lib/authz';
+import { requireApprovedMember } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
 
 export default async function FixturesPage() {
-  const currentMember = await getCurrentMember();
+  const currentMember = await requireApprovedMember();
   const liveDdslData = await fetchLiveDdslLeagueData('218148');
 
   return (
@@ -19,7 +19,7 @@ export default async function FixturesPage() {
       <div className="page-hero-banner">
         <div className="section-container">
           <div className="breadcrumb">
-            <Link href="/"><ArrowLeft size={14} /> Back to Hub</Link>
+            <Link href="/portal"><ArrowLeft size={14} /> Back to Portal</Link>
             <span>/</span>
             <span>Fixtures & Results</span>
           </div>

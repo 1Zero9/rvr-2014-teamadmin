@@ -25,7 +25,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="login-card">
         <div className="login-header">
           <Link href="/" className="login-back-link">
-            <ArrowLeft size={16} /> Back to Public Hub
+            <ArrowLeft size={16} /> Back to Public Gallery
           </Link>
           <div className="login-crest-wrap">
             <Image
@@ -37,11 +37,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             />
           </div>
           <span className="login-badge">
-            <Lock size={12} /> RESTRICTED TEAM ACCESS
+            <Lock size={12} /> RESTRICTED SQUAD & ADMIN ACCESS
           </span>
-          <h1>Admin & Coach Portal</h1>
+          <h1>Team Admin Portal</h1>
           <p>
-            Enter the admin password to access squad finances, player contribution tracking, referee fees, and management controls.
+            Enter your team passcode to access DDSL fixtures, skills drills, training schedule, squad finances, and management controls.
           </p>
         </div>
 

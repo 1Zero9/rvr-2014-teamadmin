@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import { ArrowLeft, Dumbbell, Zap } from 'lucide-react';
+import { ArrowLeft, Zap } from 'lucide-react';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
 import { SCSection } from '../components/sc-section';
-import { getCurrentMember } from '../lib/authz';
+import { requireApprovedMember } from '../lib/authz';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SCPage() {
-  const currentMember = await getCurrentMember();
+  const currentMember = await requireApprovedMember();
 
   return (
     <div className="public-page-root">
@@ -17,7 +17,7 @@ export default async function SCPage() {
       <div className="page-hero-banner">
         <div className="section-container">
           <div className="breadcrumb">
-            <Link href="/"><ArrowLeft size={14} /> Back to Hub</Link>
+            <Link href="/portal"><ArrowLeft size={14} /> Back to Portal</Link>
             <span>/</span>
             <span>Strength & Conditioning</span>
           </div>
