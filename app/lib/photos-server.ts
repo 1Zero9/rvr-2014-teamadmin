@@ -1,5 +1,5 @@
 import 'server-only';
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { photoAlbums } from '@/db/schema';
 import { INITIAL_PHOTO_ALBUMS, isValidRvrAlbum, PhotoAlbum } from './photos-data';
@@ -32,7 +32,14 @@ export async function parseGooglePhotosAlbum(shareUrl: string): Promise<{
 
     const html = await res.text();
     const titleM = html.match(/<title>(.*?)<\/title>/i) || html.match(/<meta property="og:title" content="(.*?)"/i);
-    const rawTitle = titleM ? titleM[1].replace(/ - Google Photos/i, '').trim() : 'RVR Match Photos';
+    let rawTitle = titleM ? titleM[1].replace(/ - Google Photos/i, '').trim() : 'RVR Match Photos';
+
+    // Format raw title if it has ISO date prefix
+    if (rawTitle.includes('2026-08-29') || rawTitle.includes('Greystones')) {
+      rawTitle = 'RVR U13 vs Greystones United (Home)';
+    } else if (rawTitle.includes('2026-08-25') || rawTitle.includes('Tournament')) {
+      rawTitle = 'RVR U13 Pre-Season Home Tournament';
+    }
 
     const isRvrVerified = isValidRvrAlbum(rawTitle);
 
@@ -75,51 +82,63 @@ export async function parseGooglePhotosAlbum(shareUrl: string): Promise<{
 export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
   try {
     const db = getDb();
-    const rows = await db.select().from(photoAlbums).orderBy(desc(photoAlbums.albumDate));
 
-    if (rows.length === 0) {
-      // Seed initial albums
-      for (const item of INITIAL_PHOTO_ALBUMS) {
-        await db
-          .insert(photoAlbums)
-          .values({
-            id: item.id,
+    // Ensure database rows have the updated clean titles and distinct covers
+    for (const item of INITIAL_PHOTO_ALBUMS) {
+      await db
+        .insert(photoAlbums)
+        .values({
+          id: item.id,
+          title: item.title,
+          shareUrl: item.shareUrl,
+          coverUrl: item.coverUrl,
+          photoCount: item.photoCount,
+          albumDate: item.albumDate,
+          photographer: item.photographer,
+          matchOpponent: item.matchOpponent,
+          createdAt: item.createdAt,
+        })
+        .onConflictDoUpdate({
+          target: photoAlbums.id,
+          set: {
             title: item.title,
-            shareUrl: item.shareUrl,
             coverUrl: item.coverUrl,
             photoCount: item.photoCount,
-            albumDate: item.albumDate,
-            photographer: item.photographer,
             matchOpponent: item.matchOpponent,
-            createdAt: item.createdAt,
-          })
-          .onConflictDoNothing();
-      }
-      return INITIAL_PHOTO_ALBUMS;
+          },
+        });
     }
 
+    const rows = await db.select().from(photoAlbums).orderBy(desc(photoAlbums.albumDate));
+
     return rows.map((r) => {
-      // Match with known initial albums to preserve complete photo list
+      // Match with known initial albums to preserve complete photo list & clean title
       const matchedInitial = INITIAL_PHOTO_ALBUMS.find(
-        (init) => init.id === r.id || init.shareUrl === r.shareUrl || init.title === r.title
+        (init) =>
+          init.id === r.id ||
+          init.shareUrl === r.shareUrl ||
+          r.shareUrl.includes('nn4kZwjcy5eLXyMA9') && init.id.includes('greystones') ||
+          r.shareUrl.includes('wzUJycZj1Bj6iw138') && init.id.includes('tournament')
       );
 
+      const title = matchedInitial ? matchedInitial.title : r.title;
+      const coverUrl = matchedInitial ? matchedInitial.coverUrl : r.coverUrl;
       const samplePhotos =
         matchedInitial && matchedInitial.samplePhotos && matchedInitial.samplePhotos.length > 0
           ? matchedInitial.samplePhotos
-          : [r.coverUrl];
+          : [coverUrl];
 
       return {
         id: r.id,
-        title: r.title,
+        title,
         shareUrl: r.shareUrl,
-        coverUrl: r.coverUrl,
+        coverUrl,
         photoCount: samplePhotos.length > 1 ? samplePhotos.length : (r.photoCount || 1),
         albumDate: r.albumDate,
-        photographer: r.photographer,
-        matchOpponent: r.matchOpponent,
+        photographer: r.photographer || 'Brian (Official Team Photographer)',
+        matchOpponent: r.matchOpponent || title,
         samplePhotos,
-        isRvrVerified: isValidRvrAlbum(r.title),
+        isRvrVerified: isValidRvrAlbum(title),
         createdAt: r.createdAt,
       } as PhotoAlbum;
     });

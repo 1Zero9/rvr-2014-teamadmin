@@ -19,6 +19,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Sparkles,
+  Trophy,
   User,
   X,
 } from 'lucide-react';
@@ -261,6 +262,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                     alt={album.title}
                     className="album-cover-img"
                     loading="lazy"
+                    referrerPolicy="no-referrer"
                   />
                   <div className="album-overlay-hover">
                     <div className="view-badge">
@@ -280,6 +282,11 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                     <span className="photographer-credit">
                       <Camera size={12} /> {album.photographer}
                     </span>
+                    {album.matchOpponent && (
+                      <span className="album-match-pill">
+                        <Trophy size={11} /> {album.matchOpponent}
+                      </span>
+                    )}
                   </div>
 
                   <div className="album-button-group">
@@ -320,7 +327,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                 <div>
                   <h4>{activeAlbum.title}</h4>
                   <small>
-                    Photo {activePhotoIndex + 1} of {activeAlbum.samplePhotos.length} · {activeAlbum.photographer}
+                    Photo {activePhotoIndex + 1} of {activeAlbum.samplePhotos.length} · {activeAlbum.photographer} · {activeAlbum.albumDate}
                   </small>
                 </div>
                 <div className="lightbox-actions">
@@ -374,6 +381,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                         src={activeAlbum.samplePhotos[activePhotoIndex]}
                         alt={`${activeAlbum.title} photo ${activePhotoIndex + 1}`}
                         className="lightbox-img"
+                        referrerPolicy="no-referrer"
                       />
                     </div>
 
@@ -396,7 +404,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                         className={`thumb-btn ${idx === activePhotoIndex ? 'active' : ''}`}
                         onClick={() => setActivePhotoIndex(idx)}
                       >
-                        <img src={photo} alt={`Thumb ${idx + 1}`} loading="lazy" />
+                        <img src={photo} alt={`Thumb ${idx + 1}`} loading="lazy" referrerPolicy="no-referrer" />
                       </button>
                     ))}
                   </div>
@@ -414,7 +422,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                           setViewMode('single');
                         }}
                       >
-                        <img src={photo} alt={`${activeAlbum.title} ${idx + 1}`} loading="lazy" />
+                        <img src={photo} alt={`${activeAlbum.title} ${idx + 1}`} loading="lazy" referrerPolicy="no-referrer" />
                         <span className="grid-photo-number">{idx + 1}</span>
                       </div>
                     ))}

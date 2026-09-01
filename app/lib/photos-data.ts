@@ -20,13 +20,13 @@ export function isValidRvrAlbum(title: string): boolean {
 export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
   {
     id: 'album-2026-08-29-greystones',
-    title: '2026-08-29 RVR U13 Greystones Home',
+    title: 'RVR U13 vs Greystones United (Home)',
     shareUrl: 'https://photos.app.goo.gl/nn4kZwjcy5eLXyMA9',
     coverUrl: 'https://lh3.googleusercontent.com/pw/AP1GczPWQ1M0XQgCUyIxlzreFY0fQb_nHjes_A9PzrSEb627QCquRNp3-SqtttEnegipFIpyJ7HRcseV183wWPfctXvnb-2_a42Hvlpnz7ekW3XBxhWKnbqi=w1200',
     photoCount: 57,
     albumDate: '29 Aug 2026',
     photographer: 'Brian (Official Team Photographer)',
-    matchOpponent: 'Greystones United AFC',
+    matchOpponent: 'Greystones United AFC (1-0 Win)',
     samplePhotos: [
       "https://lh3.googleusercontent.com/pw/AP1GczPWQ1M0XQgCUyIxlzreFY0fQb_nHjes_A9PzrSEb627QCquRNp3-SqtttEnegipFIpyJ7HRcseV183wWPfctXvnb-2_a42Hvlpnz7ekW3XBxhWKnbqi=w1200",
       "https://lh3.googleusercontent.com/pw/AP1GczNVYkF1p-XK6gNXcL-vaj7-Q4NoFNF5SXvbOnGHy93qy9etjhzqKlba-Pfn1e3uE9SCgaHOPnn3kjWVxw36eJOB70u3WWZYk8Nhp4HzoQi_e0D7e9Hv=w1200",
@@ -91,13 +91,13 @@ export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
   },
   {
     id: 'album-2026-08-25-tournament',
-    title: '2026-08-25 RVR U13 Home Tournament',
+    title: 'RVR U13 Pre-Season Home Tournament',
     shareUrl: 'https://photos.app.goo.gl/wzUJycZj1Bj6iw138',
     coverUrl: 'https://lh3.googleusercontent.com/pw/AP1GczPpMlX6fWQ1oJmGnQRmj3vF_Cfd3BHX_3kSSjqt5COg08EBGv9Ahywd7yzaZE9dRbD70lw3C57tZPAFlYBw_1g_XolszgWNqY_0vg79eUcMcGGQIh-a=w1200',
     photoCount: 44,
     albumDate: '25 Aug 2026',
     photographer: 'Brian (Official Team Photographer)',
-    matchOpponent: 'Pre-Season Home Tournament',
+    matchOpponent: 'Pre-Season Blitz & Tournament',
     samplePhotos: [
       "https://lh3.googleusercontent.com/pw/AP1GczPpMlX6fWQ1oJmGnQRmj3vF_Cfd3BHX_3kSSjqt5COg08EBGv9Ahywd7yzaZE9dRbD70lw3C57tZPAFlYBw_1g_XolszgWNqY_0vg79eUcMcGGQIh-a=w1200",
       "https://lh3.googleusercontent.com/pw/AP1GczNDkxVFuW6W66XhkRP5Ycjvp5xSCytGXa_pBcElhB8AMN7RNh29OhgtHJd3FosWznZacNqgdpjxjxOIMyFiHlimoSxhHMBPX3wTqR_X8UqnHXCl9INn=w1200",
