@@ -99,6 +99,7 @@ export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
             albumDate: item.albumDate,
             photographer: item.photographer,
             matchOpponent: item.matchOpponent,
+            samplePhotos: item.samplePhotos || [],
             createdAt: item.createdAt,
           })
           .onConflictDoNothing();
@@ -131,9 +132,11 @@ export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
       const title = matchedInitial ? matchedInitial.title : r.title;
       const coverUrl = matchedInitial ? matchedInitial.coverUrl : r.coverUrl;
       const samplePhotos =
-        matchedInitial && matchedInitial.samplePhotos && matchedInitial.samplePhotos.length > 0
-          ? matchedInitial.samplePhotos
-          : [coverUrl];
+        r.samplePhotos && r.samplePhotos.length > 0
+          ? r.samplePhotos
+          : matchedInitial && matchedInitial.samplePhotos && matchedInitial.samplePhotos.length > 0
+            ? matchedInitial.samplePhotos
+            : [coverUrl];
 
       return {
         id: r.id,

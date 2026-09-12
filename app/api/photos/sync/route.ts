@@ -20,6 +20,10 @@ export async function GET() {
       if (album.shareUrl && album.shareUrl.startsWith('http')) {
         const parsed = await parseGooglePhotosAlbum(album.shareUrl);
         if (parsed.isRvrVerified && parsed.photoCount > 0) {
+          // Only overwrite the stored photo list when we actually found photos,
+          // so a flaky parse never wipes out an album's existing full list.
+          const samplePhotos = parsed.samplePhotos.length > 0 ? parsed.samplePhotos : album.samplePhotos || [];
+
           await db
             .insert(photoAlbums)
             .values({
@@ -31,6 +35,7 @@ export async function GET() {
               albumDate: album.albumDate,
               photographer: album.photographer,
               matchOpponent: album.matchOpponent || parsed.title,
+              samplePhotos,
               createdAt: album.createdAt,
             })
             .onConflictDoUpdate({
@@ -39,6 +44,7 @@ export async function GET() {
                 title: parsed.title,
                 coverUrl: parsed.coverUrl,
                 photoCount: parsed.photoCount,
+                samplePhotos,
               },
             });
           updatedCount++;
@@ -104,6 +110,7 @@ export async function POST(req: NextRequest) {
       albumDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       photographer: (submittedBy || '').trim() || 'RVR Team',
       matchOpponent: finalTitle,
+      samplePhotos: parsed.samplePhotos,
       createdAt: now,
     };
 

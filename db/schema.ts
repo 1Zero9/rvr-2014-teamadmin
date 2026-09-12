@@ -1,4 +1,4 @@
-import { boolean, index, integer, pgTable, text } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core';
 
 export const members = pgTable('members', {
   id: text('id').primaryKey(),
@@ -96,6 +96,7 @@ export const photoAlbums = pgTable('photo_albums', {
   albumDate: text('album_date').notNull(),
   photographer: text('photographer').notNull().default('RVR Team'),
   matchOpponent: text('match_opponent'),
+  samplePhotos: jsonb('sample_photos').$type<string[]>().notNull().default([]),
   createdAt: text('created_at').notNull(),
 }, (table) => [
   index('idx_photo_albums_date').on(table.albumDate),
