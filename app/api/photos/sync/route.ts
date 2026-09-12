@@ -123,6 +123,44 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PATCH(req: NextRequest) {
+  try {
+    const member = await getCurrentMember();
+    if (!member) {
+      return NextResponse.json({ success: false, error: 'You must be signed in to edit an album.' }, { status: 401 });
+    }
+
+    const { id, photographer, albumDate, matchOpponent } = await req.json();
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Album id is required.' }, { status: 400 });
+    }
+
+    const updates: Partial<typeof photoAlbums.$inferInsert> = {};
+    if (typeof photographer === 'string') updates.photographer = photographer.trim() || 'RVR Team';
+    if (typeof albumDate === 'string' && albumDate.trim()) updates.albumDate = albumDate.trim();
+    if (typeof matchOpponent === 'string') updates.matchOpponent = matchOpponent.trim() || null;
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ success: false, error: 'No fields to update.' }, { status: 400 });
+    }
+
+    const db = getDb();
+    const [updated] = await db
+      .update(photoAlbums)
+      .set(updates)
+      .where(eq(photoAlbums.id, id))
+      .returning();
+
+    if (!updated) {
+      return NextResponse.json({ success: false, error: 'Album not found.' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, album: updated });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     const member = await getCurrentMember();

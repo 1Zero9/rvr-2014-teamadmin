@@ -5527,6 +5527,23 @@ a {
   background: #059669;
 }
 
+.edit-album-card {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 0;
+}
+
+.edit-album-card .add-album-form {
+  grid-template-columns: 1fr;
+}
+
+.edit-field-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: -6px;
+}
+
 .submit-feedback-msg {
   margin: 10px 0 0;
   font-size: 12px;
@@ -5635,10 +5652,16 @@ a {
   font-weight: 750;
 }
 
-.album-remove-btn {
+.album-admin-actions {
   position: absolute;
   top: 12px;
   left: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.album-edit-btn,
+.album-remove-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5649,9 +5672,21 @@ a {
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: #f87171;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
+}
+
+.album-edit-btn {
+  color: #93c5fd;
+}
+
+.album-edit-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.album-remove-btn {
+  color: #f87171;
 }
 
 .album-remove-btn:hover {

@@ -15,6 +15,7 @@ import {
   Heart,
   Image as ImageIcon,
   Layers,
+  Pencil,
   Plus,
   RefreshCw,
   ShieldCheck,
@@ -43,6 +44,12 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
   const [isSyncing, setIsSyncing] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ text: string; error?: boolean } | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [editingAlbum, setEditingAlbum] = useState<PhotoAlbum | null>(null);
+  const [editTakenBy, setEditTakenBy] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editMatch, setEditMatch] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const thumbnailRailRef = useRef<HTMLDivElement | null>(null);
 
   const openViewer = (album: PhotoAlbum, startIndex: number = 0) => {
@@ -167,6 +174,61 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
       setSubmitMsg({ text: 'Failed to connect to album service.', error: true });
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  const openEditAlbum = (album: PhotoAlbum) => {
+    setEditingAlbum(album);
+    setEditTakenBy(album.photographer || '');
+    setEditDate(album.albumDate || '');
+    setEditMatch(album.matchOpponent || '');
+    setEditError(null);
+  };
+
+  const closeEditAlbum = () => {
+    setEditingAlbum(null);
+    setEditError(null);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAlbum) return;
+
+    setIsSavingEdit(true);
+    setEditError(null);
+    try {
+      const res = await fetch('/api/photos/sync', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingAlbum.id,
+          photographer: editTakenBy,
+          albumDate: editDate,
+          matchOpponent: editMatch,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.album) {
+        setAlbums((prev) =>
+          prev.map((a) =>
+            a.id === editingAlbum.id
+              ? { ...a, photographer: data.album.photographer, albumDate: data.album.albumDate, matchOpponent: data.album.matchOpponent }
+              : a
+          )
+        );
+        setActiveAlbum((prev) =>
+          prev && prev.id === editingAlbum.id
+            ? { ...prev, photographer: data.album.photographer, albumDate: data.album.albumDate, matchOpponent: data.album.matchOpponent }
+            : prev
+        );
+        closeEditAlbum();
+      } else {
+        setEditError(data.error || 'Could not save changes.');
+      }
+    } catch {
+      setEditError('Failed to connect to album service.');
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -313,19 +375,33 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
                   </span>
                   <span className="album-date-badge">{album.albumDate}</span>
                   {isAdmin && (
-                    <button
-                      type="button"
-                      className="album-remove-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveAlbum(album);
-                      }}
-                      disabled={removingId === album.id}
-                      title="Remove album"
-                      aria-label="Remove album"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="album-admin-actions">
+                      <button
+                        type="button"
+                        className="album-edit-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditAlbum(album);
+                        }}
+                        title="Edit album details"
+                        aria-label="Edit album details"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="album-remove-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveAlbum(album);
+                        }}
+                        disabled={removingId === album.id}
+                        title="Remove album"
+                        aria-label="Remove album"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -483,6 +559,67 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
                     ))}
                   </div>
                 </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Edit Album Metadata Modal */}
+        {isAdmin && editingAlbum && (
+          <div className="photo-lightbox-modal" onClick={closeEditAlbum}>
+            <div className="add-album-card edit-album-card" onClick={(e) => e.stopPropagation()}>
+              <div className="add-album-head">
+                <div className="flex items-center gap-2">
+                  <Pencil size={18} className="text-blue-600" />
+                  <h4>Edit Album Details</h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeEditAlbum}
+                  className="close-drawer-btn"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <p className="text-xs text-slate-600 mb-3">{editingAlbum.title}</p>
+              <form onSubmit={handleSaveEdit} className="add-album-form">
+                <label className="edit-field-label" htmlFor="edit-taken-by">Taken by</label>
+                <input
+                  id="edit-taken-by"
+                  type="text"
+                  placeholder="e.g. Igor"
+                  value={editTakenBy}
+                  onChange={(e) => setEditTakenBy(e.target.value)}
+                  className="album-submitted-by-input"
+                />
+                <label className="edit-field-label" htmlFor="edit-date">Date</label>
+                <input
+                  id="edit-date"
+                  type="text"
+                  placeholder="e.g. 29 Aug 2026"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  className="album-title-input"
+                />
+                <label className="edit-field-label" htmlFor="edit-match">Match</label>
+                <input
+                  id="edit-match"
+                  type="text"
+                  placeholder="e.g. Greystones United AFC (1-0 Win)"
+                  value={editMatch}
+                  onChange={(e) => setEditMatch(e.target.value)}
+                  className="album-url-input"
+                />
+                <button
+                  type="submit"
+                  disabled={isSavingEdit}
+                  className="submit-album-btn"
+                >
+                  {isSavingEdit ? 'Saving...' : 'Save Changes'}
+                </button>
+              </form>
+              {editError && (
+                <p className="submit-feedback-msg text-red-600 font-semibold">{editError}</p>
               )}
             </div>
           </div>
