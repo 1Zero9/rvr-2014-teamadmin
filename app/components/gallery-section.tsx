@@ -38,6 +38,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
   const [isAdding, setIsAdding] = useState(false);
   const [newUrl, setNewUrl] = useState('');
   const [newTitle, setNewTitle] = useState('');
+  const [newSubmittedBy, setNewSubmittedBy] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ text: string; error?: boolean } | null>(null);
@@ -121,6 +122,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
         body: JSON.stringify({
           shareUrl: newUrl,
           title: newTitle || undefined,
+          submittedBy: newSubmittedBy || undefined,
         }),
       });
       const data = await res.json();
@@ -129,6 +131,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
         setSubmitMsg({ text: `✓ Verified RVR album added: "${data.album.title}" (${data.album.photoCount} photos)` });
         setNewUrl('');
         setNewTitle('');
+        setNewSubmittedBy('');
         setTimeout(() => {
           setIsAdding(false);
           setSubmitMsg(null);
@@ -249,6 +252,13 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
                 onChange={(e) => setNewTitle(e.target.value)}
                 className="album-title-input"
               />
+              <input
+                type="text"
+                placeholder="Submitted by (your name)"
+                value={newSubmittedBy}
+                onChange={(e) => setNewSubmittedBy(e.target.value)}
+                className="album-submitted-by-input"
+              />
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -321,13 +331,18 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
 
                 <div className="album-info-body">
                   <h3 onClick={() => openViewer(album, 0)}>{album.title}</h3>
-                  {album.matchOpponent && (
-                    <div className="album-meta-row">
+                  <div className="album-meta-row">
+                    {album.photographer && (
+                      <span className="photographer-credit">
+                        <Camera size={12} /> Submitted by {album.photographer}
+                      </span>
+                    )}
+                    {album.matchOpponent && (
                       <span className="album-match-pill">
                         <Trophy size={11} /> {album.matchOpponent}
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   <div className="album-button-group">
                     <button
@@ -367,7 +382,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
                 <div>
                   <h4>{activeAlbum.title}</h4>
                   <small>
-                    Photo {activePhotoIndex + 1} of {activeAlbum.samplePhotos.length} · {activeAlbum.albumDate}
+                    Photo {activePhotoIndex + 1} of {activeAlbum.samplePhotos.length} · Submitted by {activeAlbum.photographer} · {activeAlbum.albumDate}
                   </small>
                 </div>
                 <div className="lightbox-actions">

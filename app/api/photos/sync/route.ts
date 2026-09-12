@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { shareUrl, title: customTitle } = body;
+    const { shareUrl, title: customTitle, submittedBy } = body;
 
     if (!shareUrl || (!shareUrl.includes('photos.app.goo.gl') && !shareUrl.includes('photos.google.com'))) {
       return NextResponse.json(
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       coverUrl: parsed.coverUrl,
       photoCount: parsed.photoCount,
       albumDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      photographer: 'RVR Team',
+      photographer: (submittedBy || '').trim() || 'RVR Team',
       matchOpponent: finalTitle,
       createdAt: now,
     };
