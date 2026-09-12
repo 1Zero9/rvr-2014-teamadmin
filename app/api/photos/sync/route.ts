@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { INITIAL_PHOTO_ALBUMS, isValidRvrAlbum } from '@/app/lib/photos-data';
+import { isValidRvrAlbum } from '@/app/lib/photos-data';
 import { getPhotoAlbumsFromDb, parseGooglePhotosAlbum } from '@/app/lib/photos-server';
+import { getCurrentMember } from '@/app/lib/authz';
 import { getDb } from '@/db';
 import { photoAlbums } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-// Cron handler or GET fetcher
+// Manual "check for new photos" refresh, triggered from the gallery UI
 export async function GET() {
   try {
     const db = getDb();
@@ -27,7 +29,7 @@ export async function GET() {
               coverUrl: parsed.coverUrl,
               photoCount: parsed.photoCount,
               albumDate: album.albumDate,
-              photographer: 'Brian (Official Team Photographer)',
+              photographer: album.photographer,
               matchOpponent: album.matchOpponent || parsed.title,
               createdAt: album.createdAt,
             })
@@ -48,7 +50,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: `Checked and synced ${updatedCount} RVR Google Photos albums from Brian`,
+      message: `Checked and synced ${updatedCount} RVR Google Photos albums`,
       count: latestAlbums.length,
       albums: latestAlbums,
       lastSync: new Date().toISOString(),
@@ -60,8 +62,13 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const member = await getCurrentMember();
+    if (!member) {
+      return NextResponse.json({ success: false, error: 'You must be signed in to add an album.' }, { status: 401 });
+    }
+
     const body = await req.json();
-    const { shareUrl, title: customTitle, photographer = 'Brian (Official Team Photographer)' } = body;
+    const { shareUrl, title: customTitle } = body;
 
     if (!shareUrl || (!shareUrl.includes('photos.app.goo.gl') && !shareUrl.includes('photos.google.com'))) {
       return NextResponse.json(
@@ -78,7 +85,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: `Album title "${finalTitle}" was rejected. To ensure only official RVR football photos from Brian are published, the album title must contain "RVR" (e.g., "2026-08-29 RVR U13 vs Greystones").`,
+          error: `Album title "${finalTitle}" was rejected. To ensure only official RVR football photos are published, the album title must contain "RVR" (e.g., "2026-08-29 RVR U13 vs Greystones").`,
         },
         { status: 400 }
       );
@@ -95,7 +102,7 @@ export async function POST(req: NextRequest) {
       coverUrl: parsed.coverUrl,
       photoCount: parsed.photoCount,
       albumDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      photographer: 'Brian (Official Team Photographer)',
+      photographer: 'RVR Team',
       matchOpponent: finalTitle,
       createdAt: now,
     };
@@ -104,13 +111,34 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Verified RVR football album from Brian published successfully!`,
+      message: `Verified RVR football album published successfully!`,
       album: {
         ...newAlbum,
         samplePhotos: parsed.samplePhotos,
         isRvrVerified: true,
       },
     });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const member = await getCurrentMember();
+    if (!member) {
+      return NextResponse.json({ success: false, error: 'You must be signed in to remove an album.' }, { status: 401 });
+    }
+
+    const { id } = await req.json();
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Album id is required.' }, { status: 400 });
+    }
+
+    const db = getDb();
+    await db.delete(photoAlbums).where(eq(photoAlbums.id, id));
+
+    return NextResponse.json({ success: true, message: 'Album removed.' });
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
   }

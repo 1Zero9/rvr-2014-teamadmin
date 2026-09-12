@@ -25,7 +25,7 @@ export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
     coverUrl: 'https://lh3.googleusercontent.com/pw/AP1GczPWQ1M0XQgCUyIxlzreFY0fQb_nHjes_A9PzrSEb627QCquRNp3-SqtttEnegipFIpyJ7HRcseV183wWPfctXvnb-2_a42Hvlpnz7ekW3XBxhWKnbqi=w1200',
     photoCount: 57,
     albumDate: '29 Aug 2026',
-    photographer: 'Brian (Official Team Photographer)',
+    photographer: 'RVR Team',
     matchOpponent: 'Greystones United AFC (1-0 Win)',
     samplePhotos: [
       "https://lh3.googleusercontent.com/pw/AP1GczPWQ1M0XQgCUyIxlzreFY0fQb_nHjes_A9PzrSEb627QCquRNp3-SqtttEnegipFIpyJ7HRcseV183wWPfctXvnb-2_a42Hvlpnz7ekW3XBxhWKnbqi=w1200",
@@ -96,7 +96,7 @@ export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
     coverUrl: 'https://lh3.googleusercontent.com/pw/AP1GczPpMlX6fWQ1oJmGnQRmj3vF_Cfd3BHX_3kSSjqt5COg08EBGv9Ahywd7yzaZE9dRbD70lw3C57tZPAFlYBw_1g_XolszgWNqY_0vg79eUcMcGGQIh-a=w1200',
     photoCount: 44,
     albumDate: '25 Aug 2026',
-    photographer: 'Brian (Official Team Photographer)',
+    photographer: 'RVR Team',
     matchOpponent: 'Pre-Season Blitz & Tournament',
     samplePhotos: [
       "https://lh3.googleusercontent.com/pw/AP1GczPpMlX6fWQ1oJmGnQRmj3vF_Cfd3BHX_3kSSjqt5COg08EBGv9Ahywd7yzaZE9dRbD70lw3C57tZPAFlYBw_1g_XolszgWNqY_0vg79eUcMcGGQIh-a=w1200",

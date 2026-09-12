@@ -28,7 +28,7 @@ export default async function PhotosPage() {
         </div>
       </div>
 
-      <GallerySection initialAlbums={albums} />
+      <GallerySection initialAlbums={albums} isAdmin={Boolean(currentMember)} />
       <PublicFooter />
     </div>
   );

@@ -31,7 +31,7 @@ export default async function HomePage() {
       </div>
 
       {/* Photo Gallery Grid & Lightbox Component */}
-      <GallerySection initialAlbums={albums} />
+      <GallerySection initialAlbums={albums} isAdmin={Boolean(currentMember)} />
 
       {/* Footer */}
       <PublicFooter />

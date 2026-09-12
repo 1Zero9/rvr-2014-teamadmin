@@ -83,30 +83,26 @@ export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
   try {
     const db = getDb();
 
-    // Ensure database rows have the updated clean titles and distinct covers
-    for (const item of INITIAL_PHOTO_ALBUMS) {
-      await db
-        .insert(photoAlbums)
-        .values({
-          id: item.id,
-          title: item.title,
-          shareUrl: item.shareUrl,
-          coverUrl: item.coverUrl,
-          photoCount: item.photoCount,
-          albumDate: item.albumDate,
-          photographer: item.photographer,
-          matchOpponent: item.matchOpponent,
-          createdAt: item.createdAt,
-        })
-        .onConflictDoUpdate({
-          target: photoAlbums.id,
-          set: {
+    // Seed the initial albums once, on a fresh/empty table only, so that
+    // an admin removing one of them later doesn't have it reappear.
+    const rowCount = await db.select().from(photoAlbums).limit(1);
+    if (rowCount.length === 0) {
+      for (const item of INITIAL_PHOTO_ALBUMS) {
+        await db
+          .insert(photoAlbums)
+          .values({
+            id: item.id,
             title: item.title,
+            shareUrl: item.shareUrl,
             coverUrl: item.coverUrl,
             photoCount: item.photoCount,
+            albumDate: item.albumDate,
+            photographer: item.photographer,
             matchOpponent: item.matchOpponent,
-          },
-        });
+            createdAt: item.createdAt,
+          })
+          .onConflictDoNothing();
+      }
     }
 
     const rows = await db.select().from(photoAlbums).orderBy(desc(photoAlbums.albumDate));
@@ -135,7 +131,7 @@ export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
         coverUrl,
         photoCount: samplePhotos.length > 1 ? samplePhotos.length : (r.photoCount || 1),
         albumDate: r.albumDate,
-        photographer: r.photographer || 'Brian (Official Team Photographer)',
+        photographer: r.photographer || 'RVR Team',
         matchOpponent: r.matchOpponent || title,
         samplePhotos,
         isRvrVerified: isValidRvrAlbum(title),

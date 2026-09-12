@@ -19,17 +19,18 @@ import {
   RefreshCw,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Trophy,
-  User,
   X,
 } from 'lucide-react';
 import { PhotoAlbum } from '../lib/photos-data';
 
 interface GallerySectionProps {
   initialAlbums: PhotoAlbum[];
+  isAdmin?: boolean;
 }
 
-export function GallerySection({ initialAlbums }: GallerySectionProps) {
+export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectionProps) {
   const [albums, setAlbums] = useState<PhotoAlbum[]>(initialAlbums);
   const [activeAlbum, setActiveAlbum] = useState<PhotoAlbum | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
@@ -40,6 +41,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ text: string; error?: boolean } | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const thumbnailRailRef = useRef<HTMLDivElement | null>(null);
 
   const openViewer = (album: PhotoAlbum, startIndex: number = 0) => {
@@ -111,7 +113,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
     if (!newUrl) return;
 
     setIsSubmitting(true);
-    setSubmitMsg({ text: 'Validating and parsing Google Photos album from Brian...' });
+    setSubmitMsg({ text: 'Validating and parsing Google Photos album...' });
     try {
       const res = await fetch('/api/photos/sync', {
         method: 'POST',
@@ -141,16 +143,40 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
     }
   };
 
+  const handleRemoveAlbum = async (album: PhotoAlbum) => {
+    if (!confirm(`Remove "${album.title}"? This can't be undone.`)) return;
+
+    setRemovingId(album.id);
+    try {
+      const res = await fetch('/api/photos/sync', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: album.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAlbums((prev) => prev.filter((a) => a.id !== album.id));
+        if (activeAlbum?.id === album.id) closeViewer();
+      } else {
+        setSubmitMsg({ text: data.error || 'Could not remove album.', error: true });
+      }
+    } catch {
+      setSubmitMsg({ text: 'Failed to connect to album service.', error: true });
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
   return (
     <section className="public-section" id="photos-gallery">
       <div className="section-container">
         <div className="section-head">
           <div className="section-pill">
-            <Camera size={14} /> OFFICIAL MATCHDAY GALLERIES · PHOTOS BY BRIAN
+            <Camera size={14} /> OFFICIAL MATCHDAY GALLERIES
           </div>
           <h2>Matchday Action & Squad Photos</h2>
           <p>
-            Action snapshots captured by our team photographer, Brian. Filtered exclusively for RVR football matchdays. Browse high-resolution photos right here or download originals on Google Photos!
+            Action snapshots from our team contributors. Filtered exclusively for RVR football matchdays. Browse high-resolution photos right here or download originals on Google Photos!
           </p>
         </div>
 
@@ -159,40 +185,42 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
           <div className="gallery-stats-badge">
             <ShieldCheck size={16} className="text-emerald-600" />
             <span>
-              <strong>{albums.length} Match Albums</strong> · Official RVR Football Photos by <strong>Brian</strong>
+              <strong>{albums.length} Match Albums</strong> · Official RVR Football Photos
             </span>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              className="sync-btn"
-              onClick={handleSyncCron}
-              disabled={isSyncing}
-              title="Run weekly auto-sync check"
-            >
-              <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
-              <span>{isSyncing ? 'Checking...' : 'Check For New Photos'}</span>
-            </button>
+          {isAdmin && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                className="sync-btn"
+                onClick={handleSyncCron}
+                disabled={isSyncing}
+                title="Check Google Photos links for updates"
+              >
+                <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
+                <span>{isSyncing ? 'Checking...' : 'Check For New Photos'}</span>
+              </button>
 
-            <button
-              type="button"
-              className="add-album-trigger-btn"
-              onClick={() => setIsAdding(!isAdding)}
-            >
-              <Plus size={15} />
-              <span>Add New Google Photos Album</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                className="add-album-trigger-btn"
+                onClick={() => setIsAdding(!isAdding)}
+              >
+                <Plus size={15} />
+                <span>Add New Google Photos Album</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Add Album Form Drawer */}
-        {isAdding && (
+        {isAdmin && isAdding && (
           <div className="add-album-card">
             <div className="add-album-head">
               <div className="flex items-center gap-2">
                 <ShieldCheck size={18} className="text-blue-600" />
-                <h4>Add New Match Album from Brian</h4>
+                <h4>Add New Match Album</h4>
               </div>
               <button
                 type="button"
@@ -274,20 +302,32 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                     <Layers size={13} /> {count} HD Photos
                   </span>
                   <span className="album-date-badge">{album.albumDate}</span>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className="album-remove-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveAlbum(album);
+                      }}
+                      disabled={removingId === album.id}
+                      title="Remove album"
+                      aria-label="Remove album"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
 
                 <div className="album-info-body">
                   <h3 onClick={() => openViewer(album, 0)}>{album.title}</h3>
-                  <div className="album-meta-row">
-                    <span className="photographer-credit">
-                      <Camera size={12} /> {album.photographer}
-                    </span>
-                    {album.matchOpponent && (
+                  {album.matchOpponent && (
+                    <div className="album-meta-row">
                       <span className="album-match-pill">
                         <Trophy size={11} /> {album.matchOpponent}
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   <div className="album-button-group">
                     <button
@@ -327,7 +367,7 @@ export function GallerySection({ initialAlbums }: GallerySectionProps) {
                 <div>
                   <h4>{activeAlbum.title}</h4>
                   <small>
-                    Photo {activePhotoIndex + 1} of {activeAlbum.samplePhotos.length} · {activeAlbum.photographer} · {activeAlbum.albumDate}
+                    Photo {activePhotoIndex + 1} of {activeAlbum.samplePhotos.length} · {activeAlbum.albumDate}
                   </small>
                 </div>
                 <div className="lightbox-actions">
