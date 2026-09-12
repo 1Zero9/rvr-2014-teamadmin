@@ -105,7 +105,18 @@ export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
       }
     }
 
+    // Clean up legacy hardcoded photographer credits from earlier versions of the app
+    const legacyDefaults = ['Brian (Official Team Photographer)', 'Team Dad & Official Photographer'];
     const rows = await db.select().from(photoAlbums).orderBy(desc(photoAlbums.albumDate));
+    for (const r of rows) {
+      if (legacyDefaults.includes(r.photographer)) {
+        await db
+          .update(photoAlbums)
+          .set({ photographer: 'RVR Team' })
+          .where(eq(photoAlbums.id, r.id));
+        r.photographer = 'RVR Team';
+      }
+    }
 
     return rows.map((r) => {
       // Match with known initial albums to preserve complete photo list & clean title

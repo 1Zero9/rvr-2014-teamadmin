@@ -94,7 +94,7 @@ export const photoAlbums = pgTable('photo_albums', {
   coverUrl: text('cover_url').notNull(),
   photoCount: integer('photo_count').notNull().default(0),
   albumDate: text('album_date').notNull(),
-  photographer: text('photographer').notNull().default('Team Dad & Official Photographer'),
+  photographer: text('photographer').notNull().default('RVR Team'),
   matchOpponent: text('match_opponent'),
   createdAt: text('created_at').notNull(),
 }, (table) => [
