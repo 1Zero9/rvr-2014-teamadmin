@@ -27,6 +27,12 @@ interface FixturesSectionProps {
   liveStandings?: LeagueStanding[];
   leagueName?: string;
   leagueUrl?: string;
+  /** /api/ddsl/sync now requires a logged-in member (or the cron secret) -
+   * an anonymous visitor clicking "Sync Live DDSL" would just get a 401.
+   * Hide the button entirely for them rather than show a control that
+   * always fails, matching how /photos already gates its own admin
+   * controls behind whether someone is signed in. */
+  isAuthenticated?: boolean;
 }
 
 export function FixturesSection({
@@ -35,6 +41,7 @@ export function FixturesSection({
   liveStandings = [],
   leagueName = '13 Major 1 Boys Sat',
   leagueUrl = 'https://ddsl.ie/league/218148/',
+  isAuthenticated = false,
 }: FixturesSectionProps) {
   const [filter, setFilter] = useState<'all' | 'results' | 'fixtures' | 'table' | 'scout' | 'ddsl-portal'>('all');
   const [scope, setScope] = useState<'rvr' | 'division'>('rvr');
@@ -106,15 +113,17 @@ export function FixturesSection({
 
           <div className="sync-actions">
             {syncStatus && <span className="sync-msg">{syncStatus}</span>}
-            <button
-              type="button"
-              className="sync-btn"
-              onClick={handleSync}
-              disabled={isSyncing}
-            >
-              <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
-              <span>{isSyncing ? 'Syncing...' : 'Sync Live DDSL'}</span>
-            </button>
+            {isAuthenticated && (
+              <button
+                type="button"
+                className="sync-btn"
+                onClick={handleSync}
+                disabled={isSyncing}
+              >
+                <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
+                <span>{isSyncing ? 'Syncing...' : 'Sync Live DDSL'}</span>
+              </button>
+            )}
             <a
               href={leagueUrl}
               target="_blank"

@@ -3,13 +3,18 @@ import { ArrowLeft, ExternalLink, RefreshCw, Trophy } from 'lucide-react';
 import { FixturesSection } from '../components/fixtures-section';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
-import { requireApprovedMember } from '../lib/authz';
+import { getCurrentMember } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
 
+// Genuinely public, like /photos - match results and league standings for a
+// kids' team aren't sensitive the way /fund, /expenses and /contributions
+// are. This used to hard-redirect anyone not logged in to /login despite
+// using the same PublicHeader/PublicFooter/public-page-root styling as
+// /photos, which never did - an inconsistency, not a real access decision.
 export default async function FixturesPage() {
-  const currentMember = await requireApprovedMember();
+  const currentMember = await getCurrentMember();
   const liveDdslData = await fetchLiveDdslLeagueData('218148');
 
   return (
@@ -19,8 +24,12 @@ export default async function FixturesPage() {
       <div className="page-hero-banner">
         <div className="section-container">
           <div className="breadcrumb">
-            <Link href="/portal"><ArrowLeft size={14} /> Back to Portal</Link>
-            <span>/</span>
+            {currentMember && (
+              <>
+                <Link href="/portal"><ArrowLeft size={14} /> Back to Portal</Link>
+                <span>/</span>
+              </>
+            )}
             <span>Fixtures & Results</span>
           </div>
           <span className="section-pill">
@@ -57,6 +66,7 @@ export default async function FixturesPage() {
         liveStandings={liveDdslData.standings}
         leagueName={liveDdslData.leagueName}
         leagueUrl={liveDdslData.leagueUrl}
+        isAuthenticated={Boolean(currentMember)}
       />
       <PublicFooter />
     </div>
