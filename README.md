@@ -14,14 +14,9 @@ Private team fund, accounts and information hub for the Rivervalley Rangers 2014
 
 ## Access model
 
-The application is temporarily running in a single Super Admin setup mode with no application-level login. The Sites deployment remains owner-only so financial information is not exposed while a replacement authentication system is selected.
-
-- **Super Admin:** full control, including users and roles
-- **Admin:** accounts, expenses, calendar, ideas and read-only member oversight
-- **Coach:** team information plus expense requests, dates and ideas
-- **Parent:** approved read access to transparent accounts and team information, plus activity ideas
-
-The role model and server-side authorization checks remain in the codebase for the replacement authentication system. Parent views do not expose payer names in the public-facing dashboard or ledger.
+This is a single-owner workspace with no in-app account, password, session, or
+role system. Enable Vercel Deployment Protection for the project; that is the
+sole access boundary for the site and its data-changing endpoints.
 
 ## Local development & Deployment
 

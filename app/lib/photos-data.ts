@@ -17,6 +17,17 @@ export function isValidRvrAlbum(title: string): boolean {
   return upper.includes('RVR') || upper.includes('RIVERVALLEY') || upper.includes('RIVER VALLEY');
 }
 
+/** Album dates are display text (for example, "12 Sept 2026"), so database
+ * text ordering is not chronological. Keep ordering at the presentation
+ * boundary where both seeded and database-backed albums use the same shape. */
+export function sortPhotoAlbumsNewestFirst(albums: PhotoAlbum[]): PhotoAlbum[] {
+  return [...albums].sort((a, b) => {
+    const aTime = Date.parse(a.albumDate);
+    const bTime = Date.parse(b.albumDate);
+    return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+  });
+}
+
 export const INITIAL_PHOTO_ALBUMS: PhotoAlbum[] = [
   {
     id: 'album-2026-08-29-greystones',

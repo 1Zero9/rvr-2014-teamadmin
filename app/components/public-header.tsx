@@ -3,9 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Camera, Lock, Menu, ShieldCheck, Sparkles, Trophy, X } from 'lucide-react';
+import { Camera, Menu, ShieldCheck, X } from 'lucide-react';
 
-export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean }) {
+export function PublicHeader(_props: { isAuthenticated?: boolean } = {}) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -45,22 +45,20 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
             <Camera size={15} />
             <span>Squad Photos</span>
           </Link>
-          {isAuthenticated && (
-            <Link href="/portal" className="nav-item portal-nav-highlight">
-              <ShieldCheck size={15} />
-              <span>Team Portal (Active)</span>
-            </Link>
-          )}
+          <Link href="/portal" className="nav-item portal-nav-highlight">
+            <ShieldCheck size={15} />
+            <span>Team workspace</span>
+          </Link>
         </nav>
 
         {/* Action Button */}
         <div className="header-actions">
           <Link
-            href={isAuthenticated ? '/portal' : '/login'}
+            href="/portal"
             className="portal-cta-btn"
           >
-            {isAuthenticated ? <ShieldCheck size={15} /> : <Lock size={14} />}
-            <span>{isAuthenticated ? 'Open Portal' : 'Admin Portal'}</span>
+            <ShieldCheck size={15} />
+            <span>Open workspace</span>
           </Link>
 
           <button
@@ -86,23 +84,21 @@ export function PublicHeader({ isAuthenticated }: { isAuthenticated?: boolean })
               <Camera size={16} />
               <span>Squad Photos Gallery</span>
             </Link>
-            {isAuthenticated && (
-              <Link
-                href="/portal"
-                className="mobile-nav-item"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <ShieldCheck size={16} />
-                <span>Team Portal Dashboard</span>
-              </Link>
-            )}
             <Link
-              href={isAuthenticated ? '/portal' : '/login'}
+              href="/portal"
+              className="mobile-nav-item"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <ShieldCheck size={16} />
+              <span>Team workspace</span>
+            </Link>
+            <Link
+              href="/portal"
               className="mobile-portal-btn"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {isAuthenticated ? <ShieldCheck size={16} /> : <Lock size={15} />}
-              <span>{isAuthenticated ? 'Open Team Portal' : 'Admin Portal Login'}</span>
+              <ShieldCheck size={16} />
+              <span>Open workspace</span>
             </Link>
           </nav>
         </div>

@@ -2,7 +2,7 @@ import 'server-only';
 import { desc, eq } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { photoAlbums } from '@/db/schema';
-import { INITIAL_PHOTO_ALBUMS, isValidRvrAlbum, PhotoAlbum } from './photos-data';
+import { INITIAL_PHOTO_ALBUMS, isValidRvrAlbum, PhotoAlbum, sortPhotoAlbumsNewestFirst } from './photos-data';
 
 export async function parseGooglePhotosAlbum(shareUrl: string): Promise<{
   title: string;
@@ -119,7 +119,7 @@ export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
       }
     }
 
-    return rows.map((r) => {
+    return sortPhotoAlbumsNewestFirst(rows.map((r) => {
       // Match with known initial albums to preserve complete photo list & clean title
       const matchedInitial = INITIAL_PHOTO_ALBUMS.find(
         (init) =>
@@ -151,9 +151,9 @@ export async function getPhotoAlbumsFromDb(): Promise<PhotoAlbum[]> {
         isRvrVerified: isValidRvrAlbum(title),
         createdAt: r.createdAt,
       } as PhotoAlbum;
-    });
+    }));
   } catch (err) {
     console.error('Error fetching photo albums from DB, returning defaults:', err);
-    return INITIAL_PHOTO_ALBUMS;
+    return sortPhotoAlbumsNewestFirst(INITIAL_PHOTO_ALBUMS);
   }
 }

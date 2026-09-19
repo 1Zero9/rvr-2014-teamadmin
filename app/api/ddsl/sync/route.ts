@@ -1,32 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchLiveDdslLeagueData } from '@/app/lib/ddsl-live';
-import { getCurrentMember } from '@/app/lib/authz';
 import { getDb } from '@/db';
 import { matches } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-// This route writes to the database and was previously callable by anyone
-// on the internet with no auth at all. Vercel's Cron Jobs call it with
-// `Authorization: Bearer $CRON_SECRET` (set CRON_SECRET in the project's
-// env vars - Vercel injects it into every cron invocation automatically
-// once it exists); the "Sync Live DDSL" button in the fixtures UI calls it
-// from an already-authenticated member's browser session instead, so both
-// paths need to be accepted here.
-async function isAuthorized(request: NextRequest): Promise<boolean> {
-  const authHeader = request.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`) {
-    return true;
-  }
-  const member = await getCurrentMember();
-  return member !== null;
-}
-
 export async function GET(request: NextRequest) {
-  if (!(await isAuthorized(request))) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
     const data = await fetchLiveDdslLeagueData('218148');
 

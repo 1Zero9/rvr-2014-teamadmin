@@ -27,12 +27,8 @@ interface FixturesSectionProps {
   liveStandings?: LeagueStanding[];
   leagueName?: string;
   leagueUrl?: string;
-  /** /api/ddsl/sync now requires a logged-in member (or the cron secret) -
-   * an anonymous visitor clicking "Sync Live DDSL" would just get a 401.
-   * Hide the button entirely for them rather than show a control that
-   * always fails, matching how /photos already gates its own admin
-   * controls behind whether someone is signed in. */
-  isAuthenticated?: boolean;
+  /** Manual DDSL sync writes to the database, so only a Super Admin sees it. */
+  canSync?: boolean;
 }
 
 export function FixturesSection({
@@ -41,7 +37,7 @@ export function FixturesSection({
   liveStandings = [],
   leagueName = '13 Major 1 Boys Sat',
   leagueUrl = 'https://ddsl.ie/league/218148/',
-  isAuthenticated = false,
+  canSync = false,
 }: FixturesSectionProps) {
   // The league table is the actual point of this page - land on it, not on
   // "All Matches".
@@ -115,7 +111,7 @@ export function FixturesSection({
 
           <div className="sync-actions">
             {syncStatus && <span className="sync-msg">{syncStatus}</span>}
-            {isAuthenticated && (
+            {canSync && (
               <button
                 type="button"
                 className="sync-btn"

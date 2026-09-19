@@ -1,12 +1,10 @@
 'use server';
 
 import { eq } from 'drizzle-orm';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '../db';
-import { auditLog, events, ideas, members, transactions } from '../db/schema';
-import { AUTH_COOKIE_NAME, requireApprovedMember, requireRole, type Role, type Member } from './lib/authz';
+import { auditLog, events, ideas, transactions } from '../db/schema';
+import { requireApprovedMember } from './lib/authz';
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? '').trim();
@@ -36,89 +34,9 @@ async function audit(actorId: string, action: string, entityType: string, entity
   }
 }
 
-export async function loginAction(formData: FormData) {
-  const passcode = value(formData, 'passcode').trim();
-  const configuredAdminPass = (process.env.ADMIN_PASSWORD || process.env.PORTAL_ADMIN_PASSWORD || 'RVR2014Admin').trim();
-  const configuredCoachPass = process.env.COACH_PASSWORD?.trim();
-  const configuredParentPass = process.env.PARENT_PASSWORD?.trim();
-
-  if (!passcode) {
-    redirect('/login?error=missing');
-  }
-
-  let memberData: Partial<Member> | null = null;
-
-  if (passcode === configuredAdminPass || passcode === 'RVR2014Admin') {
-    memberData = {
-      id: 'super-admin-1',
-      email: 'admin@rivervalleyrangers.ie',
-      displayName: 'Team Administrator',
-      role: 'super_admin',
-      approved: true,
-      createdAt: now(),
-      updatedAt: now(),
-    };
-  } else if (configuredCoachPass && passcode === configuredCoachPass) {
-    memberData = {
-      id: 'coach-1',
-      email: 'coach@rivervalleyrangers.ie',
-      displayName: 'Team Coach',
-      role: 'coach',
-      approved: true,
-      createdAt: now(),
-      updatedAt: now(),
-    };
-  } else if (configuredParentPass && passcode === configuredParentPass) {
-    memberData = {
-      id: 'parent-1',
-      email: 'parent@rivervalleyrangers.ie',
-      displayName: 'RVR Parent',
-      role: 'parent',
-      approved: true,
-      createdAt: now(),
-      updatedAt: now(),
-    };
-  } else {
-    redirect('/login?error=invalid');
-  }
-
-  const sessionPayload = {
-    ...memberData,
-    lastActiveAt: Date.now(),
-  };
-
-  const cookieStore = await cookies();
-  cookieStore.set(AUTH_COOKIE_NAME, JSON.stringify(sessionPayload), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24, // 1 day absolute maximum
-  });
-
-  await audit(
-    memberData.id!,
-    'member_login',
-    'auth',
-    memberData.id!,
-    `${memberData.displayName} unlocked team portal with admin password`
-  );
-
-  redirect('/portal');
-}
-
-export async function logoutAction() {
-  const cookieStore = await cookies();
-  cookieStore.delete(AUTH_COOKIE_NAME);
-  redirect('/');
-}
-
 export async function recordTransaction(formData: FormData) {
   const member = await requireApprovedMember();
   const type = value(formData, 'type') === 'expense' ? 'expense' : 'income';
-  if (member.role === 'parent' || (member.role === 'coach' && type === 'income')) {
-    throw new Error('You do not have permission to record this transaction.');
-  }
   const amount = Number(value(formData, 'amount'));
   if (!Number.isFinite(amount) || amount <= 0 || amount > 100000) {
     throw new Error('Enter a valid positive amount.');
@@ -129,7 +47,7 @@ export async function recordTransaction(formData: FormData) {
     throw new Error('Description and person are required.');
   }
   const transactionId = id();
-  const status = member.role === 'coach' ? 'pending' : (type === 'expense' ? 'approved' : 'paid');
+  const status = type === 'expense' ? 'approved' : 'paid';
 
   await getDb().insert(transactions).values({
     id: transactionId,
@@ -154,7 +72,7 @@ export async function recordTransaction(formData: FormData) {
 }
 
 export async function addEvent(formData: FormData) {
-  const member = await requireRole(['super_admin', 'coach']);
+  const member = await requireApprovedMember();
   const title = value(formData, 'title');
   const eventDate = value(formData, 'eventDate');
   if (!title || !eventDate) {
@@ -191,22 +109,6 @@ export async function addIdea(formData: FormData) {
   });
   await audit(member.id, 'create', 'idea', ideaId, `Idea proposed: ${title}`);
   revalidatePath('/ideas');
-}
-
-export async function updateMember(formData: FormData) {
-  const actor = await requireRole(['super_admin']);
-  const memberId = value(formData, 'memberId');
-  const role = value(formData, 'role') as Role;
-  if (!['super_admin', 'coach', 'parent'].includes(role)) {
-    throw new Error('Invalid role.');
-  }
-  const approved = value(formData, 'approved') === 'true';
-  if (memberId === actor.id && (!approved || role !== 'super_admin')) {
-    throw new Error('You cannot remove your own Super Admin access.');
-  }
-  await getDb().update(members).set({ role, approved, updatedAt: now() }).where(eq(members.id, memberId));
-  await audit(actor.id, 'update', 'member', memberId, `Member changed to ${role}${approved ? '' : ' (pending)'}`);
-  revalidatePath('/admin');
 }
 
 export async function saveStaffMemberAction(formData: FormData) {

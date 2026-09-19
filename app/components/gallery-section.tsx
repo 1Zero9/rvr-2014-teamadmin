@@ -24,14 +24,14 @@ import {
   Trophy,
   X,
 } from 'lucide-react';
-import { PhotoAlbum } from '../lib/photos-data';
+import { PhotoAlbum, sortPhotoAlbumsNewestFirst } from '../lib/photos-data';
 
 interface GallerySectionProps {
   initialAlbums: PhotoAlbum[];
-  isAdmin?: boolean;
+  canManagePhotos?: boolean;
 }
 
-export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectionProps) {
+export function GallerySection({ initialAlbums, canManagePhotos = false }: GallerySectionProps) {
   const [albums, setAlbums] = useState<PhotoAlbum[]>(initialAlbums);
   const [activeAlbum, setActiveAlbum] = useState<PhotoAlbum | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
@@ -109,7 +109,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
       const res = await fetch('/api/photos/sync');
       const data = await res.json();
       if (data.success && data.albums) {
-        setAlbums(data.albums);
+        setAlbums(sortPhotoAlbumsNewestFirst(data.albums));
         setSubmitMsg({ text: `Auto-Check Complete: ${data.albums.length} RVR albums verified & updated.` });
         setTimeout(() => setSubmitMsg(null), 3500);
       }
@@ -139,7 +139,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
       });
       const data = await res.json();
       if (data.success && data.album) {
-        setAlbums((prev) => [data.album, ...prev]);
+        setAlbums((prev) => sortPhotoAlbumsNewestFirst([...prev, data.album]));
         setSubmitMsg({ text: `✓ Verified RVR album added: "${data.album.title}" (${data.album.photoCount} photos)` });
         setNewUrl('');
         setNewTitle('');
@@ -215,11 +215,11 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
       const data = await res.json();
       if (data.success && data.album) {
         setAlbums((prev) =>
-          prev.map((a) =>
+          sortPhotoAlbumsNewestFirst(prev.map((a) =>
             a.id === editingAlbum.id
               ? { ...a, photographer: data.album.photographer, albumDate: data.album.albumDate, matchOpponent: data.album.matchOpponent }
               : a
-          )
+          ))
         );
         setActiveAlbum((prev) =>
           prev && prev.id === editingAlbum.id
@@ -244,7 +244,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
           <div className="section-pill">
             <Camera size={14} /> OFFICIAL MATCHDAY GALLERIES
           </div>
-          <h2>Matchday Action & Squad Photos</h2>
+          <h2>Latest match albums</h2>
           <p>
             Action snapshots from our team contributors. Filtered exclusively for RVR football matchdays. Browse high-resolution photos right here or download originals on Google Photos!
           </p>
@@ -259,7 +259,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
             </span>
           </div>
 
-          {isAdmin && (
+          {canManagePhotos && (
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
@@ -285,7 +285,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
         </div>
 
         {/* Add Album Form Drawer */}
-        {isAdmin && isAdding && (
+        {canManagePhotos && isAdding && (
           <div className="add-album-card">
             <div className="add-album-head">
               <div className="flex items-center gap-2">
@@ -379,7 +379,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
                     <Layers size={13} /> {count} HD Photos
                   </span>
                   <span className="album-date-badge">{album.albumDate}</span>
-                  {isAdmin && (
+                  {canManagePhotos && (
                     <div className="album-admin-actions">
                       <button
                         type="button"
@@ -570,7 +570,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
         )}
 
         {/* Edit Album Metadata Modal */}
-        {isAdmin && editingAlbum && (
+        {canManagePhotos && editingAlbum && (
           <div className="photo-lightbox-modal" onClick={closeEditAlbum}>
             <div className="add-album-card edit-album-card" onClick={(e) => e.stopPropagation()}>
               <div className="add-album-head">

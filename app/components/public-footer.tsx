@@ -75,7 +75,7 @@ export function PublicFooter() {
               <p>
                 Private squad hub: DDSL fixtures, skills drills, training schedule, matchday fuel, team fund, and referee fees.
               </p>
-              <Link href="/login" className="footer-login-btn">
+              <Link href="/portal" className="footer-login-btn">
                 <Lock size={14} /> Log In to Team Portal
               </Link>
             </div>

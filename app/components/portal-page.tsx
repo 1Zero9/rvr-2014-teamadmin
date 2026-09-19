@@ -11,7 +11,6 @@ import {
   Globe,
   Home,
   Lightbulb,
-  LogOut,
   Medal,
   Play,
   ReceiptText,
@@ -20,9 +19,7 @@ import {
   WalletCards,
   Zap,
 } from 'lucide-react';
-import { logoutAction } from '../actions';
-import { roleLabel, canManageAccounts, type Member } from '../lib/authz';
-import { InactivityTracker } from './inactivity-tracker';
+import { type Member } from '../lib/authz';
 
 const squadNavItems = [
   ['Fixtures & Standings', '/fixtures', Trophy],
@@ -111,16 +108,6 @@ export function PortalPage({
 
         <div className="sidebar-bottom">
           <p>MANAGEMENT</p>
-          {canManageAccounts(member.role) && (
-            <Link
-              className={active === '/admin' ? 'nav-link active' : 'nav-link'}
-              href="/admin"
-            >
-              <ShieldCheck size={18} />
-              <span>Admin portal</span>
-            </Link>
-          )}
-
           <Link className="nav-link public-hub-link" href="/">
             <Camera size={17} />
             <span>Public Photos Gallery</span>
@@ -130,13 +117,8 @@ export function PortalPage({
             <span>{initials}</span>
             <div>
               <strong>{member.displayName}</strong>
-              <small>{roleLabel(member.role)}</small>
+              <small>Private workspace</small>
             </div>
-            <form action={logoutAction}>
-              <button type="submit" title="Sign out" className="logout-icon-btn">
-                <LogOut size={16} />
-              </button>
-            </form>
           </div>
         </div>
       </aside>
@@ -150,7 +132,6 @@ export function PortalPage({
         </header>
         {children}
       </section>
-      <InactivityTracker />
     </main>
   );
 }

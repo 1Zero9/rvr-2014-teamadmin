@@ -16,7 +16,6 @@ import {
   Home,
   Landmark,
   Lightbulb,
-  LogOut,
   Medal,
   Play,
   Plus,
@@ -29,10 +28,9 @@ import {
 } from 'lucide-react';
 import { getDb } from '../../db';
 import { transactions } from '../../db/schema';
-import { logoutAction } from '../actions';
 import { MatchdayCountdown } from '../components/matchday-countdown';
 import { AccessPending } from '../components/portal-page';
-import { requireApprovedMember, roleLabel, canManageAccounts } from '../lib/authz';
+import { requireApprovedMember } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
@@ -135,7 +133,6 @@ const SQUAD_HUB_CARDS = [
 
 export default async function PortalDashboardPage() {
   const member = await requireApprovedMember();
-  if (!member.approved) return <AccessPending member={member} />;
 
   let rows: typeof transactions.$inferSelect[] = [];
   try {
@@ -208,13 +205,6 @@ export default async function PortalDashboardPage() {
 
         <div className="sidebar-bottom">
           <p>MANAGEMENT</p>
-          {canManageAccounts(member.role) && (
-            <Link className="nav-link" href="/admin">
-              <ShieldCheck size={18} />
-              <span>Admin portal</span>
-            </Link>
-          )}
-
           <Link className="nav-link public-hub-link" href="/">
             <Camera size={17} />
             <span>Public Photos Gallery</span>
@@ -231,13 +221,8 @@ export default async function PortalDashboardPage() {
             </span>
             <div>
               <strong>{member.displayName}</strong>
-              <small>{roleLabel(member.role)}</small>
+              <small>Private workspace</small>
             </div>
-            <form action={logoutAction}>
-              <button type="submit" title="Sign out" className="logout-icon-btn">
-                <LogOut size={16} />
-              </button>
-            </form>
           </div>
         </div>
       </aside>
@@ -248,17 +233,15 @@ export default async function PortalDashboardPage() {
             <p>2026/27 SEASON · PRIVATE TEAM PORTAL</p>
             <h1>Welcome back, {displayName}.</h1>
           </div>
-          {member.role !== 'parent' && (
-            <Link href="/expenses" className="primary">
-              <Plus size={17} /> Record transaction
-            </Link>
-          )}
+          <Link href="/expenses" className="primary">
+            <Plus size={17} /> Record transaction
+          </Link>
         </header>
 
         <div className="notice">
           <ShieldCheck size={18} />
           <span>
-            <strong>Private team space.</strong> Only verified RVR 2014 coaches, parents, and administrators can access these squad tools and financial records.
+            <strong>Private team workspace.</strong> This deployment is protected outside the app; all tools and financial records are available here once you have access.
           </span>
         </div>
 

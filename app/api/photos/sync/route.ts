@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidRvrAlbum } from '@/app/lib/photos-data';
 import { getPhotoAlbumsFromDb, parseGooglePhotosAlbum } from '@/app/lib/photos-server';
-import { getCurrentMember } from '@/app/lib/authz';
 import { getDb } from '@/db';
 import { photoAlbums } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -68,11 +67,6 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const member = await getCurrentMember();
-    if (!member) {
-      return NextResponse.json({ success: false, error: 'You must be signed in to add an album.' }, { status: 401 });
-    }
-
     const body = await req.json();
     const { shareUrl, title: customTitle, submittedBy } = body;
 
@@ -132,11 +126,6 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const member = await getCurrentMember();
-    if (!member) {
-      return NextResponse.json({ success: false, error: 'You must be signed in to edit an album.' }, { status: 401 });
-    }
-
     const { id, photographer, albumDate, matchOpponent } = await req.json();
     if (!id) {
       return NextResponse.json({ success: false, error: 'Album id is required.' }, { status: 400 });
@@ -170,11 +159,6 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const member = await getCurrentMember();
-    if (!member) {
-      return NextResponse.json({ success: false, error: 'You must be signed in to remove an album.' }, { status: 401 });
-    }
-
     const { id } = await req.json();
     if (!id) {
       return NextResponse.json({ success: false, error: 'Album id is required.' }, { status: 400 });

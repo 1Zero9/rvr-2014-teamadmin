@@ -3,16 +3,13 @@ import { ArrowLeft, ExternalLink, RefreshCw, Trophy } from 'lucide-react';
 import { FixturesSection } from '../components/fixtures-section';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
-import { getCurrentMember } from '../lib/authz';
+import { canManageAccounts, getCurrentMember } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
 
-// Genuinely public, like /photos - match results and league standings for a
-// kids' team aren't sensitive the way /fund, /expenses and /contributions
-// are. This used to hard-redirect anyone not logged in to /login despite
-// using the same PublicHeader/PublicFooter/public-page-root styling as
-// /photos, which never did - an inconsistency, not a real access decision.
+// The whole workspace is protected at deployment level. This page remains a
+// normal part of the workspace, without a second app-level access check.
 export default async function FixturesPage() {
   const currentMember = await getCurrentMember();
   const liveDdslData = await fetchLiveDdslLeagueData('218148');
@@ -66,7 +63,7 @@ export default async function FixturesPage() {
         liveStandings={liveDdslData.standings}
         leagueName={liveDdslData.leagueName}
         leagueUrl={liveDdslData.leagueUrl}
-        isAuthenticated={Boolean(currentMember)}
+        canSync={Boolean(currentMember && canManageAccounts(currentMember.role))}
       />
       <PublicFooter />
     </div>
