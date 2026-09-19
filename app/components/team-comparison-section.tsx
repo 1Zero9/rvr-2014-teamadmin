@@ -1,11 +1,12 @@
 'use client';
 
-import { Swords, TrendingUp } from 'lucide-react';
+import { Swords, TrendingUp, Target } from 'lucide-react';
 import { MatchRecord } from '../lib/matches-data';
 import {
   RVR_TEAM_NAME,
   getRecentForm,
   getCommonOpponentComparison,
+  getMatchupVerdict,
   TeamResult,
 } from '../lib/team-comparison';
 
@@ -60,12 +61,34 @@ export function TeamComparisonSection({
       {upcomingOpponents.map((opponent) => {
         const opponentForm = getRecentForm(allDivisionMatches, opponent);
         const common = getCommonOpponentComparison(allDivisionMatches, RVR_TEAM_NAME, opponent);
+        const verdict = getMatchupVerdict(allDivisionMatches, RVR_TEAM_NAME, opponent);
+        const verdictLabel =
+          verdict.favoured === 'teamA'
+            ? 'RVR favoured'
+            : verdict.favoured === 'teamB'
+              ? `${opponent} favoured`
+              : 'Too close to call';
 
         return (
           <div key={opponent} className="scout-card">
             <div className="scout-card-head">
               <Swords size={16} />
               <h3>River Valley Rangers FC vs {opponent}</h3>
+            </div>
+
+            <div className={`scout-verdict scout-verdict-${verdict.favoured}`}>
+              <div className="scout-verdict-label">
+                <Target size={14} />
+                <strong>{verdictLabel}</strong>
+              </div>
+              <ul className="scout-verdict-reasons">
+                {verdict.reasons.map((r, i) => (
+                  <li key={i}>{r}</li>
+                ))}
+              </ul>
+              <p className="scout-verdict-caveat">
+                A simple form-and-record heuristic, not a statistical model - the reasoning above is the whole method, nothing hidden.
+              </p>
             </div>
 
             <div className="scout-form-row">
@@ -82,7 +105,7 @@ export function TeamComparisonSection({
             <div className="scout-common-section">
               <div className="scout-common-head">
                 <TrendingUp size={14} />
-                <span>Common opponents — not a prediction, just the record so far</span>
+                <span>Common opponents — the record the verdict above is partly based on</span>
               </div>
 
               {common.length === 0 ? (

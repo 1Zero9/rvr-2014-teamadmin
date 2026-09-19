@@ -43,7 +43,9 @@ export function FixturesSection({
   leagueUrl = 'https://ddsl.ie/league/218148/',
   isAuthenticated = false,
 }: FixturesSectionProps) {
-  const [filter, setFilter] = useState<'all' | 'results' | 'fixtures' | 'table' | 'scout' | 'ddsl-portal'>('all');
+  // The league table is the actual point of this page - land on it, not on
+  // "All Matches".
+  const [filter, setFilter] = useState<'all' | 'results' | 'fixtures' | 'table' | 'scout' | 'ddsl-portal'>('table');
   const [scope, setScope] = useState<'rvr' | 'division'>('rvr');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);

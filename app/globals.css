@@ -6622,6 +6622,47 @@ a {
   color: #0f172a;
 }
 
+.scout-verdict {
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid transparent;
+}
+
+.scout-verdict-teamA { background: #f0fdf4; border-color: #bbf7d0; }
+.scout-verdict-teamB { background: #fef2f2; border-color: #fecaca; }
+.scout-verdict-even { background: #f8fafc; border-color: #e2e8f0; }
+
+.scout-verdict-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.scout-verdict-teamA .scout-verdict-label { color: #15803d; }
+.scout-verdict-teamB .scout-verdict-label { color: #b91c1c; }
+.scout-verdict-even .scout-verdict-label { color: #475569; }
+
+.scout-verdict-reasons {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.scout-verdict-reasons li {
+  margin-bottom: 2px;
+}
+
+.scout-verdict-caveat {
+  margin: 0;
+  font-size: 11px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
 .scout-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
