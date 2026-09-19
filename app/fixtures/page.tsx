@@ -26,12 +26,30 @@ export default async function FixturesPage() {
           <span className="section-pill">
             <Trophy size={14} /> DDSL OFFICIAL LEAGUE FEED · ID: 218148
           </span>
-          <h1>{liveDdslData.leagueName}</h1>
+          <h1>{liveDdslData.leagueName || 'Fixtures & Results'}</h1>
           <p>
             Official match schedule, verified full-time results, goalscorers, upcoming kick-offs, and live division standings for River Valley Rangers FC.
           </p>
         </div>
       </div>
+
+      {liveDdslData.error && (
+        <div className="section-container" style={{ margin: '16px auto' }}>
+          <div
+            style={{
+              background: '#fff4f4',
+              border: '1px solid #f3b7b7',
+              borderRadius: 8,
+              padding: '14px 18px',
+              color: '#8a2020',
+              fontSize: 14,
+            }}
+          >
+            Couldn&apos;t load live DDSL data right now, so nothing below is
+            shown rather than guessing. Try refreshing shortly.
+          </div>
+        </div>
+      )}
 
       <FixturesSection
         initialMatches={liveDdslData.rvrMatches}

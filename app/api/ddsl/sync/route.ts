@@ -8,6 +8,15 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const data = await fetchLiveDdslLeagueData('218148');
+
+    // fetchLiveDdslLeagueData no longer throws on a failed fetch/parse - it
+    // catches internally and returns an honest empty result with `.error`
+    // set, so this route's own try/catch never sees it. Check explicitly,
+    // or a DDSL outage would report success:true with zero matches synced.
+    if (data.error) {
+      return NextResponse.json({ success: false, error: data.error }, { status: 502 });
+    }
+
     const db = getDb();
 
     // Upsert RVR matches into database

@@ -8,6 +8,11 @@ export interface DdslDivisionData {
   rvrMatches: MatchRecord[];
   allDivisionMatches: MatchRecord[];
   standings: LeagueStanding[];
+  /** Set when the live fetch/parse failed. Callers must show this plainly -
+   * never substitute fabricated matches or standings for it. A youth
+   * football result is either the real DDSL record or clearly marked as
+   * unavailable, never a plausible-looking guess. */
+  error?: string;
 }
 
 export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Promise<DdslDivisionData> {
@@ -136,72 +141,79 @@ export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Prom
       isRvr: boolean;
     }>();
 
-    // Initialise all division teams seen in matches
+    // Initialise all division teams seen in matches - using each match's own
+    // parsed homeTeam/awayTeam directly rather than re-locating them in the
+    // raw HTML by searching near the venue string, which broke whenever two
+    // matches shared a venue (a real, frequent case: home fixtures share a
+    // ground) and was never needed since the fields are already on `m`.
     parsedMatches.forEach((m) => {
-      // Find hometeam and awayteam from raw matches
-      const rawMatch = html.substring(html.indexOf(m.venue) - 200, html.indexOf(m.venue) + 200);
-      const homeM = rawMatch.match(/data-hometeam="([^"]*)"/i);
-      const awayM = rawMatch.match(/data-awayteam="([^"]*)"/i);
-
-      if (homeM && awayM) {
-        [homeM[1], awayM[1]].forEach((t) => {
-          if (!teamsMap.has(t)) {
-            const isRvr = t.toLowerCase().includes('river valley') || t.toLowerCase().includes('rivervalley');
-            teamsMap.set(t, {
-              team: t,
-              p: 0,
-              w: 0,
-              d: 0,
-              l: 0,
-              gf: 0,
-              ga: 0,
-              gd: 0,
-              pts: 0,
-              form: [],
-              isRvr: isRvr,
-            });
-          }
-        });
-      }
+      [m.homeTeam, m.awayTeam].forEach((t) => {
+        if (t && !teamsMap.has(t)) {
+          const isRvr = t.toLowerCase().includes('river valley') || t.toLowerCase().includes('rivervalley');
+          teamsMap.set(t, {
+            team: t,
+            p: 0,
+            w: 0,
+            d: 0,
+            l: 0,
+            gf: 0,
+            ga: 0,
+            gd: 0,
+            pts: 0,
+            form: [],
+            isRvr: isRvr,
+          });
+        }
+      });
     });
 
-    // Populate stats from completed matches
-    const completedMatches = parsedMatches.filter((m) => m.status === 'completed');
+    // Populate stats from EVERY completed match in the division, not just
+    // ones RVR played at home. The previous version only processed matches
+    // where m.homeAway === 'home' (RVR's own home fixtures), so every other
+    // team's record - and RVR's own away results - never got counted: a
+    // real division of 141 parsed matches produced a standings table where
+    // 8 of 11 teams showed zero games played. Credit both the home and away
+    // side of every completed match directly from the match's own
+    // homeTeam/awayTeam fields (already parsed above) - no need to re-scan
+    // the raw HTML by proximity to the venue string, which was fragile and
+    // is no longer used.
+    const completedMatches = parsedMatches.filter(
+      (m) => m.status === 'completed' && m.homeScore !== null && m.awayScore !== null,
+    );
     completedMatches.forEach((m) => {
-      // If RVR match
-      if (m.homeAway === 'home') {
-        const rvrTeam = teamsMap.get('River Valley Rangers FC');
-        const oppTeam = teamsMap.get(m.opponent);
+      const homeTeam = teamsMap.get(m.homeTeam!);
+      const awayTeam = teamsMap.get(m.awayTeam!);
+      if (!homeTeam || !awayTeam) return;
 
-        if (rvrTeam && oppTeam && m.rvrGoals !== null && m.opponentGoals !== null) {
-          rvrTeam.p += 1;
-          oppTeam.p += 1;
-          rvrTeam.gf += m.rvrGoals!;
-          rvrTeam.ga += m.opponentGoals!;
-          oppTeam.gf += m.opponentGoals!;
-          oppTeam.ga += m.rvrGoals!;
+      const homeGoals = m.homeScore!;
+      const awayGoals = m.awayScore!;
 
-          if (m.rvrGoals! > m.opponentGoals!) {
-            rvrTeam.w += 1;
-            rvrTeam.pts += 3;
-            rvrTeam.form.push('W');
-            oppTeam.l += 1;
-            oppTeam.form.push('L');
-          } else if (m.rvrGoals! === m.opponentGoals!) {
-            rvrTeam.d += 1;
-            rvrTeam.pts += 1;
-            rvrTeam.form.push('D');
-            oppTeam.d += 1;
-            oppTeam.pts += 1;
-            oppTeam.form.push('D');
-          } else {
-            rvrTeam.l += 1;
-            rvrTeam.form.push('L');
-            oppTeam.w += 1;
-            oppTeam.pts += 3;
-            oppTeam.form.push('W');
-          }
-        }
+      homeTeam.p += 1;
+      awayTeam.p += 1;
+      homeTeam.gf += homeGoals;
+      homeTeam.ga += awayGoals;
+      awayTeam.gf += awayGoals;
+      awayTeam.ga += homeGoals;
+
+      if (homeGoals > awayGoals) {
+        homeTeam.w += 1;
+        homeTeam.pts += 3;
+        homeTeam.form.push('W');
+        awayTeam.l += 1;
+        awayTeam.form.push('L');
+      } else if (homeGoals === awayGoals) {
+        homeTeam.d += 1;
+        homeTeam.pts += 1;
+        homeTeam.form.push('D');
+        awayTeam.d += 1;
+        awayTeam.pts += 1;
+        awayTeam.form.push('D');
+      } else {
+        homeTeam.l += 1;
+        homeTeam.form.push('L');
+        awayTeam.w += 1;
+        awayTeam.pts += 3;
+        awayTeam.form.push('W');
       }
     });
 
@@ -217,7 +229,7 @@ export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Prom
       ga: t.ga,
       gd: t.gf - t.ga,
       pts: t.pts,
-      form: t.form.length > 0 ? t.form : ['-'] as any,
+      form: t.form,
       isRvr: t.isRvr,
     }));
 
@@ -240,94 +252,26 @@ export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Prom
       syncedAt: now,
       rvrMatches: rvrMatches.length > 0 ? rvrMatches : parsedMatches,
       allDivisionMatches: parsedMatches,
-      standings: standingsArray.length > 0 ? standingsArray : [
-        { pos: 1, team: 'Castleknock Celtic FC', p: 1, w: 1, d: 0, l: 0, gf: 2, ga: 0, gd: 2, pts: 3, form: ['W'] },
-        { pos: 2, team: 'Arthur Griffith Park FC', p: 1, w: 1, d: 0, l: 0, gf: 2, ga: 0, gd: 2, pts: 3, form: ['W'] },
-        { pos: 3, team: 'Lourdes Celtic FC', p: 1, w: 1, d: 0, l: 0, gf: 3, ga: 2, gd: 1, pts: 3, form: ['W'] },
-        { pos: 4, team: 'Phoenix FC', p: 1, w: 1, d: 0, l: 0, gf: 3, ga: 2, gd: 1, pts: 3, form: ['W'] },
-        { pos: 5, team: 'River Valley Rangers FC', p: 1, w: 1, d: 0, l: 0, gf: 1, ga: 0, gd: 1, pts: 3, form: ['W'], isRvr: true },
-        { pos: 6, team: 'Granada FC', p: 1, w: 0, d: 1, l: 0, gf: 3, ga: 3, gd: 0, pts: 1, form: ['D'] },
-        { pos: 7, team: 'Rosemount Mulvey FC', p: 1, w: 0, d: 1, l: 0, gf: 3, ga: 3, gd: 0, pts: 1, form: ['D'] },
-        { pos: 8, team: 'Bohemian FC', p: 1, w: 0, d: 0, l: 1, gf: 2, ga: 3, gd: -1, pts: 0, form: ['L'] },
-        { pos: 9, team: 'Mount Merrion Youths FC', p: 1, w: 0, d: 0, l: 1, gf: 2, ga: 3, gd: -1, pts: 0, form: ['L'] },
-        { pos: 10, team: 'Greystones United AFC', p: 1, w: 0, d: 0, l: 1, gf: 0, ga: 1, gd: -1, pts: 0, form: ['L'] },
-        { pos: 11, team: 'Cherry Orchard FC', p: 1, w: 0, d: 0, l: 1, gf: 0, ga: 2, gd: -2, pts: 0, form: ['L'] },
-        { pos: 12, team: 'Collinstown FC', p: 1, w: 0, d: 0, l: 1, gf: 0, ga: 2, gd: -2, pts: 0, form: ['L'] },
-        { pos: 13, team: 'St Joseph\'s AFC', p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0, form: ['-'] as any },
-      ],
+      standings: standingsArray,
     };
   } catch (error) {
+    // No fabricated matches or standings on failure - a real youth football
+    // result is either the genuine DDSL record or clearly marked as
+    // unavailable, never a plausible-looking invented one (this used to
+    // return hardcoded fake scores, a made-up referee name and an invented
+    // result attributed to a real opponent). Callers must check `error` and
+    // show it plainly rather than rendering empty arrays as "no matches."
     console.error('Error scraping DDSL live league data:', error);
     const now = new Date().toISOString();
     return {
-      leagueName: '13 Major 1 Boys Sat',
+      leagueName: '',
       leagueUrl: url,
       leagueId,
       syncedAt: now,
-      rvrMatches: [
-        {
-          id: 'm-ddsl-218148-1',
-          opponent: 'Greystones United AFC',
-          competition: '13 Major 1 Boys Sat',
-          matchDate: '29 Aug 2026',
-          kickoffTime: '10:00 AM',
-          venue: 'Rivervalley Park',
-          homeAway: 'home',
-          status: 'completed',
-          rvrGoals: 1,
-          opponentGoals: 0,
-          scorers: 'Official DDSL Match Record',
-          potm: 'Ref: Mick O\'Beirne',
-          matchNotes: 'DDSL Official Result · Rivervalley Park',
-          ddslMatchId: 'DDSL-218148-29Aug-RVR',
-          syncedAt: now,
-          createdAt: now,
-        },
-        {
-          id: 'm-ddsl-218148-2',
-          opponent: 'Rosemount Mulvey FC',
-          competition: '13 Major 1 Boys Sat',
-          matchDate: 'TBC',
-          kickoffTime: 'TBC',
-          venue: 'Rivervalley Park',
-          homeAway: 'home',
-          status: 'upcoming',
-          matchNotes: 'Scheduled League Fixture · Rivervalley Park',
-          ddslMatchId: 'DDSL-218148-TBC-Rosemount',
-          syncedAt: now,
-          createdAt: now,
-        },
-        {
-          id: 'm-ddsl-218148-3',
-          opponent: 'Arthur Griffith Park FC',
-          competition: '13 Major 1 Boys Sat',
-          matchDate: 'TBC',
-          kickoffTime: 'TBC',
-          venue: 'Esker Drive',
-          homeAway: 'away',
-          status: 'upcoming',
-          matchNotes: 'Scheduled League Fixture · Esker Drive',
-          ddslMatchId: 'DDSL-218148-TBC-AGP',
-          syncedAt: now,
-          createdAt: now,
-        },
-      ],
+      rvrMatches: [],
       allDivisionMatches: [],
-      standings: [
-        { pos: 1, team: 'Castleknock Celtic FC', p: 1, w: 1, d: 0, l: 0, gf: 2, ga: 0, gd: 2, pts: 3, form: ['W'] },
-        { pos: 2, team: 'Arthur Griffith Park FC', p: 1, w: 1, d: 0, l: 0, gf: 2, ga: 0, gd: 2, pts: 3, form: ['W'] },
-        { pos: 3, team: 'Lourdes Celtic FC', p: 1, w: 1, d: 0, l: 0, gf: 3, ga: 2, gd: 1, pts: 3, form: ['W'] },
-        { pos: 4, team: 'Phoenix FC', p: 1, w: 1, d: 0, l: 0, gf: 3, ga: 2, gd: 1, pts: 3, form: ['W'] },
-        { pos: 5, team: 'River Valley Rangers FC', p: 1, w: 1, d: 0, l: 0, gf: 1, ga: 0, gd: 1, pts: 3, form: ['W'], isRvr: true },
-        { pos: 6, team: 'Granada FC', p: 1, w: 0, d: 1, l: 0, gf: 3, ga: 3, gd: 0, pts: 1, form: ['D'] },
-        { pos: 7, team: 'Rosemount Mulvey FC', p: 1, w: 0, d: 1, l: 0, gf: 3, ga: 3, gd: 0, pts: 1, form: ['D'] },
-        { pos: 8, team: 'Bohemian FC', p: 1, w: 0, d: 0, l: 1, gf: 2, ga: 3, gd: -1, pts: 0, form: ['L'] },
-        { pos: 9, team: 'Mount Merrion Youths FC', p: 1, w: 0, d: 0, l: 1, gf: 2, ga: 3, gd: -1, pts: 0, form: ['L'] },
-        { pos: 10, team: 'Greystones United AFC', p: 1, w: 0, d: 0, l: 1, gf: 0, ga: 1, gd: -1, pts: 0, form: ['L'] },
-        { pos: 11, team: 'Cherry Orchard FC', p: 1, w: 0, d: 0, l: 1, gf: 0, ga: 2, gd: -2, pts: 0, form: ['L'] },
-        { pos: 12, team: 'Collinstown FC', p: 1, w: 0, d: 0, l: 1, gf: 0, ga: 2, gd: -2, pts: 0, form: ['L'] },
-        { pos: 13, team: 'St Joseph\'s AFC', p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0, form: ['-'] as any },
-      ],
+      standings: [],
+      error: error instanceof Error ? error.message : 'Failed to load DDSL league data',
     };
   }
 }
