@@ -21,7 +21,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { logoutAction } from '../actions';
-import { roleLabel, type Member } from '../lib/authz';
+import { roleLabel, canManageAccounts, type Member } from '../lib/authz';
 import { InactivityTracker } from './inactivity-tracker';
 
 const squadNavItems = [
@@ -111,7 +111,7 @@ export function PortalPage({
 
         <div className="sidebar-bottom">
           <p>MANAGEMENT</p>
-          {(member.role === 'super_admin' || member.role === 'admin') && (
+          {canManageAccounts(member.role) && (
             <Link
               className={active === '/admin' ? 'nav-link active' : 'nav-link'}
               href="/admin"

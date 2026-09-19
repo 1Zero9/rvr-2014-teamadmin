@@ -32,7 +32,7 @@ import { transactions } from '../../db/schema';
 import { logoutAction } from '../actions';
 import { MatchdayCountdown } from '../components/matchday-countdown';
 import { AccessPending } from '../components/portal-page';
-import { requireApprovedMember, roleLabel } from '../lib/authz';
+import { requireApprovedMember, roleLabel, canManageAccounts } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
@@ -208,7 +208,7 @@ export default async function PortalDashboardPage() {
 
         <div className="sidebar-bottom">
           <p>MANAGEMENT</p>
-          {(member.role === 'super_admin' || member.role === 'admin') && (
+          {canManageAccounts(member.role) && (
             <Link className="nav-link" href="/admin">
               <ShieldCheck size={18} />
               <span>Admin portal</span>

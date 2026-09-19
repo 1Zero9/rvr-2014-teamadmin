@@ -2,8 +2,22 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { members } from '../../db/schema';
 
-export type Role = 'super_admin' | 'admin' | 'coach' | 'parent';
+export type Role = 'super_admin' | 'coach' | 'parent';
 export type Member = typeof members.$inferSelect;
+
+/** 'admin' and 'super_admin' were functionally identical everywhere except
+ * one screen (who can edit member roles) - dropped as a separate role.
+ * `role` is a TypeScript-level constraint on a plain text column, not a
+ * real database enum, so an existing row (or an old session cookie) can
+ * still carry the literal string 'admin' after this change. Normalize it
+ * here, at the one place every role check ultimately reads through, rather
+ * than risk someone silently losing account-management access because a
+ * stale value no longer matches any check. */
+export function normalizeRole(role: string | null | undefined): Role {
+  if (role === 'admin') return 'super_admin';
+  if (role === 'coach' || role === 'parent') return role;
+  return 'super_admin';
+}
 
 export const AUTH_COOKIE_NAME = 'rvr_auth_session';
 export const DEFAULT_INACTIVITY_TIMEOUT_MINUTES = 20;
@@ -42,7 +56,7 @@ export async function getCurrentMember(): Promise<Member | null> {
       id: data.id,
       email: data.email ?? 'admin@rivervalleyrangers.ie',
       displayName: data.displayName ?? 'Team Administrator',
-      role: (data.role as Role) ?? 'super_admin',
+      role: normalizeRole(data.role),
       approved: data.approved ?? true,
       createdAt: data.createdAt ?? new Date().toISOString(),
       updatedAt: data.updatedAt ?? new Date().toISOString(),
@@ -69,20 +83,19 @@ export async function requireRole(allowed: Role[]): Promise<Member> {
 }
 
 export function canManageAccounts(role: string) {
-  return role === 'super_admin' || role === 'admin';
+  return normalizeRole(role) === 'super_admin';
 }
 
 export function canManageMembers(role: string) {
-  return role === 'super_admin';
+  return normalizeRole(role) === 'super_admin';
 }
 
 export function roleLabel(role: string) {
   return (
     ({
       super_admin: 'Super Admin',
-      admin: 'Admin',
       coach: 'Coach',
       parent: 'Parent',
-    } as Record<string, string>)[role] ?? role
+    } as Record<string, string>)[normalizeRole(role)] ?? role
   );
 }

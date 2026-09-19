@@ -154,7 +154,7 @@ export async function recordTransaction(formData: FormData) {
 }
 
 export async function addEvent(formData: FormData) {
-  const member = await requireRole(['super_admin', 'admin', 'coach']);
+  const member = await requireRole(['super_admin', 'coach']);
   const title = value(formData, 'title');
   const eventDate = value(formData, 'eventDate');
   if (!title || !eventDate) {
@@ -197,7 +197,7 @@ export async function updateMember(formData: FormData) {
   const actor = await requireRole(['super_admin']);
   const memberId = value(formData, 'memberId');
   const role = value(formData, 'role') as Role;
-  if (!['super_admin', 'admin', 'coach', 'parent'].includes(role)) {
+  if (!['super_admin', 'coach', 'parent'].includes(role)) {
     throw new Error('Invalid role.');
   }
   const approved = value(formData, 'approved') === 'true';

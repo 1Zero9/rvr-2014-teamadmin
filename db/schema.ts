@@ -4,7 +4,13 @@ export const members = pgTable('members', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   displayName: text('display_name').notNull(),
-  role: text('role', { enum: ['super_admin', 'admin', 'coach', 'parent'] }).notNull().default('parent'),
+  // 'admin' was dropped as a separate role (merged into 'super_admin' - see
+  // authz.ts's normalizeRole) since it was functionally identical to it
+  // everywhere except one screen. This is a TypeScript-level constraint on
+  // a plain text column, not a real Postgres enum, so no migration changes
+  // the actual data - normalizeRole handles any row still literally storing
+  // 'admin' at read time.
+  role: text('role', { enum: ['super_admin', 'coach', 'parent'] }).notNull().default('parent'),
   approved: boolean('approved').notNull().default(false),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

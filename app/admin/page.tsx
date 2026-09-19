@@ -4,7 +4,7 @@ import { getDb } from '../../db';
 import { auditLog, members } from '../../db/schema';
 import { updateMember } from '../actions';
 import { AccessPending, PortalPage } from '../components/portal-page';
-import { requireApprovedMember, roleLabel } from '../lib/authz';
+import { requireApprovedMember, roleLabel, canManageAccounts, normalizeRole } from '../lib/authz';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,7 @@ export default async function AdminPage() {
   const member = await requireApprovedMember();
   if (!member.approved) return <AccessPending member={member} />;
 
-  if (member.role !== 'super_admin' && member.role !== 'admin') {
+  if (!canManageAccounts(member.role)) {
     return (
       <PortalPage
         member={member}
@@ -96,13 +96,12 @@ export default async function AdminPage() {
                     </span>
                   </td>
                   <td>
-                    {member.role === 'super_admin' ? (
+                    {canManageAccounts(member.role) ? (
                       <form className="role-form" action={updateMember}>
                         <input type="hidden" name="memberId" value={person.id} />
-                        <select name="role" defaultValue={person.role}>
+                        <select name="role" defaultValue={normalizeRole(person.role)}>
                           <option value="parent">Parent</option>
                           <option value="coach">Coach</option>
-                          <option value="admin">Admin</option>
                           <option value="super_admin">Super Admin</option>
                         </select>
                         <select
