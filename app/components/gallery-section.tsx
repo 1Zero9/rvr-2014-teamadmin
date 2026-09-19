@@ -39,13 +39,18 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
   const [isAdding, setIsAdding] = useState(false);
   const [newUrl, setNewUrl] = useState('');
   const [newTitle, setNewTitle] = useState('');
-  const [newSubmittedBy, setNewSubmittedBy] = useState('');
+  // One "Photographer" field, not two: the add form used to call this
+  // "Submitted by" and the edit form called the same underlying
+  // `photographer` property "Taken by" - same concept asked at two
+  // different moments with two different names. Unified here; the API
+  // (app/api/photos/sync/route.ts) already treated them as one field.
+  const [newPhotographer, setNewPhotographer] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ text: string; error?: boolean } | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [editingAlbum, setEditingAlbum] = useState<PhotoAlbum | null>(null);
-  const [editTakenBy, setEditTakenBy] = useState('');
+  const [editPhotographer, setEditPhotographer] = useState('');
   const [editDate, setEditDate] = useState('');
   const [editMatch, setEditMatch] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -129,7 +134,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
         body: JSON.stringify({
           shareUrl: newUrl,
           title: newTitle || undefined,
-          submittedBy: newSubmittedBy || undefined,
+          submittedBy: newPhotographer || undefined,
         }),
       });
       const data = await res.json();
@@ -138,7 +143,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
         setSubmitMsg({ text: `✓ Verified RVR album added: "${data.album.title}" (${data.album.photoCount} photos)` });
         setNewUrl('');
         setNewTitle('');
-        setNewSubmittedBy('');
+        setNewPhotographer('');
         setTimeout(() => {
           setIsAdding(false);
           setSubmitMsg(null);
@@ -179,7 +184,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
 
   const openEditAlbum = (album: PhotoAlbum) => {
     setEditingAlbum(album);
-    setEditTakenBy(album.photographer || '');
+    setEditPhotographer(album.photographer || '');
     setEditDate(album.albumDate || '');
     setEditMatch(album.matchOpponent || '');
     setEditError(null);
@@ -202,7 +207,7 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: editingAlbum.id,
-          photographer: editTakenBy,
+          photographer: editPhotographer,
           albumDate: editDate,
           matchOpponent: editMatch,
         }),
@@ -316,9 +321,9 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
               />
               <input
                 type="text"
-                placeholder="Submitted by (your name)"
-                value={newSubmittedBy}
-                onChange={(e) => setNewSubmittedBy(e.target.value)}
+                placeholder="Photographer (your name)"
+                value={newPhotographer}
+                onChange={(e) => setNewPhotographer(e.target.value)}
                 className="album-submitted-by-input"
               />
               <button
@@ -583,13 +588,13 @@ export function GallerySection({ initialAlbums, isAdmin = false }: GallerySectio
               </div>
               <p className="text-xs text-slate-600 mb-3">{editingAlbum.title}</p>
               <form onSubmit={handleSaveEdit} className="add-album-form">
-                <label className="edit-field-label" htmlFor="edit-taken-by">Taken by</label>
+                <label className="edit-field-label" htmlFor="edit-photographer">Photographer</label>
                 <input
-                  id="edit-taken-by"
+                  id="edit-photographer"
                   type="text"
                   placeholder="e.g. Igor"
-                  value={editTakenBy}
-                  onChange={(e) => setEditTakenBy(e.target.value)}
+                  value={editPhotographer}
+                  onChange={(e) => setEditPhotographer(e.target.value)}
                   className="album-submitted-by-input"
                 />
                 <label className="edit-field-label" htmlFor="edit-date">Date</label>
