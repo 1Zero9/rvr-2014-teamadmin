@@ -19,6 +19,7 @@ import {
   Users,
 } from 'lucide-react';
 import { LeagueStanding, MatchRecord } from '../lib/matches-data';
+import { TeamComparisonSection } from './team-comparison-section';
 
 interface FixturesSectionProps {
   initialMatches: MatchRecord[];
@@ -35,7 +36,7 @@ export function FixturesSection({
   leagueName = '13 Major 1 Boys Sat',
   leagueUrl = 'https://ddsl.ie/league/218148/',
 }: FixturesSectionProps) {
-  const [filter, setFilter] = useState<'all' | 'results' | 'fixtures' | 'table' | 'ddsl-portal'>('all');
+  const [filter, setFilter] = useState<'all' | 'results' | 'fixtures' | 'table' | 'scout' | 'ddsl-portal'>('all');
   const [scope, setScope] = useState<'rvr' | 'division'>('rvr');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
@@ -43,6 +44,13 @@ export function FixturesSection({
   const activeMatchesList = scope === 'rvr' ? initialMatches : (allDivisionMatches.length > 0 ? allDivisionMatches : initialMatches);
   const completedMatches = activeMatchesList.filter((m) => m.status === 'completed');
   const upcomingMatches = activeMatchesList.filter((m) => m.status === 'upcoming');
+
+  // Always RVR's own upcoming opponents for the scout report, regardless of
+  // the all-division/RVR-only scope toggle above - scouting an opponent
+  // only makes sense for a fixture RVR is actually playing.
+  const rvrUpcomingOpponents = [
+    ...new Set(initialMatches.filter((m) => m.status === 'upcoming').map((m) => m.opponent)),
+  ];
 
   const handleSync = async () => {
     setIsSyncing(true);
@@ -150,9 +158,16 @@ export function FixturesSection({
             >
               🏆 DDSL Standings Table ({liveStandings.length})
             </button>
+            <button
+              type="button"
+              className={`filter-tab ${filter === 'scout' ? 'active' : ''}`}
+              onClick={() => setFilter('scout')}
+            >
+              🔍 Scout Report ({rvrUpcomingOpponents.length})
+            </button>
           </div>
 
-          {filter !== 'table' && filter !== 'ddsl-portal' && (
+          {filter !== 'table' && filter !== 'scout' && filter !== 'ddsl-portal' && (
             <div className="scope-toggle-group">
               <button
                 type="button"
@@ -172,8 +187,13 @@ export function FixturesSection({
           )}
         </div>
 
-        {/* League Table View */}
-        {filter === 'table' ? (
+        {/* Scout Report View */}
+        {filter === 'scout' ? (
+          <TeamComparisonSection
+            allDivisionMatches={allDivisionMatches.length > 0 ? allDivisionMatches : initialMatches}
+            upcomingOpponents={rvrUpcomingOpponents}
+          />
+        ) : filter === 'table' ? (
           <div className="league-table-card">
             <div className="table-card-head">
               <div>
