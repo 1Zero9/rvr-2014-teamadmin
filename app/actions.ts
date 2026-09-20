@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '../db';
 import { auditLog, events, ideas, transactions } from '../db/schema';
-import { AUTH_COOKIE_NAME, createSessionValue, requireApprovedMember } from './lib/authz';
+import { AUTH_COOKIE_NAME, createSessionValue, requireApprovedMember, timingSafeStringEqual } from './lib/authz';
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? '').trim();
@@ -40,7 +40,7 @@ export async function loginAction(formData: FormData) {
   const password = value(formData, 'password');
   const expected = process.env.AUTH_PASSWORD;
   if (!expected) throw new Error('AUTH_PASSWORD must be configured.');
-  if (password !== expected) redirect('/login?error=invalid');
+  if (!timingSafeStringEqual(password, expected)) redirect('/login?error=invalid');
 
   (await cookies()).set(AUTH_COOKIE_NAME, createSessionValue(), {
     httpOnly: true,

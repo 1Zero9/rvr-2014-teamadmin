@@ -24,6 +24,24 @@ function sign(payload: string) {
   return createHmac('sha256', secret()).update(payload).digest('base64url');
 }
 
+/** Constant-time string comparison, for anywhere a secret gets compared to
+ * user input (the login password, an API token, etc). A plain `===` leaks
+ * how many leading characters matched via how long the comparison takes -
+ * real for a short shared password, not just a timing-attack curiosity.
+ * Mirrors the pattern already used for session-cookie validation below. */
+export function timingSafeStringEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    // Still do a (mismatched-length) comparison so the early return above
+    // isn't itself a length oracle - cheap, and avoids a second timing
+    // signal for "how close is the length" on top of content.
+    timingSafeEqual(bufA, Buffer.from(a));
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
+
 function valid(value: string | undefined) {
   if (!value) return false;
   const index = value.lastIndexOf('.');
