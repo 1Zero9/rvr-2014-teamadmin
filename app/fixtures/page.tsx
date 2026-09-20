@@ -3,15 +3,14 @@ import { ArrowLeft, ExternalLink, RefreshCw, Trophy } from 'lucide-react';
 import { FixturesSection } from '../components/fixtures-section';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
-import { canManageAccounts, getCurrentMember } from '../lib/authz';
+import { canManageAccounts, requireApprovedMember } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
 
 export const dynamic = 'force-dynamic';
 
-// The whole workspace is protected at deployment level. This page remains a
-// normal part of the workspace, without a second app-level access check.
+// The whole workspace uses one shared-password session.
 export default async function FixturesPage() {
-  const currentMember = await getCurrentMember();
+  const currentMember = await requireApprovedMember();
   const liveDdslData = await fetchLiveDdslLeagueData('218148');
 
   return (

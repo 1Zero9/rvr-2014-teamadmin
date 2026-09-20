@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchLiveDdslLeagueData } from '@/app/lib/ddsl-live';
+import { isAuthenticatedRequest } from '@/app/lib/authz';
 import { getDb } from '@/db';
 import { matches } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const isCron = Boolean(process.env.CRON_SECRET) && request.headers.get('authorization') === `Bearer ${process.env.CRON_SECRET}`;
+  if (!isCron && !isAuthenticatedRequest(request.cookies.get('rvr_workspace_session')?.value)) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const data = await fetchLiveDdslLeagueData('218148');
 

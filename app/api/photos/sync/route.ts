@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidRvrAlbum } from '@/app/lib/photos-data';
+import { AUTH_COOKIE_NAME, isAuthenticatedRequest } from '@/app/lib/authz';
 import { getPhotoAlbumsFromDb, parseGooglePhotosAlbum } from '@/app/lib/photos-server';
 import { getDb } from '@/db';
 import { photoAlbums } from '@/db/schema';
@@ -7,8 +8,13 @@ import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
+function authorized(req: NextRequest): boolean {
+  return isAuthenticatedRequest(req.cookies.get(AUTH_COOKIE_NAME)?.value);
+}
+
 // Manual "check for new photos" refresh, triggered from the gallery UI
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!authorized(req)) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   try {
     const db = getDb();
     const existing = await getPhotoAlbumsFromDb();
@@ -66,6 +72,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!authorized(req)) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   try {
     const body = await req.json();
     const { shareUrl, title: customTitle, submittedBy } = body;
@@ -125,6 +132,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  if (!authorized(req)) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   try {
     const { id, photographer, albumDate, matchOpponent } = await req.json();
     if (!id) {
@@ -158,6 +166,7 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!authorized(req)) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   try {
     const { id } = await req.json();
     if (!id) {

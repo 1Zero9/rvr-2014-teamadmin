@@ -14,9 +14,11 @@ Private team fund, accounts and information hub for the Rivervalley Rangers 2014
 
 ## Access model
 
-This is a single-owner workspace with no in-app account, password, session, or
-role system. Enable Vercel Deployment Protection for the project; that is the
-sole access boundary for the site and its data-changing endpoints.
+This is a private, single-owner workspace with one shared password. There are
+no user accounts, roles, approval flows, or separate coach/parent logins.
+
+Set `AUTH_PASSWORD` and `AUTH_SESSION_SECRET` (at least 32 random characters)
+in Vercel before deploying. The shared password opens a signed 30-day session.
 
 ## Local development & Deployment
 
