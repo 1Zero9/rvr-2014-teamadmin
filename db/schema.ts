@@ -81,6 +81,34 @@ export const matches = pgTable('matches', {
   index('idx_matches_competition').on(table.competition),
 ]);
 
+/**
+ * Private, coach-entered match result. This deliberately lives beside—not in—
+ * the DDSL feed: league results may be score-capped, while this is the
+ * squad's complete record.
+ */
+export const matchPerformanceSummaries = pgTable('match_performance_summaries', {
+  matchId: text('match_id').primaryKey(),
+  rvrGoals: integer('rvr_goals').notNull(),
+  opponentGoals: integer('opponent_goals').notNull(),
+  playerOfMatch: text('player_of_match'),
+  notes: text('notes'),
+  updatedAt: text('updated_at').notNull(),
+});
+
+/** One player's contribution in one match; season totals are calculated from these rows. */
+export const playerMatchStats = pgTable('player_match_stats', {
+  id: text('id').primaryKey(),
+  matchId: text('match_id').notNull(),
+  playerName: text('player_name').notNull(),
+  goals: integer('goals').notNull().default(0),
+  assists: integer('assists').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+}, (table) => [
+  index('idx_player_match_stats_match').on(table.matchId),
+  index('idx_player_match_stats_player').on(table.playerName),
+]);
+
 export const auditLog = pgTable('audit_log', {
   id: text('id').primaryKey(),
   actorId: text('actor_id').notNull(),
@@ -125,5 +153,3 @@ export const coachingStaff = pgTable('coaching_staff', {
   index('idx_coaching_staff_order').on(table.sortOrder),
   index('idx_coaching_staff_created').on(table.createdAt),
 ]);
-
-

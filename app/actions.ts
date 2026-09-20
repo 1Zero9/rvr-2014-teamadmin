@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '../db';
-import { auditLog, events, ideas, transactions } from '../db/schema';
+import { auditLog, events, ideas, matchPerformanceSummaries, playerMatchStats, transactions } from '../db/schema';
 import { AUTH_COOKIE_NAME, createSessionValue, requireApprovedMember, timingSafeStringEqual } from './lib/authz';
 
 function value(formData: FormData, key: string) {
@@ -127,6 +127,55 @@ export async function addIdea(formData: FormData) {
   });
   await audit(member.id, 'create', 'idea', ideaId, `Idea proposed: ${title}`);
   revalidatePath('/ideas');
+}
+
+export async function saveMatchPerformanceAction(formData: FormData) {
+  const member = await requireApprovedMember();
+  const matchId = value(formData, 'matchId');
+  const rvrGoals = Number(value(formData, 'rvrGoals'));
+  const opponentGoals = Number(value(formData, 'opponentGoals'));
+  if (!matchId || !Number.isInteger(rvrGoals) || !Number.isInteger(opponentGoals) || rvrGoals < 0 || opponentGoals < 0) {
+    throw new Error('Choose a match and enter valid whole-number scores.');
+  }
+
+  const names = formData.getAll('playerName').map((item) => String(item).trim());
+  const goals = formData.getAll('playerGoals').map((item) => Number(item));
+  const assists = formData.getAll('playerAssists').map((item) => Number(item));
+  const contributions = names.flatMap((playerName, index) => {
+    const playerGoals = goals[index] || 0;
+    const playerAssists = assists[index] || 0;
+    if (!playerName) return [];
+    if (!Number.isInteger(playerGoals) || !Number.isInteger(playerAssists) || playerGoals < 0 || playerAssists < 0) {
+      throw new Error('Goals and assists must be whole numbers of zero or more.');
+    }
+    return [{ playerName, goals: playerGoals, assists: playerAssists }];
+  });
+  if (contributions.reduce((total, row) => total + row.goals, 0) > rvrGoals) {
+    throw new Error('Goals credited to players cannot exceed the real RVR score.');
+  }
+
+  const updatedAt = now();
+  const db = getDb();
+  await db.transaction(async (tx) => {
+    await tx.insert(matchPerformanceSummaries).values({
+      matchId,
+      rvrGoals,
+      opponentGoals,
+      playerOfMatch: value(formData, 'playerOfMatch') || null,
+      notes: value(formData, 'notes') || null,
+      updatedAt,
+    }).onConflictDoUpdate({
+      target: matchPerformanceSummaries.matchId,
+      set: { rvrGoals, opponentGoals, playerOfMatch: value(formData, 'playerOfMatch') || null, notes: value(formData, 'notes') || null, updatedAt },
+    });
+    await tx.delete(playerMatchStats).where(eq(playerMatchStats.matchId, matchId));
+    if (contributions.length) {
+      await tx.insert(playerMatchStats).values(contributions.map((row) => ({ id: id(), matchId, ...row, createdAt: updatedAt, updatedAt })));
+    }
+  });
+  await audit(member.id, 'save', 'match_performance', matchId, `Updated private match statistics (${rvrGoals}-${opponentGoals}).`);
+  revalidatePath('/stats');
+  revalidatePath('/portal');
 }
 
 export async function saveStaffMemberAction(formData: FormData) {

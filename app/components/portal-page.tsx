@@ -9,6 +9,7 @@ import {
   CircleHelp,
   Compass,
   Globe,
+  BarChart3,
   Home,
   Lightbulb,
   Medal,
@@ -30,6 +31,7 @@ const squadNavItems = [
   ['Pitch Venues & GPS', '/venues', Compass],
   ['Cups & Blitzes', '/tournaments', Medal],
   ['Squad Photos', '/photos', Camera],
+  ['Player stats', '/stats', BarChart3],
 ] as const;
 
 const adminNavItems = [

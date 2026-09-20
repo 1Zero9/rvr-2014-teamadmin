@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, RefreshCw, Trophy } from 'lucide-react';
+import { ArrowLeft, BarChart3, ExternalLink, RefreshCw, Trophy } from 'lucide-react';
 import { FixturesSection } from '../components/fixtures-section';
 import { PublicFooter } from '../components/public-footer';
 import { PublicHeader } from '../components/public-header';
@@ -33,8 +33,11 @@ export default async function FixturesPage() {
           </span>
           <h1>{liveDdslData.leagueName || 'Fixtures & Results'}</h1>
           <p>
-            Official match schedule, verified full-time results, goalscorers, upcoming kick-offs, and live division standings for River Valley Rangers FC.
+            Official match schedule and live division standings for River Valley Rangers FC. DDSL scorelines may be capped; the private tracker keeps the squad&apos;s real score and player contributions.
           </p>
+          <Link href="/stats" className="secondary" style={{ display: 'inline-flex', marginTop: 16, alignItems: 'center', gap: 7 }}>
+            <BarChart3 size={16} /> Open private player tracker
+          </Link>
         </div>
       </div>
 

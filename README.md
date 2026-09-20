@@ -1,6 +1,6 @@
 # RVR 2014 Team Admin
 
-Private team fund, accounts and information hub for the Rivervalley Rangers 2014 team.
+Private team fund, match and information hub for the Rivervalley Rangers 2014 team.
 
 ## What is included
 
@@ -9,7 +9,7 @@ Private team fund, accounts and information hub for the Rivervalley Rangers 2014
 - A transparent team-fund ledger
 - Important dates and team activity ideas
 - Club pitch, DDSL and safeguarding links
-- Super Admin, Admin, Coach and Parent roles
+- Private match tracker for real scorelines, scorers, assists and player of the match
 - A complete audit trail
 
 ## Access model
@@ -22,8 +22,8 @@ in Vercel before deploying. The shared password opens a signed 30-day session.
 
 ## Local development & Deployment
 
-This project uses Next.js 16 (App Router), React 19, and Drizzle ORM with LibSQL (Turso/SQLite).
+This project uses Next.js 16 (App Router), React 19, and Drizzle ORM with PostgreSQL.
 
-- **Local:** Install dependencies with `npm install` and run `npm run dev`. It automatically uses a local SQLite file (`local.db`).
-- **Database schema:** Update schema with `npm run db:push`.
-- **Deployment (Vercel):** Connect repository to Vercel. In Vercel Project Settings, add `DATABASE_URL` (and `DATABASE_AUTH_TOKEN` if using Turso) as environment variables.
+- **Local:** Install dependencies with `npm install` and run `npm run dev`. Configure one of `POSTGRES_URL`, `PRISMA_DATABASE_URL`, or `DATABASE_URL`.
+- **Database schema:** The historic Drizzle migration snapshots in `drizzle/` are SQLite-era metadata and cannot safely generate PostgreSQL migrations. Apply the explicit SQL in `db/migrations/20260920_private_match_statistics.sql` to add the private tracker tables.
+- **Deployment (Vercel):** Keep the same PostgreSQL connection variable in Project Settings. The private tracker and the rest of the workspace use that database.

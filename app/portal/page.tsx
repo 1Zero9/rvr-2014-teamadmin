@@ -13,6 +13,7 @@ import {
   CircleHelp,
   Compass,
   Globe,
+  BarChart3,
   Home,
   Landmark,
   Lightbulb,
@@ -44,6 +45,7 @@ const squadNavItems = [
   ['Pitch Venues & GPS', '/venues', Compass],
   ['Cups & Blitzes', '/tournaments', Medal],
   ['Squad Photos', '/photos', Camera],
+  ['Player stats', '/stats', BarChart3],
 ] as const;
 
 const adminNavItems = [
@@ -128,6 +130,15 @@ const SQUAD_HUB_CARDS = [
     icon: Camera,
     desc: 'Match action photos, goal celebrations, tournament victories, and squad memories from the season.',
     href: '/photos',
+  },
+  {
+    id: 'stats',
+    title: 'Goals, Assists & Awards',
+    badge: 'Private tracker',
+    color: 'purple',
+    icon: BarChart3,
+    desc: 'Keep the real scoreline, goals, assists, and player-of-the-match totals for the season.',
+    href: '/stats',
   },
 ];
 

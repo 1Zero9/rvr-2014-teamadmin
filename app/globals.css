@@ -4570,6 +4570,51 @@ a {
   color: #104eb0;
 }
 
+.private-stats-notice { margin-bottom: 20px; }
+
+.match-stats-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  gap: 20px;
+  align-items: start;
+  margin: 20px 0;
+}
+
+.match-stats-form { display: grid; gap: 14px; }
+.match-stats-form label { display: grid; gap: 6px; color: #334155; font-size: 12px; font-weight: 750; }
+.match-stats-form input, .match-stats-form select, .match-stats-form textarea {
+  width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; background: white;
+  color: #0f172a; font: inherit; padding: 10px 11px;
+}
+.match-stats-form textarea { resize: vertical; }
+.match-stats-score-row { display: grid; grid-template-columns: 1fr 20px 1fr 1.7fr; gap: 10px; align-items: end; }
+.match-stats-score-row > span { padding-bottom: 10px; color: #64748b; text-align: center; }
+.contribution-heading { display: flex; justify-content: space-between; align-items: baseline; margin-top: 2px; }
+.contribution-heading strong { color: #0f172a; font-size: 13px; }
+.contribution-heading span, .match-stats-help { color: #64748b; font-size: 12px; line-height: 1.5; }
+.contribution-rows { display: grid; gap: 8px; }
+.contribution-row { display: grid; grid-template-columns: minmax(0, 1fr) 86px 86px 34px; gap: 8px; align-items: center; }
+.contribution-row::before { content: 'Player'; position: absolute; left: -9999px; }
+.icon-button, .text-button { border: 0; background: transparent; color: #2563eb; cursor: pointer; }
+.icon-button { display: grid; place-items: center; padding: 8px; border-radius: 7px; }
+.icon-button:disabled { color: #cbd5e1; cursor: not-allowed; }
+.text-button { display: inline-flex; align-items: center; gap: 5px; width: fit-content; padding: 2px 0; font-weight: 700; font-size: 12px; }
+.compact-table th, .compact-table td { padding: 10px 12px; }
+.motm-list { display: grid; gap: 8px; }
+.motm-list > div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #e2e8f0; }
+.motm-list > div:last-child { border-bottom: 0; }
+.motm-list span { color: #64748b; font-size: 12px; }
+
+@media (max-width: 780px) {
+  .match-stats-layout { grid-template-columns: 1fr; }
+  .match-stats-score-row { grid-template-columns: 1fr 16px 1fr; }
+  .potm-input { grid-column: 1 / -1; }
+}
+
+@media (max-width: 520px) {
+  .contribution-row { grid-template-columns: minmax(0, 1fr) 58px 58px 32px; gap: 5px; }
+}
+
 /* League Standings Table */
 .league-table-card {
   border-radius: 16px;
@@ -6753,4 +6798,3 @@ a {
     grid-template-columns: 1fr;
   }
 }
-
