@@ -3240,6 +3240,12 @@ a {
   justify-content: space-between;
   margin-bottom: 22px;
 }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.install-app-wrap { position: relative; }
+.install-app-button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 11px; background: #fff; color: #334155; font-size: 12px; font-weight: 700; cursor: pointer; }
+.install-app-help { position: absolute; z-index: 5; top: calc(100% + 7px); right: 0; width: 210px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px; background: #fff; box-shadow: 0 8px 20px rgba(15, 23, 42, .12); color: #334155; font-size: 12px; line-height: 1.4; }
+.passkey-enrol { position: relative; }.passkey-enrol > span { position: absolute; z-index: 5; top: calc(100% + 7px); right: 0; width: 220px; border-radius: 8px; padding: 8px; background: #fff; color: #334155; font-size: 11px; box-shadow: 0 8px 20px rgba(15, 23, 42, .12); }
+.passkey-login { display: grid; gap: 10px; margin-top: 18px; text-align: center; }.passkey-login > span { color: #94a3b8; font-size: 12px; }
 
 .topbar p, .card-label, .section-heading span {
   margin: 0 0 6px;
@@ -4048,37 +4054,35 @@ a {
     display: block;
   }
   .sidebar {
-    position: relative;
+    position: fixed;
+    z-index: 20;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    height: auto;
+    height: 66px;
     flex-direction: row;
-    align-items: center;
-    padding: 10px 16px;
+    padding: 7px 8px;
+    box-shadow: 0 -8px 24px rgba(6, 23, 45, .2);
   }
   .brand {
-    margin: 0;
-  }
-  .brand img {
-    width: 42px;
-    height: 42px;
+    display: none;
   }
   .sidebar nav {
     display: flex;
-    margin-left: auto;
+    width: 100%;
+    margin: 0;
+    justify-content: space-around;
   }
   .sidebar .nav-link {
-    display: none;
-  }
-  .sidebar .nav-link.active {
     display: flex;
-    width: 42px;
-    min-height: 42px;
+    flex: 1;
+    min-height: 48px;
   }
   .sidebar-bottom {
     display: none;
   }
   .content {
-    padding: 22px 16px 40px;
+    padding: 22px 16px 92px;
   }
   .topbar {
     align-items: flex-end;
@@ -4086,6 +4090,9 @@ a {
   .topbar h1 {
     font-size: 22px;
   }
+  .topbar-actions { align-self: flex-start; }
+  .install-app-button { padding: 8px; font-size: 0; }
+  .passkey-enrol .install-app-button { font-size: 11px; }
   .primary {
     padding: 9px 12px;
     font-size: 12px;

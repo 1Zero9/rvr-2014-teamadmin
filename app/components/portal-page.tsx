@@ -2,6 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BarChart3, Camera, Home, Swords, Trophy } from 'lucide-react';
 import { type Member } from '../lib/authz';
+import { InstallAppButton } from './install-app-button';
+import { EnrolPasskeyButton } from './passkey-buttons';
 
 const navItems = [
   ['Home', '/portal', Home],
@@ -82,7 +84,7 @@ export function PortalPage({
             <p>{eyebrow}</p>
             <h1>{title}</h1>
           </div>
-          {action}
+          <div className="topbar-actions"><EnrolPasskeyButton />{action}<InstallAppButton /></div>
         </header>
         {children}
       </section>

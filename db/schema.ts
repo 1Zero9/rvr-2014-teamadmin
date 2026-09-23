@@ -144,6 +144,13 @@ export const auditLog = pgTable('audit_log', {
   index('idx_audit_log_created_at').on(table.createdAt),
 ]);
 
+export const passkeys = pgTable('passkeys', {
+  id: text('id').primaryKey(), credentialId: text('credential_id').notNull().unique(), publicKey: text('public_key').notNull(),
+  counter: integer('counter').notNull().default(0), transports: jsonb('transports').$type<string[]>().notNull().default([]),
+  createdAt: text('created_at').notNull(), lastUsedAt: text('last_used_at'),
+});
+export const passkeyChallenges = pgTable('passkey_challenges', { purpose: text('purpose').primaryKey(), challenge: text('challenge').notNull(), expiresAt: text('expires_at').notNull() });
+
 export const photoAlbums = pgTable('photo_albums', {
   id: text('id').primaryKey(),
   title: text('title').notNull(),

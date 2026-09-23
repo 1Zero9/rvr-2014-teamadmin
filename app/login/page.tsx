@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { loginAction } from '../actions';
 import { getCurrentMember } from '../lib/authz';
+import { PasskeyLoginButton } from '../components/passkey-buttons';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   if (await getCurrentMember()) redirect('/portal');
@@ -21,6 +22,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </div>
           <button type="submit" className="login-submit-btn">Open workspace</button>
         </form>
+        <div className="passkey-login"><span>or</span><PasskeyLoginButton /></div>
       </div>
     </main>
   );
