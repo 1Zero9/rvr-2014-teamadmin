@@ -10,8 +10,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <div className="login-card">
         <div className="login-header">
           <span className="login-badge">RVR U13 · PRIVATE WORKSPACE</span>
-          <h1>Team admin</h1>
-          <p>Enter the shared team password.</p>
+          <h1>Match desk</h1>
+          <p>Enter your private workspace password.</p>
         </div>
         {error === 'invalid' && <p className="login-error-banner">That password is not correct.</p>}
         <form action={loginAction} className="login-form">

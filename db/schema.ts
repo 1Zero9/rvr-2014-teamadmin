@@ -109,6 +109,29 @@ export const playerMatchStats = pgTable('player_match_stats', {
   index('idx_player_match_stats_player').on(table.playerName),
 ]);
 
+/** Goal-by-goal private record, imported from the match app and checked by the owner. */
+export const matchGoalEvents = pgTable('match_goal_events', {
+  id: text('id').primaryKey(),
+  matchId: text('match_id').notNull(),
+  minute: integer('minute'),
+  scorerName: text('scorer_name').notNull(),
+  assistName: text('assist_name'),
+  sortOrder: integer('sort_order').notNull(),
+  createdAt: text('created_at').notNull(),
+}, (table) => [index('idx_match_goal_events_match').on(table.matchId)]);
+
+/** Starting and bench selection as shown in the private match app. */
+export const matchSquadSelections = pgTable('match_squad_selections', {
+  id: text('id').primaryKey(),
+  matchId: text('match_id').notNull(),
+  playerName: text('player_name').notNull(),
+  squadNumber: integer('squad_number'),
+  selection: text('selection', { enum: ['starting', 'bench'] }).notNull(),
+  isCaptain: boolean('is_captain').notNull().default(false),
+  sortOrder: integer('sort_order').notNull(),
+  createdAt: text('created_at').notNull(),
+}, (table) => [index('idx_match_squad_selections_match').on(table.matchId)]);
+
 export const auditLog = pgTable('audit_log', {
   id: text('id').primaryKey(),
   actorId: text('actor_id').notNull(),

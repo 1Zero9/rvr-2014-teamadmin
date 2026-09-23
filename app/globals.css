@@ -4581,6 +4581,26 @@ a {
 }
 
 .match-stats-form { display: grid; gap: 14px; }
+.match-importer { display: grid; gap: 14px; }
+.screenshot-picker { min-height: 84px; display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px dashed #94a3b8; border-radius: 10px; color: #1e3a5f; cursor: pointer; }
+.screenshot-picker span { display: grid; gap: 3px; }
+.screenshot-picker small { color: #64748b; font-size: 11px; }
+.screenshot-picker input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.screenshot-file-list { margin: -4px 0 0; padding-left: 18px; color: #64748b; font-size: 12px; display: grid; gap: 3px; }
+.match-import-error { margin: 0; color: #b42318; font-size: 13px; }
+.import-review { display: grid; gap: 11px; padding-top: 4px; border-top: 1px solid #e2e8f0; }
+.import-review label { display: grid; gap: 6px; color: #334155; font-size: 12px; font-weight: 750; }
+.import-review select { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; color: #0f172a; background: white; }
+.import-score, .import-summary { display: grid; gap: 3px; padding: 10px 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; }
+.import-score span, .import-summary span { color: #475569; line-height: 1.45; }
+.spin { animation: match-import-spin 1s linear infinite; }
+.team-explorer-select { display: grid; gap: 6px; color: #334155; font-size: 12px; font-weight: 750; }
+.team-explorer-select select { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #fff; color: #0f172a; }
+.album-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+.album-link-card { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; color: inherit; text-decoration: none; }
+.album-link-card img { display: block; width: 100%; height: 132px; object-fit: cover; background: #e2e8f0; }
+.album-link-card div { padding: 13px; }.album-link-card span { color: #64748b; font-size: 10px; font-weight: 800; letter-spacing: .08em; }.album-link-card h3 { margin: 5px 0 8px; font-size: 16px; }.album-link-card p { display: flex; align-items: center; gap: 5px; margin: 0; color: #1d4ed8; font-size: 13px; font-weight: 700; }
+@keyframes match-import-spin { to { transform: rotate(360deg); } }
 .match-stats-form label { display: grid; gap: 6px; color: #334155; font-size: 12px; font-weight: 750; }
 .match-stats-form input, .match-stats-form select, .match-stats-form textarea {
   width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; background: white;

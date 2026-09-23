@@ -3,6 +3,7 @@ import { Award, Goal, Trophy } from 'lucide-react';
 import { getDb } from '../../db';
 import { matchPerformanceSummaries, playerMatchStats } from '../../db/schema';
 import { MatchStatsManager } from '../components/match-stats-manager';
+import { MatchScreenshotImporter } from '../components/match-screenshot-importer';
 import { PortalPage } from '../components/portal-page';
 import { requireApprovedMember } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
@@ -57,7 +58,7 @@ export default async function StatsPage() {
         <div className="metric"><span>Contributions logged</span><strong>{contributions.reduce((sum, row) => sum + row.goals + row.assists, 0)}</strong></div>
       </div>
       <div className="match-stats-layout">
-        <MatchStatsManager matches={live.rvrMatches.map((match) => ({ id: match.id, label: matchLabels.get(match.id) || match.id }))} />
+        <MatchScreenshotImporter matches={live.rvrMatches.map((match) => ({ id: match.id, label: matchLabels.get(match.id) || match.id }))} />
         <article className="panel">
           <div className="section-heading"><div><span>SEASON TOTALS</span><h3>Goals & assists</h3></div><Goal size={20} /></div>
           {leaderboard.length === 0 ? <p className="match-stats-help">Record the first match to start the running table.</p> : (

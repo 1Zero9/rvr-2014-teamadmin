@@ -5,7 +5,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '../db';
-import { auditLog, events, ideas, matchPerformanceSummaries, playerMatchStats, transactions } from '../db/schema';
+import { auditLog, events, ideas, matchGoalEvents, matchPerformanceSummaries, matchSquadSelections, photoAlbums, playerMatchStats, transactions } from '../db/schema';
+import type { ImportedMatch } from './lib/match-import';
 import { AUTH_COOKIE_NAME, createSessionValue, requireApprovedMember, timingSafeStringEqual } from './lib/authz';
 
 function value(formData: FormData, key: string) {
@@ -176,6 +177,56 @@ export async function saveMatchPerformanceAction(formData: FormData) {
   await audit(member.id, 'save', 'match_performance', matchId, `Updated private match statistics (${rvrGoals}-${opponentGoals}).`);
   revalidatePath('/stats');
   revalidatePath('/portal');
+}
+
+export async function saveImportedMatchAction(formData: FormData) {
+  const member = await requireApprovedMember();
+  const matchId = value(formData, 'matchId');
+  let imported: ImportedMatch;
+  try { imported = JSON.parse(value(formData, 'importedMatch')) as ImportedMatch; } catch { throw new Error('The imported match data is invalid. Please analyse the screenshots again.'); }
+  if (!matchId || !Number.isInteger(imported.rvrGoals) || !Number.isInteger(imported.opponentGoals) || imported.rvrGoals < 0 || imported.opponentGoals < 0) throw new Error('Choose a match and confirm the score.');
+  const clean = (name: string) => name.trim();
+  const goals = imported.goals.filter((goal) => clean(goal.scorerName));
+  const contributions = new Map<string, { goals: number; assists: number }>();
+  for (const goal of goals) {
+    const scorer = clean(goal.scorerName); const assist = clean(goal.assistName || '');
+    const scorerRow = contributions.get(scorer) || { goals: 0, assists: 0 }; scorerRow.goals++; contributions.set(scorer, scorerRow);
+    if (assist) { const assistRow = contributions.get(assist) || { goals: 0, assists: 0 }; assistRow.assists++; contributions.set(assist, assistRow); }
+  }
+  const selected = [
+    ...imported.starters.map((player, sortOrder) => ({ ...player, selection: 'starting' as const, sortOrder })),
+    ...imported.bench.map((player, sortOrder) => ({ ...player, selection: 'bench' as const, sortOrder })),
+  ].filter((player) => clean(player.playerName));
+  const updatedAt = now(); const db = getDb();
+  await db.transaction(async (tx) => {
+    await tx.insert(matchPerformanceSummaries).values({ matchId, rvrGoals: imported.rvrGoals, opponentGoals: imported.opponentGoals, playerOfMatch: imported.playerOfMatch || null, notes: imported.notes || null, updatedAt }).onConflictDoUpdate({ target: matchPerformanceSummaries.matchId, set: { rvrGoals: imported.rvrGoals, opponentGoals: imported.opponentGoals, playerOfMatch: imported.playerOfMatch || null, notes: imported.notes || null, updatedAt } });
+    await tx.delete(playerMatchStats).where(eq(playerMatchStats.matchId, matchId));
+    await tx.delete(matchGoalEvents).where(eq(matchGoalEvents.matchId, matchId));
+    await tx.delete(matchSquadSelections).where(eq(matchSquadSelections.matchId, matchId));
+    if (contributions.size) await tx.insert(playerMatchStats).values([...contributions.entries()].map(([playerName, stats]) => ({ id: id(), matchId, playerName, ...stats, createdAt: updatedAt, updatedAt })));
+    if (goals.length) await tx.insert(matchGoalEvents).values(goals.map((goal, sortOrder) => ({ id: id(), matchId, minute: goal.minute, scorerName: clean(goal.scorerName), assistName: clean(goal.assistName || '') || null, sortOrder, createdAt: updatedAt })));
+    if (selected.length) await tx.insert(matchSquadSelections).values(selected.map((player) => ({ id: id(), matchId, playerName: clean(player.playerName), squadNumber: player.squadNumber, selection: player.selection, isCaptain: player.isCaptain, sortOrder: player.sortOrder, createdAt: updatedAt })));
+  });
+  await audit(member.id, 'import', 'match_performance', matchId, `Imported private match record (${imported.rvrGoals}-${imported.opponentGoals}) from screenshots.`);
+  revalidatePath('/stats'); revalidatePath('/portal'); revalidatePath('/fixtures');
+}
+
+export async function addGooglePhotosAlbumAction(formData: FormData) {
+  const member = await requireApprovedMember();
+  const title = value(formData, 'title');
+  const shareUrl = value(formData, 'shareUrl');
+  let url: URL;
+  try { url = new URL(shareUrl); } catch { throw new Error('Enter a valid Google Photos album link.'); }
+  if (url.protocol !== 'https:' || !/(^|\.)photos\.app\.goo\.gl$|(^|\.)photos\.google\.com$/i.test(url.hostname) || !title) {
+    throw new Error('Enter an album title and a valid HTTPS Google Photos link.');
+  }
+  const albumId = id();
+  await getDb().insert(photoAlbums).values({
+    id: albumId, title, shareUrl, coverUrl: '/hero-squad.jpg', photoCount: 0,
+    albumDate: new Date().toISOString().slice(0, 10), photographer: 'Private album', samplePhotos: [], createdAt: now(),
+  });
+  await audit(member.id, 'create', 'photo_album', albumId, `Added Google Photos album: ${title}`);
+  revalidatePath('/albums');
 }
 
 export async function saveStaffMemberAction(formData: FormData) {

@@ -1,47 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  Apple,
-  ArrowDownLeft,
-  Calendar,
-  CalendarDays,
-  Camera,
-  CircleHelp,
-  Compass,
-  Globe,
-  BarChart3,
-  Home,
-  Lightbulb,
-  Medal,
-  Play,
-  ReceiptText,
-  ShieldCheck,
-  Trophy,
-  WalletCards,
-  Zap,
-} from 'lucide-react';
+import { BarChart3, Camera, Home, Swords, Trophy } from 'lucide-react';
 import { type Member } from '../lib/authz';
 
-const squadNavItems = [
-  ['Fixtures & Standings', '/fixtures', Trophy],
-  ['Skills Vault', '/skills', Play],
-  ['Training & Kit', '/training', Calendar],
-  ['Speed & S&C', '/sc', Zap],
-  ['Game Day Fuel', '/nutrition', Apple],
-  ['Pitch Venues & GPS', '/venues', Compass],
-  ['Cups & Blitzes', '/tournaments', Medal],
-  ['Squad Photos', '/photos', Camera],
-  ['Player stats', '/stats', BarChart3],
-] as const;
-
-const adminNavItems = [
-  ['Portal Overview', '/portal', Home],
-  ['Team fund', '/fund', WalletCards],
-  ['Contributions', '/contributions', ArrowDownLeft],
-  ['Expenses', '/expenses', ReceiptText],
-  ['Calendar', '/calendar', CalendarDays],
-  ['Activity ideas', '/ideas', Lightbulb],
-  ['Team information', '/information', CircleHelp],
+const navItems = [
+  ['Home', '/portal', Home],
+  ['Fixtures & League', '/fixtures', Trophy],
+  ['Scout teams', '/fixtures#scout', Swords],
+  ['Import & Stats', '/stats', BarChart3],
+  ['Albums', '/albums', Camera],
 ] as const;
 
 export function PortalPage({
@@ -83,8 +50,8 @@ export function PortalPage({
         </Link>
 
         <nav className="sidebar-nav-scroll" aria-label="Portal main navigation">
-          <p className="sidebar-nav-heading">Squad & Match Hub</p>
-          {squadNavItems.map(([label, href, Icon]) => (
+          <p className="sidebar-nav-heading">MATCH DESK</p>
+          {navItems.map(([label, href, Icon]) => (
             <Link
               className={active === href ? 'nav-link active' : 'nav-link'}
               href={href}
@@ -95,25 +62,10 @@ export function PortalPage({
             </Link>
           ))}
 
-          <p className="sidebar-nav-heading">Team Admin & Fund</p>
-          {adminNavItems.map(([label, href, Icon]) => (
-            <Link
-              className={active === href ? 'nav-link active' : 'nav-link'}
-              href={href}
-              key={href}
-            >
-              <Icon size={17} />
-              <span>{label}</span>
-            </Link>
-          ))}
         </nav>
 
         <div className="sidebar-bottom">
-          <p>MANAGEMENT</p>
-          <Link className="nav-link public-hub-link" href="/">
-            <Camera size={17} />
-            <span>Public Photos Gallery</span>
-          </Link>
+          <p>OWNER</p>
 
           <div className="user-card">
             <span>{initials}</span>

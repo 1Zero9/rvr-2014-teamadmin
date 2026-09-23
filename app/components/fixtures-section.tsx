@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Award,
   Calendar,
@@ -45,6 +44,10 @@ export function FixturesSection({
   const [scope, setScope] = useState<'rvr' | 'division'>('rvr');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (window.location.hash === '#scout') setFilter('scout');
+  }, []);
 
   const activeMatchesList = scope === 'rvr' ? initialMatches : (allDivisionMatches.length > 0 ? allDivisionMatches : initialMatches);
   const completedMatches = activeMatchesList.filter((m) => m.status === 'completed');
@@ -381,10 +384,10 @@ export function FixturesSection({
                   {/* Action Link */}
                   <div className="match-card-footer">
                     <span className="ddsl-id-tag">{match.ddslMatchId || 'DDSL-218148'}</span>
-                    <Link href="/venues" className="match-venue-link">
+                    <span className="match-venue-link">
                       <MapPin size={12} />
-                      <span>Pitch GPS</span>
-                    </Link>
+                      <span>{match.venue}</span>
+                    </span>
                   </div>
                 </article>
               );
