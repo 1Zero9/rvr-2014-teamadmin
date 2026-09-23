@@ -6825,3 +6825,34 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* Phone-first match desk: navigation stays at the bottom, with compact
+   glanceable metrics above the fold. Kept last to override legacy portal CSS. */
+@media (max-width: 600px) {
+  .app-shell { display: block; }
+  .app-shell > .sidebar {
+    position: fixed !important;
+    top: auto !important;
+    right: 0;
+    bottom: 0 !important;
+    left: 0;
+    z-index: 50;
+    width: auto;
+    height: calc(64px + env(safe-area-inset-bottom));
+    min-height: 64px;
+    padding: 6px 8px env(safe-area-inset-bottom);
+    background: #06172d;
+    box-shadow: 0 -8px 24px rgba(6, 23, 45, .22);
+  }
+  .app-shell > .sidebar .brand, .app-shell > .sidebar .sidebar-bottom, .app-shell > .sidebar .sidebar-nav-heading { display: none; }
+  .app-shell > .sidebar .sidebar-nav-scroll { display: flex; width: 100%; padding: 0; margin: 0; flex-direction: row; overflow: visible; }
+  .app-shell > .sidebar .nav-link { display: flex; flex: 1; min-height: 50px; padding: 0; justify-content: center; border-radius: 10px; }
+  .app-shell > .content { padding: 20px 16px calc(90px + env(safe-area-inset-bottom)); }
+  .topbar { margin-bottom: 16px; }
+  .topbar h1 { font-size: 24px; }
+  .metric-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .metric { min-height: 104px; padding: 14px 12px; border-radius: 14px; }
+  .metric span { font-size: 10px; line-height: 1.25; }
+  .metric strong { margin-top: 14px; font-size: 25px; line-height: 1; letter-spacing: -.04em; overflow: hidden; text-overflow: ellipsis; }
+  .match-stats-layout { gap: 12px; }
+}
