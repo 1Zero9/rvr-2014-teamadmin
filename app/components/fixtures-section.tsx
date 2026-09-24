@@ -46,7 +46,19 @@ export function FixturesSection({
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    if (window.location.hash === '#scout') setFilter('scout');
+    const openRequestedView = () => {
+      const view = new URLSearchParams(window.location.search).get('view');
+      // Keep old shared links working, while new links use a durable query
+      // parameter instead of a hash that is easy to lose during navigation.
+      if (view === 'scout' || window.location.hash === '#scout') setFilter('scout');
+    };
+    openRequestedView();
+    window.addEventListener('hashchange', openRequestedView);
+    window.addEventListener('popstate', openRequestedView);
+    return () => {
+      window.removeEventListener('hashchange', openRequestedView);
+      window.removeEventListener('popstate', openRequestedView);
+    };
   }, []);
 
   const activeMatchesList = scope === 'rvr' ? initialMatches : (allDivisionMatches.length > 0 ? allDivisionMatches : initialMatches);

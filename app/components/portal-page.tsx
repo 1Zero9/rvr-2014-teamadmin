@@ -1,15 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { BarChart3, Camera, Home, Swords, Trophy } from 'lucide-react';
+import { BarChart3, CalendarDays, Camera, Home } from 'lucide-react';
 import { type Member } from '../lib/authz';
 import { InstallAppButton } from './install-app-button';
 import { EnrolPasskeyButton } from './passkey-buttons';
 
 const navItems = [
   ['Home', '/portal', Home],
-  ['Fixtures & League', '/fixtures', Trophy],
-  ['Scout teams', '/fixtures#scout', Swords],
-  ['Import & Stats', '/stats', BarChart3],
+  ['Matches', '/fixtures', CalendarDays],
+  ['Stats', '/stats', BarChart3],
   ['Albums', '/albums', Camera],
 ] as const;
 
@@ -46,13 +45,13 @@ export function PortalPage({
             alt="Rivervalley Rangers AFC crest"
           />
           <div>
-            <strong>RVR U13 Major 1</strong>
-            <span>2014 Squad · Team Portal</span>
+            <strong>Finn&apos;s Football</strong>
+            <span>Private match desk</span>
           </div>
         </Link>
 
         <nav className="sidebar-nav-scroll" aria-label="Portal main navigation">
-          <p className="sidebar-nav-heading">MATCH DESK</p>
+          <p className="sidebar-nav-heading">FINN&apos;S FOOTBALL</p>
           {navItems.map(([label, href, Icon]) => (
             <Link
               className={active === href ? 'nav-link active' : 'nav-link'}
@@ -101,7 +100,7 @@ export function AccessPending({ member }: { member: Member }) {
         height={90}
         alt="Rivervalley Rangers AFC crest"
       />
-      <p>RVR 2014 TEAM ADMIN</p>
+      <p>FINN&apos;S FOOTBALL</p>
       <h1>Access pending approval</h1>
       <span>
         Your account ({member.email}) is awaiting approval from a Team Super Admin.

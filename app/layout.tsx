@@ -5,19 +5,19 @@ import { PwaRegistration } from './components/pwa-registration';
 
 const geist = Geist({ variable: '--font-geist', subsets: ['latin'] });
 export const metadata: Metadata = {
-  metadataBase: new URL('https://rvr-2014-teamadmin.vercel.app'),
-  title: 'RVR Match Desk',
-  description: 'Private RVR 2014 match, league and scouting desk.',
+  metadataBase: new URL('https://finns-football.vercel.app'),
+  title: "Finn's Football",
+  description: "Finn's private football match, league and scouting desk.",
   icons: { icon: '/rvr-crest.png', apple: '/rvr-crest.png' },
   openGraph: {
-    title: 'RVR Match Desk',
-    description: 'Private match, league and scouting desk.',
+    title: "Finn's Football",
+    description: "Finn's private football desk.",
     images: ['/hero-squad.jpg'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RVR Match Desk',
-    description: 'Private match, league and scouting desk.',
+    title: "Finn's Football",
+    description: "Finn's private football desk.",
     images: ['/hero-squad.jpg'],
   },
 };

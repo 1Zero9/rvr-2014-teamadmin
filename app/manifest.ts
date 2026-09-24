@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'RVR Match Desk',
-    short_name: 'RVR Desk',
-    description: 'Private match, league and scouting desk for RVR 2014.',
+    name: "Finn's Football",
+    short_name: "Finn's Football",
+    description: "Finn's private football match, league and scouting desk.",
     start_url: '/portal',
     scope: '/',
     display: 'standalone',
