@@ -6863,11 +6863,13 @@ a {
   .portal-hub-card { min-height: 0; }
 }
 
-.form-dots {
+.form-dots,
+.metric strong.form-dots {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .form-dot {
@@ -6888,7 +6890,7 @@ a {
 /* The private app is primarily used as an installed phone app. These rules
    deliberately sit after the legacy site CSS so phone controls stay readable
    and comfortably tappable instead of inheriting the old marketing-site scale. */
-@media (max-width: 600px) {
+@media (max-width: 780px) {
   .app-shell > .content {
     width: 100%;
     padding: 24px 16px calc(98px + env(safe-area-inset-bottom));
@@ -6923,10 +6925,12 @@ a {
   .private-stats-notice { padding: 14px 16px; }
 
   .metric-row { gap: 10px; }
-  .metric { min-height: 112px; padding: 16px 12px; border-radius: 16px; }
+  .metric { min-height: 104px; padding: 15px 12px; border-radius: 16px; }
   .metric span { font-size: 11px; }
-  .metric strong { margin-top: 16px; font-size: 31px; }
-  .form-dot { width: 25px; height: 25px; font-size: 11px; }
+  .metric strong { margin-top: 14px; font-size: 29px; }
+  .metric-form { padding-inline: 9px; }
+  .metric strong.form-dots { margin-top: 16px; gap: 3px; }
+  .form-dot { width: 22px; height: 22px; font-size: 10px; }
 
   .match-stats-layout { display: grid; gap: 14px; margin: 14px 0; }
   .panel, .match-card { padding: 20px; border-radius: 16px; }
@@ -6992,4 +6996,11 @@ a {
 
 @media (display-mode: standalone) and (max-width: 600px) {
   .install-app-wrap { display: none; }
+}
+
+@media (max-width: 420px) {
+  .metric { padding-inline: 10px; }
+  .metric-form { padding-inline: 7px; }
+  .metric strong.form-dots { gap: 2px; }
+  .form-dot { width: 19px; height: 19px; font-size: 9px; }
 }
