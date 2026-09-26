@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
+import { Geist, Oswald, Bebas_Neue } from 'next/font/google';
 import './globals.css';
 import { PwaRegistration } from './components/pwa-registration';
 
 const geist = Geist({ variable: '--font-geist', subsets: ['latin'] });
+// Scoreboard/broadcast-style display type, used on the Home match-day screen.
+const oswald = Oswald({ variable: '--font-oswald', subsets: ['latin'], weight: ['500', '600', '700'] });
+const bebasNeue = Bebas_Neue({ variable: '--font-bebas', subsets: ['latin'], weight: '400' });
 export const metadata: Metadata = {
   metadataBase: new URL('https://finns-football.vercel.app'),
   title: "Finn's Team",
@@ -21,4 +24,4 @@ export const metadata: Metadata = {
     images: ['/hero-squad.jpg'],
   },
 };
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body className={geist.variable}><PwaRegistration />{children}</body></html>; }
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body className={`${geist.variable} ${oswald.variable} ${bebasNeue.variable}`}><PwaRegistration />{children}</body></html>; }

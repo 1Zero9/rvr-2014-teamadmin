@@ -7,6 +7,7 @@
   --blue: #8c1d40;
   --blue-light: #b33a5e;
   --blue-glow: #8c1d4033;
+  --maroon-deep: #5c1029;
   --emerald: #10b981;
   --amber: #f59e0b;
   --ink: #142033;
@@ -2019,3 +2020,128 @@ a {
   .metric strong.form-dots { gap: 2px; }
   .form-dot { width: 19px; height: 19px; font-size: 9px; }
 }
+
+/* ==========================================================================
+   HOME SCOREBOARD — confirmed 2026-09-26 against a founder-reviewed proof
+   (three presentation directions; this one was picked over a generic
+   card-per-widget dashboard and a ruled "team sheet" layout). Scoped to the
+   Home screen only — solid colour blocks and condensed display type stand
+   in deliberate contrast to the rest of the app's bordered white panels.
+   ========================================================================== */
+
+.scoreboard-stack { display: grid; gap: 10px; margin-top: 4px; }
+
+.scoreboard-readout {
+  display: flex;
+  background: var(--navy);
+  border-radius: 14px;
+  padding: 16px 4px;
+  color: #fff;
+}
+.scoreboard-readout > div { flex: 1; text-align: center; border-right: 1px solid rgba(255, 255, 255, 0.14); }
+.scoreboard-readout > div:last-child { border-right: none; }
+.scoreboard-readout span {
+  display: block;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+.scoreboard-readout strong {
+  font-family: var(--font-geist), monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 600;
+  text-shadow: 0 0 16px rgba(255, 90, 130, 0.4);
+}
+.scoreboard-form { display: flex; gap: 3px; justify-content: center; }
+.scoreboard-form i {
+  font-style: normal;
+  font-family: var(--font-geist), monospace;
+  font-size: 10px;
+  font-weight: 700;
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+}
+.scoreboard-form .sb-w { background: rgba(22, 163, 74, 0.35); color: #86efac; }
+.scoreboard-form .sb-d { background: rgba(217, 119, 6, 0.35); color: #fbbf24; }
+.scoreboard-form .sb-l { background: rgba(220, 38, 38, 0.35); color: #fca5a5; }
+
+.scoreboard-block {
+  background: var(--navy);
+  border-radius: 14px;
+  padding: 18px 20px;
+  color: #fff;
+  text-decoration: none;
+  display: block;
+}
+.scoreboard-block.next { background: var(--maroon-deep); }
+.scoreboard-block .label {
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+.scoreboard-block h3 {
+  font-family: var(--font-bebas), var(--font-oswald), sans-serif;
+  font-size: 30px;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  margin: 6px 0 4px;
+  font-weight: 400;
+}
+.scoreboard-block .meta {
+  margin: 0;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: var(--font-geist), monospace;
+  font-variant-numeric: tabular-nums;
+}
+.scoreboard-block .score {
+  font-family: var(--font-bebas), sans-serif;
+  font-size: 46px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin: 4px 0 2px;
+}
+
+.scoreboard-standings {
+  background: var(--navy);
+  border-radius: 14px;
+  padding: 14px 18px 6px;
+  color: #fff;
+}
+.scoreboard-standings .label {
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 10px;
+}
+.scoreboard-standings-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 34px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-geist), monospace;
+  font-size: 13px;
+}
+.scoreboard-standings-row:first-of-type { border-top: none; }
+.scoreboard-standings-row .pos { color: rgba(255, 255, 255, 0.5); font-variant-numeric: tabular-nums; }
+.scoreboard-standings-row .team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scoreboard-standings-row .pts { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.scoreboard-standings-row.is-rvr { color: #f4b8cc; }
+.scoreboard-standings-row.is-rvr .pos { color: #f4b8cc; }
