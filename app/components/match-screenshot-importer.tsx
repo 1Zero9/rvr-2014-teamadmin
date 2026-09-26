@@ -28,8 +28,7 @@ export function MatchScreenshotImporter({ matches }: { matches: MatchOption[] })
   }
 
   return <article className="panel match-importer">
-    <div className="section-heading"><div><span>WEEKLY MATCH IMPORT</span><h3>Read match screenshots</h3></div><Sparkles size={20} /></div>
-    <p className="match-stats-help">Choose the match detail, starting squad and bench screenshots; add the Results screen when you have it. Images are analysed for this import and are not retained by this site.</p>
+    <div className="section-heading"><div><span>IMPORT</span><h3>Match screenshots</h3></div><Sparkles size={20} /></div>
     <label className="screenshot-picker"><ImageUp size={20} /><span><strong>{files.length ? `${files.length} screenshot${files.length === 1 ? '' : 's'} selected` : 'Choose 3–4 screenshots'}</strong><small>PNG, JPEG or WebP · 6 MB maximum each</small></span><input type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={(event) => setFiles(Array.from(event.target.files || []).slice(0, 4))} /></label>
     {files.length > 0 && <ul className="screenshot-file-list">{files.map((file) => <li key={`${file.name}-${file.lastModified}`}>{file.name}</li>)}</ul>}
     <button type="button" className="primary" disabled={working} onClick={analyse}>{working ? <LoaderCircle className="spin" size={16} /> : <Sparkles size={16} />}{working ? 'Reading screenshots…' : 'Read screenshots'}</button>
@@ -38,10 +37,9 @@ export function MatchScreenshotImporter({ matches }: { matches: MatchOption[] })
       <input type="hidden" name="importedMatch" value={JSON.stringify(match)} />
       <label>Save against fixture<select name="matchId" required defaultValue=""><option value="" disabled>Choose the matching fixture</option>{matches.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
       <div className="import-score"><strong>Extracted score</strong><span>RVR {match.rvrGoals} – {match.opponentGoals} opponent</span></div>
-      <div className="import-summary"><strong>{match.goals.length} goals</strong><span>{match.goals.map((goal) => `${goal.minute ? `${goal.minute}′ ` : ''}${goal.scorerName}${goal.assistName ? ` (${goal.assistName})` : ''}`).join(' · ') || 'No goal events visible'}</span></div>
+      <div className="import-summary"><strong>{match.goals.length} goals</strong><span>{match.goals.map((goal) => `${goal.team === 'opponent' ? 'OPP ' : ''}${goal.minute ? `${goal.minute}′ ` : ''}${goal.scorerName}${goal.assistName ? ` (${goal.assistName})` : ''}`).join(' · ') || 'No goal events visible'}</span></div>
       <div className="import-summary"><strong>Squad</strong><span>{match.starters.length} starting · {match.bench.length} bench{match.playerOfMatch ? ` · POTM: ${match.playerOfMatch}` : ''}</span></div>
-      <p className="match-stats-help">Review the result above against the screenshots before saving. Saving again replaces the imported private record for this fixture.</p>
-      <button className="primary" type="submit"><Save size={16} /> Confirm and save match</button>
+      <button className="primary" type="submit"><Save size={16} /> Save match</button>
     </form>}
   </article>;
 }

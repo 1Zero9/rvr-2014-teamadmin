@@ -4252,25 +4252,22 @@ a {
   background: #257bf3;
 }
 
-/* Fixtures Sync Bar */
-.fixtures-sync-bar {
+/* Compact source state and controls for the private matches screen. */
+.fixtures-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 20px;
-  border-radius: 12px;
-  background: #f0f7ff;
-  border: 1px solid #cfe2fb;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.sync-info {
+.feed-status {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #1e3a8a;
+  gap: 8px;
+  color: #52647c;
   font-size: 12px;
+  font-weight: 700;
 }
 
 .live-dot {
@@ -4280,6 +4277,12 @@ a {
   background: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
   animation: pulse-dot 2s infinite;
+}
+
+.feed-status.offline .live-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, .18);
+  animation: none;
 }
 
 @keyframes pulse-dot {
@@ -4622,6 +4625,16 @@ a {
 .contribution-rows { display: grid; gap: 8px; }
 .contribution-row { display: grid; grid-template-columns: minmax(0, 1fr) 86px 86px 34px; gap: 8px; align-items: center; }
 .contribution-row::before { content: 'Player'; position: absolute; left: -9999px; }
+.goal-edit-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 64px 108px 34px; }
+.goal-edit-row input, .goal-edit-row select { border: 1px solid #cbd5e1; border-radius: 7px; padding: 8px 9px; font: inherit; color: #0f172a; background: white; }
+.match-detail-goals { display: grid; gap: 6px; margin: 6px 0; font-size: 13px; color: #334155; }
+.match-detail-goals li { list-style: none; }
+.match-detail-goals .opponent-goal { color: #94a3b8; }
+.match-detail-card { display: grid; gap: 10px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; }
+.match-detail-card:last-child { margin-bottom: 0; }
+.match-detail-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.match-detail-header h4 { margin: 0; font-size: 14px; }
+.match-detail-header strong { font-size: 15px; }
 .icon-button, .text-button { border: 0; background: transparent; color: #2563eb; cursor: pointer; }
 .icon-button { display: grid; place-items: center; padding: 8px; border-radius: 7px; }
 .icon-button:disabled { color: #cbd5e1; cursor: not-allowed; }
@@ -6953,9 +6966,7 @@ a {
   .section-head h2 { font-size: 24px; line-height: 1.16; }
   .section-head p { font-size: 15px; line-height: 1.5; }
   .section-pill { font-size: 10px; }
-  .fixtures-sync-bar { gap: 12px; padding: 14px; border-radius: 14px; }
-  .sync-info { font-size: 13px; line-height: 1.4; }
-  .sync-info small { font-size: 12px; }
+  .fixtures-toolbar { align-items: center; margin-bottom: 14px; }
   .sync-actions { width: 100%; }
   .sync-btn, .sync-ext-btn { min-height: 44px; justify-content: center; font-size: 13px; }
   .fixtures-filter-row { gap: 12px; }

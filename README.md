@@ -1,4 +1,4 @@
-# RVR 2014 Team Admin
+# Finn's Team
 
 Private team fund, match and information hub for the Rivervalley Rangers 2014 team.
 
@@ -25,5 +25,5 @@ in Vercel before deploying. The shared password opens a signed 30-day session.
 This project uses Next.js 16 (App Router), React 19, and Drizzle ORM with PostgreSQL.
 
 - **Local:** Install dependencies with `npm install` and run `npm run dev`. Configure one of `POSTGRES_URL`, `PRISMA_DATABASE_URL`, or `DATABASE_URL`.
-- **Database schema:** The historic Drizzle migration snapshots in `drizzle/` are SQLite-era metadata and cannot safely generate PostgreSQL migrations. Apply the explicit SQL in `db/migrations/20260920_private_match_statistics.sql` to add the private tracker tables.
+- **Database schema:** The historic Drizzle migration snapshots in `drizzle/` are SQLite-era metadata and cannot safely generate PostgreSQL migrations. Apply the explicit SQL files in `db/migrations/` in date order, including `20260926_goal_team.sql` which tags each goal event with the scoring team.
 - **Deployment (Vercel):** Keep the same PostgreSQL connection variable in Project Settings. The private tracker and the rest of the workspace use that database.

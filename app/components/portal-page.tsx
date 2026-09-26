@@ -45,13 +45,13 @@ export function PortalPage({
             alt="Rivervalley Rangers AFC crest"
           />
           <div>
-            <strong>Finn&apos;s Football</strong>
+            <strong>Finn&apos;s Team</strong>
             <span>Private match desk</span>
           </div>
         </Link>
 
         <nav className="sidebar-nav-scroll" aria-label="Portal main navigation">
-          <p className="sidebar-nav-heading">FINN&apos;S FOOTBALL</p>
+          <p className="sidebar-nav-heading">FINN&apos;S TEAM</p>
           {navItems.map(([label, href, Icon]) => (
             <Link
               className={active === href ? 'nav-link active' : 'nav-link'}
@@ -100,7 +100,7 @@ export function AccessPending({ member }: { member: Member }) {
         height={90}
         alt="Rivervalley Rangers AFC crest"
       />
-      <p>FINN&apos;S FOOTBALL</p>
+      <p>FINN&apos;S TEAM</p>
       <h1>Access pending approval</h1>
       <span>
         Your account ({member.email}) is awaiting approval from a Team Super Admin.

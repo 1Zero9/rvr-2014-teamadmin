@@ -130,55 +130,6 @@ export async function addIdea(formData: FormData) {
   revalidatePath('/ideas');
 }
 
-export async function saveMatchPerformanceAction(formData: FormData) {
-  const member = await requireApprovedMember();
-  const matchId = value(formData, 'matchId');
-  const rvrGoals = Number(value(formData, 'rvrGoals'));
-  const opponentGoals = Number(value(formData, 'opponentGoals'));
-  if (!matchId || !Number.isInteger(rvrGoals) || !Number.isInteger(opponentGoals) || rvrGoals < 0 || opponentGoals < 0) {
-    throw new Error('Choose a match and enter valid whole-number scores.');
-  }
-
-  const names = formData.getAll('playerName').map((item) => String(item).trim());
-  const goals = formData.getAll('playerGoals').map((item) => Number(item));
-  const assists = formData.getAll('playerAssists').map((item) => Number(item));
-  const contributions = names.flatMap((playerName, index) => {
-    const playerGoals = goals[index] || 0;
-    const playerAssists = assists[index] || 0;
-    if (!playerName) return [];
-    if (!Number.isInteger(playerGoals) || !Number.isInteger(playerAssists) || playerGoals < 0 || playerAssists < 0) {
-      throw new Error('Goals and assists must be whole numbers of zero or more.');
-    }
-    return [{ playerName, goals: playerGoals, assists: playerAssists }];
-  });
-  if (contributions.reduce((total, row) => total + row.goals, 0) > rvrGoals) {
-    throw new Error('Goals credited to players cannot exceed the real RVR score.');
-  }
-
-  const updatedAt = now();
-  const db = getDb();
-  await db.transaction(async (tx) => {
-    await tx.insert(matchPerformanceSummaries).values({
-      matchId,
-      rvrGoals,
-      opponentGoals,
-      playerOfMatch: value(formData, 'playerOfMatch') || null,
-      notes: value(formData, 'notes') || null,
-      updatedAt,
-    }).onConflictDoUpdate({
-      target: matchPerformanceSummaries.matchId,
-      set: { rvrGoals, opponentGoals, playerOfMatch: value(formData, 'playerOfMatch') || null, notes: value(formData, 'notes') || null, updatedAt },
-    });
-    await tx.delete(playerMatchStats).where(eq(playerMatchStats.matchId, matchId));
-    if (contributions.length) {
-      await tx.insert(playerMatchStats).values(contributions.map((row) => ({ id: id(), matchId, ...row, createdAt: updatedAt, updatedAt })));
-    }
-  });
-  await audit(member.id, 'save', 'match_performance', matchId, `Updated private match statistics (${rvrGoals}-${opponentGoals}).`);
-  revalidatePath('/stats');
-  revalidatePath('/portal');
-}
-
 export async function saveImportedMatchAction(formData: FormData) {
   const member = await requireApprovedMember();
   const matchId = value(formData, 'matchId');
@@ -189,6 +140,7 @@ export async function saveImportedMatchAction(formData: FormData) {
   const goals = imported.goals.filter((goal) => clean(goal.scorerName));
   const contributions = new Map<string, { goals: number; assists: number }>();
   for (const goal of goals) {
+    if (goal.team === 'opponent') continue;
     const scorer = clean(goal.scorerName); const assist = clean(goal.assistName || '');
     const scorerRow = contributions.get(scorer) || { goals: 0, assists: 0 }; scorerRow.goals++; contributions.set(scorer, scorerRow);
     if (assist) { const assistRow = contributions.get(assist) || { goals: 0, assists: 0 }; assistRow.assists++; contributions.set(assist, assistRow); }
@@ -204,10 +156,50 @@ export async function saveImportedMatchAction(formData: FormData) {
     await tx.delete(matchGoalEvents).where(eq(matchGoalEvents.matchId, matchId));
     await tx.delete(matchSquadSelections).where(eq(matchSquadSelections.matchId, matchId));
     if (contributions.size) await tx.insert(playerMatchStats).values([...contributions.entries()].map(([playerName, stats]) => ({ id: id(), matchId, playerName, ...stats, createdAt: updatedAt, updatedAt })));
-    if (goals.length) await tx.insert(matchGoalEvents).values(goals.map((goal, sortOrder) => ({ id: id(), matchId, minute: goal.minute, scorerName: clean(goal.scorerName), assistName: clean(goal.assistName || '') || null, sortOrder, createdAt: updatedAt })));
+    if (goals.length) await tx.insert(matchGoalEvents).values(goals.map((goal, sortOrder) => ({ id: id(), matchId, minute: goal.minute, scorerName: clean(goal.scorerName), assistName: clean(goal.assistName || '') || null, team: goal.team === 'opponent' ? 'opponent' as const : 'rvr' as const, sortOrder, createdAt: updatedAt })));
     if (selected.length) await tx.insert(matchSquadSelections).values(selected.map((player) => ({ id: id(), matchId, playerName: clean(player.playerName), squadNumber: player.squadNumber, selection: player.selection, isCaptain: player.isCaptain, sortOrder: player.sortOrder, createdAt: updatedAt })));
   });
   await audit(member.id, 'import', 'match_performance', matchId, `Imported private match record (${imported.rvrGoals}-${imported.opponentGoals}) from screenshots.`);
+  revalidatePath('/stats'); revalidatePath('/portal'); revalidatePath('/fixtures');
+}
+
+export async function updateMatchPerformanceAction(formData: FormData) {
+  const member = await requireApprovedMember();
+  const matchId = value(formData, 'matchId');
+  const rvrGoals = Number(value(formData, 'rvrGoals'));
+  const opponentGoals = Number(value(formData, 'opponentGoals'));
+  if (!matchId || !Number.isInteger(rvrGoals) || !Number.isInteger(opponentGoals) || rvrGoals < 0 || opponentGoals < 0) throw new Error('Choose a match and confirm the score.');
+  const playerOfMatch = value(formData, 'playerOfMatch') || null;
+  const notes = value(formData, 'notes') || null;
+
+  const clean = (name: string) => name.trim();
+  const minutes = formData.getAll('goalMinute').map(String);
+  const scorers = formData.getAll('goalScorer').map(String);
+  const assists = formData.getAll('goalAssist').map(String);
+  const teams = formData.getAll('goalTeam').map(String);
+  const goals = scorers.map((scorerName, index) => ({
+    minute: minutes[index]?.trim() ? Number(minutes[index]) : null,
+    scorerName: clean(scorerName),
+    assistName: clean(assists[index] || ''),
+    team: teams[index] === 'opponent' ? 'opponent' as const : 'rvr' as const,
+  })).filter((goal) => goal.scorerName);
+
+  const contributions = new Map<string, { goals: number; assists: number }>();
+  for (const goal of goals) {
+    if (goal.team === 'opponent') continue;
+    const scorerRow = contributions.get(goal.scorerName) || { goals: 0, assists: 0 }; scorerRow.goals++; contributions.set(goal.scorerName, scorerRow);
+    if (goal.assistName) { const assistRow = contributions.get(goal.assistName) || { goals: 0, assists: 0 }; assistRow.assists++; contributions.set(goal.assistName, assistRow); }
+  }
+
+  const updatedAt = now(); const db = getDb();
+  await db.transaction(async (tx) => {
+    await tx.insert(matchPerformanceSummaries).values({ matchId, rvrGoals, opponentGoals, playerOfMatch, notes, updatedAt }).onConflictDoUpdate({ target: matchPerformanceSummaries.matchId, set: { rvrGoals, opponentGoals, playerOfMatch, notes, updatedAt } });
+    await tx.delete(playerMatchStats).where(eq(playerMatchStats.matchId, matchId));
+    await tx.delete(matchGoalEvents).where(eq(matchGoalEvents.matchId, matchId));
+    if (contributions.size) await tx.insert(playerMatchStats).values([...contributions.entries()].map(([playerName, stats]) => ({ id: id(), matchId, playerName, ...stats, createdAt: updatedAt, updatedAt })));
+    if (goals.length) await tx.insert(matchGoalEvents).values(goals.map((goal, sortOrder) => ({ id: id(), matchId, minute: goal.minute, scorerName: goal.scorerName, assistName: goal.assistName || null, team: goal.team, sortOrder, createdAt: updatedAt })));
+  });
+  await audit(member.id, 'update', 'match_performance', matchId, `Edited private match record (${rvrGoals}-${opponentGoals}).`);
   revalidatePath('/stats'); revalidatePath('/portal'); revalidatePath('/fixtures');
 }
 

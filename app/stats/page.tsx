@@ -1,8 +1,8 @@
 import { desc } from 'drizzle-orm';
-import { Award, Goal, Trophy } from 'lucide-react';
+import { Award, Goal } from 'lucide-react';
 import { getDb } from '../../db';
-import { matchPerformanceSummaries, playerMatchStats } from '../../db/schema';
-import { MatchStatsManager } from '../components/match-stats-manager';
+import { matchGoalEvents, matchPerformanceSummaries, playerMatchStats } from '../../db/schema';
+import { MatchDetailCard } from '../components/match-detail-card';
 import { MatchScreenshotImporter } from '../components/match-screenshot-importer';
 import { PortalPage } from '../components/portal-page';
 import { requireApprovedMember } from '../lib/authz';
@@ -17,14 +17,22 @@ export default async function StatsPage() {
   const live = await fetchLiveDdslLeagueData('218148');
   let summaries: typeof matchPerformanceSummaries.$inferSelect[] = [];
   let contributions: typeof playerMatchStats.$inferSelect[] = [];
+  let goalEvents: typeof matchGoalEvents.$inferSelect[] = [];
   try {
     const db = getDb();
-    [summaries, contributions] = await Promise.all([
+    [summaries, contributions, goalEvents] = await Promise.all([
       db.select().from(matchPerformanceSummaries).orderBy(desc(matchPerformanceSummaries.updatedAt)),
       db.select().from(playerMatchStats),
+      db.select().from(matchGoalEvents).orderBy(matchGoalEvents.sortOrder),
     ]);
   } catch (error) {
     console.error('Unable to load private match statistics:', error);
+  }
+  const goalsByMatch = new Map<string, typeof matchGoalEvents.$inferSelect[]>();
+  for (const goal of goalEvents) {
+    const list = goalsByMatch.get(goal.matchId) || [];
+    list.push(goal);
+    goalsByMatch.set(goal.matchId, list);
   }
 
   const matchLabels = new Map(live.rvrMatches.map((match) => [
@@ -47,11 +55,7 @@ export default async function StatsPage() {
   const realGoals = summaries.reduce((sum, item) => sum + item.rvrGoals, 0);
 
   return (
-    <PortalPage member={member} active="/stats" eyebrow="PRIVATE PERFORMANCE TRACKER" title="Goals, assists & player of the match">
-      <div className="notice private-stats-notice">
-        <Trophy size={18} />
-        <span><strong>Your real squad record.</strong> DDSL results remain official for the table; this tracker preserves the actual score and player contributions.</span>
-      </div>
+    <PortalPage member={member} active="/stats" eyebrow="STATS" title="Season record">
       <div className="metric-row">
         <div className="metric"><span>Matches recorded</span><strong>{summaries.length}</strong></div>
         <div className="metric"><span>Real RVR goals</span><strong>{realGoals}</strong></div>
@@ -72,6 +76,23 @@ export default async function StatsPage() {
         <div className="section-heading"><div><span>PLAYER OF THE MATCH</span><h3>Matchday awards</h3></div><Award size={20} /></div>
         {motmLeaders.length === 0 ? <p className="match-stats-help">Player of the match awards will appear after your first record.</p> : (
           <div className="motm-list">{motmLeaders.map(([player, awards]) => <div key={player}><strong>{player}</strong><span>{awards} {awards === 1 ? 'award' : 'awards'}</span></div>)}</div>
+        )}
+      </article>
+      <article className="panel">
+        <div className="section-heading"><div><span>MATCH BY MATCH</span><h3>Per-match record</h3></div><Goal size={20} /></div>
+        {summaries.length === 0 ? <p className="match-stats-help">Record your first match above to see it here.</p> : (
+          summaries.map((summary) => (
+            <MatchDetailCard
+              key={summary.matchId}
+              matchId={summary.matchId}
+              label={matchLabels.get(summary.matchId) || summary.matchId}
+              rvrGoals={summary.rvrGoals}
+              opponentGoals={summary.opponentGoals}
+              playerOfMatch={summary.playerOfMatch}
+              notes={summary.notes}
+              goals={(goalsByMatch.get(summary.matchId) || []).map((goal) => ({ minute: goal.minute, scorerName: goal.scorerName, assistName: goal.assistName, team: goal.team }))}
+            />
+          ))
         )}
       </article>
     </PortalPage>

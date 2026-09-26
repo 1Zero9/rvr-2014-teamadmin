@@ -31,7 +31,7 @@ export function TeamComparisonSection({ allDivisionMatches, upcomingOpponents }:
     </article>
     {!isRvr && <article className="scout-card">
       <div className="scout-card-head"><Target size={16} /><h3>RVR comparison vs {team}</h3></div>
-      <div className={`scout-verdict scout-verdict-${verdict.favoured}`}><div className="scout-verdict-label"><Target size={14} /><strong>{verdict.favoured === 'teamA' ? 'RVR favoured' : verdict.favoured === 'teamB' ? `${team} favoured` : 'Too close to call'}</strong></div><ul className="scout-verdict-reasons">{verdict.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul><p className="scout-verdict-caveat">A transparent form and shared-opponent heuristic, not a predicted score.</p></div>
+      <div className={`scout-verdict scout-verdict-${verdict.favoured}`}><div className="scout-verdict-label"><Target size={14} /><strong>{verdict.favoured === 'teamA' ? 'RVR favoured' : verdict.favoured === 'teamB' ? `${team} favoured` : 'Too close to call'}</strong></div><ul className="scout-verdict-reasons">{verdict.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul></div>
       <div className="scout-common-section"><div className="scout-common-head"><TrendingUp size={14} /><span>Shared opponents</span></div>{common.length ? <div className="table-responsive"><table className="scout-common-table"><thead><tr><th>Opponent</th><th>RVR</th><th>{team}</th></tr></thead><tbody>{common.map((row) => <tr key={row.opponent}><td>{row.opponent}</td><td><ResultBadge result={row.teamAResult} /></td><td><ResultBadge result={row.teamBResult} /></td></tr>)}</tbody></table></div> : <p className="scout-no-data">No shared opponents played yet.</p>}</div>
     </article>}
   </div>;

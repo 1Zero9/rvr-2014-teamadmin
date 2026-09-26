@@ -2,20 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import {
-  Award,
   Calendar,
-  CheckCircle,
-  ChevronRight,
-  Clock,
   ExternalLink,
-  Flame,
-  Globe,
   MapPin,
   RefreshCw,
-  Search,
-  Sparkles,
-  Trophy,
-  Users,
 } from 'lucide-react';
 import { LeagueStanding, MatchRecord } from '../lib/matches-data';
 import { TeamComparisonSection } from './team-comparison-section';
@@ -26,6 +16,7 @@ interface FixturesSectionProps {
   liveStandings?: LeagueStanding[];
   leagueName?: string;
   leagueUrl?: string;
+  isLive?: boolean;
   /** Manual DDSL sync writes to the database, so only a Super Admin sees it. */
   canSync?: boolean;
 }
@@ -36,6 +27,7 @@ export function FixturesSection({
   liveStandings = [],
   leagueName = '13 Major 1 Boys Sat',
   leagueUrl = 'https://ddsl.ie/league/218148/',
+  isLive = true,
   canSync = false,
 }: FixturesSectionProps) {
   // The league table is the actual point of this page - land on it, not on
@@ -44,6 +36,7 @@ export function FixturesSection({
   const [scope, setScope] = useState<'rvr' | 'division'>('rvr');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [feedLive, setFeedLive] = useState(isLive);
 
   useEffect(() => {
     const openRequestedView = () => {
@@ -74,19 +67,22 @@ export function FixturesSection({
 
   const handleSync = async () => {
     setIsSyncing(true);
-    setSyncStatus('Connecting to DDSL League 218148...');
+    setSyncStatus('Refreshing…');
     try {
       const res = await fetch('/api/ddsl/sync');
       const data = await res.json();
       if (data.success) {
-        setSyncStatus(`Live Sync Success! ${data.rvrCount} RVR matches & ${data.standingsCount} team standings updated.`);
+        setFeedLive(true);
+        setSyncStatus('Up to date');
         setTimeout(() => setSyncStatus(null), 4000);
       } else {
-        setSyncStatus('Live data is already up to date.');
+        setFeedLive(false);
+        setSyncStatus('Couldn’t refresh');
         setTimeout(() => setSyncStatus(null), 3000);
       }
     } catch {
-      setSyncStatus('Refreshed with DDSL League 218148.');
+      setFeedLive(false);
+      setSyncStatus('Couldn’t refresh');
       setTimeout(() => setSyncStatus(null), 3000);
     } finally {
       setIsSyncing(false);
@@ -102,26 +98,10 @@ export function FixturesSection({
   return (
     <section className="public-section" id="fixtures-hub">
       <div className="section-container">
-        <div className="section-head">
-          <div className="section-pill">
-            <Trophy size={14} /> LIVE DDSL FEED · LEAGUE 218148
-          </div>
-          <h2>{leagueName}</h2>
-          <p>
-            Official match outcomes, upcoming kick-offs, referee appointments, and live division standings for River Valley Rangers FC.
-          </p>
-        </div>
-
-        {/* Sync Status Banner */}
-        <div className="fixtures-sync-bar">
-          <div className="sync-info">
+        <div className="fixtures-toolbar">
+          <div className={`feed-status ${feedLive ? 'live' : 'offline'}`}>
             <span className="live-dot" />
-            <div>
-              <strong>Live DDSL Integration:</strong> Connected directly to <em>https://ddsl.ie/league/218148/</em>
-              <small className="block text-slate-500 text-[11px] mt-0.5">
-                Automatically synchronised with official DDSL match sheets & referee reports.
-              </small>
-            </div>
+            <span>DDSL {feedLive ? 'live' : 'unavailable'}</span>
           </div>
 
           <div className="sync-actions">
@@ -134,7 +114,7 @@ export function FixturesSection({
                 disabled={isSyncing}
               >
                 <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
-                <span>{isSyncing ? 'Syncing...' : 'Sync Live DDSL'}</span>
+                <span>{isSyncing ? 'Refreshing…' : 'Refresh'}</span>
               </button>
             )}
             <a
@@ -143,7 +123,7 @@ export function FixturesSection({
               rel="noreferrer"
               className="sync-ext-btn"
             >
-              <span>Open DDSL.ie</span>
+              <span>Open DDSL</span>
               <ExternalLink size={12} />
             </a>
           </div>
@@ -157,35 +137,35 @@ export function FixturesSection({
               className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
               onClick={() => setFilter('all')}
             >
-              All Matches ({activeMatchesList.length})
+              All
             </button>
             <button
               type="button"
               className={`filter-tab ${filter === 'results' ? 'active' : ''}`}
               onClick={() => setFilter('results')}
             >
-              Latest Results ({completedMatches.length})
+              Results
             </button>
             <button
               type="button"
               className={`filter-tab ${filter === 'fixtures' ? 'active' : ''}`}
               onClick={() => setFilter('fixtures')}
             >
-              Upcoming Fixtures ({upcomingMatches.length})
+              Fixtures
             </button>
             <button
               type="button"
               className={`filter-tab ${filter === 'table' ? 'active' : ''}`}
               onClick={() => setFilter('table')}
             >
-              🏆 DDSL Standings Table ({liveStandings.length})
+              Table
             </button>
             <button
               type="button"
               className={`filter-tab ${filter === 'scout' ? 'active' : ''}`}
               onClick={() => setFilter('scout')}
             >
-              🔍 Scout Report ({rvrUpcomingOpponents.length})
+              Scout
             </button>
           </div>
 
@@ -196,14 +176,14 @@ export function FixturesSection({
                 className={`scope-btn ${scope === 'rvr' ? 'active' : ''}`}
                 onClick={() => setScope('rvr')}
               >
-                RVR 2014 Matches
+                Our matches
               </button>
               <button
                 type="button"
                 className={`scope-btn ${scope === 'division' ? 'active' : ''}`}
                 onClick={() => setScope('division')}
               >
-                All Division Matches
+                Division
               </button>
             </div>
           )}
@@ -221,7 +201,6 @@ export function FixturesSection({
               <div>
                 <span className="table-badge">OFFICIAL DDSL STANDINGS</span>
                 <h3>{leagueName}</h3>
-                <small className="text-slate-500 block mt-1">DDSL League ID: 218148 · Season 2026/27</small>
               </div>
               <a
                 href={leagueUrl}
@@ -291,12 +270,6 @@ export function FixturesSection({
               </table>
             </div>
 
-            <div className="table-footer-notes">
-              <p>
-                <strong>Scoring:</strong> Win = 3 pts · Draw = 1 pt · Loss = 0 pts. Live synced with DDSL League 218148.
-              </p>
-              <small>Last synced with DDSL registry today</small>
-            </div>
           </div>
         ) : (
           /* Fixtures & Results Grid */

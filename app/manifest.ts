@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Finn's Football",
-    short_name: "Finn's Football",
-    description: "Finn's private football match, league and scouting desk.",
+    name: "Finn's Team",
+    short_name: "Finn's Team",
+    description: "Finn's private team, league and scouting desk.",
     start_url: '/portal',
     scope: '/',
     display: 'standalone',

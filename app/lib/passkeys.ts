@@ -4,7 +4,7 @@ import { passkeyChallenges } from '../../db/schema';
 
 export function webauthnConfig(request: Request) {
   const url = new URL(request.url);
-  return { rpID: url.hostname, origin: url.origin, rpName: "Finn's Football" };
+  return { rpID: url.hostname, origin: url.origin, rpName: "Finn's Team" };
 }
 
 export async function saveChallenge(purpose: string, challenge: string) {

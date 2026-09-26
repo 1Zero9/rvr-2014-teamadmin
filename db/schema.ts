@@ -116,6 +116,7 @@ export const matchGoalEvents = pgTable('match_goal_events', {
   minute: integer('minute'),
   scorerName: text('scorer_name').notNull(),
   assistName: text('assist_name'),
+  team: text('team', { enum: ['rvr', 'opponent'] }).notNull().default('rvr'),
   sortOrder: integer('sort_order').notNull(),
   createdAt: text('created_at').notNull(),
 }, (table) => [index('idx_match_goal_events_match').on(table.matchId)]);

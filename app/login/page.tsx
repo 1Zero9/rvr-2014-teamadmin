@@ -10,8 +10,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main className="login-wrapper">
       <div className="login-card">
         <div className="login-header">
-          <span className="login-badge">FINN&apos;S FOOTBALL · PRIVATE APP</span>
-          <h1>Finn&apos;s Football</h1>
+          <span className="login-badge">FINN&apos;S TEAM · PRIVATE APP</span>
+          <h1>Finn&apos;s Team</h1>
           <p>Enter your private workspace password.</p>
         </div>
         {error === 'invalid' && <p className="login-error-banner">That password is not correct.</p>}

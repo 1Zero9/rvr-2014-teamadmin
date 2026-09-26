@@ -6,18 +6,18 @@ import { PwaRegistration } from './components/pwa-registration';
 const geist = Geist({ variable: '--font-geist', subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://finns-football.vercel.app'),
-  title: "Finn's Football",
-  description: "Finn's private football match, league and scouting desk.",
+  title: "Finn's Team",
+  description: "Finn's private team, league and scouting desk.",
   icons: { icon: '/rvr-crest.png', apple: '/rvr-crest.png' },
   openGraph: {
-    title: "Finn's Football",
-    description: "Finn's private football desk.",
+    title: "Finn's Team",
+    description: "Finn's private team desk.",
     images: ['/hero-squad.jpg'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Finn's Football",
-    description: "Finn's private football desk.",
+    title: "Finn's Team",
+    description: "Finn's private team desk.",
     images: ['/hero-squad.jpg'],
   },
 };

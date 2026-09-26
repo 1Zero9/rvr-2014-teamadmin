@@ -12,7 +12,7 @@ const schema = {
     opponentGoals: { type: 'integer', minimum: 0 },
     playerOfMatch: { type: 'string', nullable: true },
     notes: { type: 'string', nullable: true },
-    goals: { type: 'array', items: { type: 'object', required: ['minute', 'scorerName', 'assistName'], properties: { minute: { type: 'integer', minimum: 0, nullable: true }, scorerName: { type: 'string' }, assistName: { type: 'string', nullable: true } } } },
+    goals: { type: 'array', items: { type: 'object', required: ['minute', 'scorerName', 'assistName', 'team'], properties: { minute: { type: 'integer', minimum: 0, nullable: true }, scorerName: { type: 'string' }, assistName: { type: 'string', nullable: true }, team: { type: 'string', enum: ['rvr', 'opponent'] } } } },
     starters: { type: 'array', items: { type: 'object', required: ['playerName', 'squadNumber', 'isCaptain'], properties: { playerName: { type: 'string' }, squadNumber: { type: 'integer', nullable: true }, isCaptain: { type: 'boolean' } } } },
     bench: { type: 'array', items: { type: 'object', required: ['playerName', 'squadNumber', 'isCaptain'], properties: { playerName: { type: 'string' }, squadNumber: { type: 'integer', nullable: true }, isCaptain: { type: 'boolean' } } } },
   },
@@ -39,8 +39,8 @@ export async function POST(request: Request) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: 'Extract only visible facts from these youth football match screenshots. RVR means River Valley Rangers. Do not infer positions, substitutions, dates, or missing names. Use null when not visible. Retain displayed spelling. Return the whole starting squad and bench where present. A captain badge means isCaptain true.' }] },
-      contents: [{ role: 'user', parts: [{ text: 'These are screenshots for one completed match. Extract the score from RVR perspective, goal events, player of the match, starters and bench.' }, ...content] }],
+      systemInstruction: { parts: [{ text: 'Extract only visible facts from these youth football match screenshots. RVR means River Valley Rangers. Do not infer positions, substitutions, dates, or missing names. Use null when not visible. Retain displayed spelling. Return the whole starting squad and bench where present. A captain badge means isCaptain true. Every goal event must be tagged with which team scored it: "rvr" for a River Valley Rangers goal, "opponent" for a goal scored against RVR. Never guess a team; use the side of the screen, shirt colour, or team column shown in the screenshot to decide.' }] },
+      contents: [{ role: 'user', parts: [{ text: 'These are screenshots for one completed match. Extract the score from RVR perspective, goal events (each tagged with the scoring team), player of the match, starters and bench.' }, ...content] }],
       generationConfig: { responseMimeType: 'application/json', responseSchema: schema },
     }),
   });
