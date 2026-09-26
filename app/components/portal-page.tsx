@@ -82,9 +82,18 @@ export function PortalPage({
       </aside>
       <section className="content">
         <header className="topbar">
-          <div>
-            <p>{eyebrow}</p>
-            <h1>{title}</h1>
+          <div className="topbar-heading">
+            <Image
+              src="/rvr-crest.png"
+              width={32}
+              height={32}
+              alt="Rivervalley Rangers AFC crest"
+              className="topbar-crest"
+            />
+            <div>
+              <p>{eyebrow}</p>
+              <h1>{title}</h1>
+            </div>
           </div>
           <div className="topbar-actions"><EnrolPasskeyButton />{action}<InstallAppButton /></div>
         </header>

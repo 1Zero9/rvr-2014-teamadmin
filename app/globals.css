@@ -3257,6 +3257,8 @@ a {
   margin-bottom: 22px;
 }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
+.topbar-heading { display: flex; align-items: center; gap: 10px; }
+.topbar-crest { display: none; }
 .install-app-wrap { position: relative; }
 .install-app-button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 11px; background: #fff; color: #334155; font-size: 12px; font-weight: 700; cursor: pointer; }
 .install-app-help { position: absolute; z-index: 5; top: calc(100% + 7px); right: 0; width: 210px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px; background: #fff; box-shadow: 0 8px 20px rgba(15, 23, 42, .12); color: #334155; font-size: 12px; line-height: 1.4; }
@@ -4065,7 +4067,7 @@ a {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 600px), (max-height: 500px) and (orientation: landscape) {
   .app-shell {
     display: block;
   }
@@ -4105,6 +4107,10 @@ a {
   }
   .topbar h1 {
     font-size: 22px;
+  }
+  .topbar-crest {
+    display: block;
+    border-radius: 8px;
   }
   .topbar-actions { align-self: flex-start; }
   .install-app-button { padding: 8px; font-size: 0; }
@@ -4612,7 +4618,10 @@ a {
 .screenshot-picker span { display: grid; gap: 3px; }
 .screenshot-picker small { color: #64748b; font-size: 11px; }
 .screenshot-picker input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.screenshot-file-list { margin: -4px 0 0; padding-left: 18px; color: #64748b; font-size: 12px; display: grid; gap: 3px; }
+.screenshot-file-list { margin: -4px 0 0; padding-left: 0; color: #64748b; font-size: 12px; display: grid; gap: 3px; list-style: none; }
+.screenshot-file-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.screenshot-file-list li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.screenshot-file-list .icon-button { padding: 3px; flex: 0 0 auto; }
 .match-import-error { margin: 0; color: #b42318; font-size: 13px; }
 .import-review { display: grid; gap: 11px; padding-top: 4px; border-top: 1px solid #e2e8f0; }
 .import-review label { display: grid; gap: 6px; color: #334155; font-size: 12px; font-weight: 750; }
@@ -6883,8 +6892,12 @@ a {
 }
 
 /* Phone-first match desk: navigation stays at the bottom, with compact
-   glanceable metrics above the fold. Kept last to override legacy portal CSS. */
-@media (max-width: 600px) {
+   glanceable metrics above the fold. Kept last to override legacy portal CSS.
+   The second condition catches a phone turned to landscape: it's wide
+   enough to fail the width check but still short and still a phone, so
+   without this it fell through to the desktop sidebar - a full 260px fixed
+   column had no business appearing on a rotated phone. */
+@media (max-width: 600px), (max-height: 500px) and (orientation: landscape) {
   .app-shell { display: block; }
   .app-shell > .sidebar {
     position: fixed !important;

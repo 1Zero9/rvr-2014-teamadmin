@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ImageUp, LoaderCircle, Save, Sparkles } from 'lucide-react';
+import { ImageUp, LoaderCircle, Save, Sparkles, X } from 'lucide-react';
 import { saveImportedMatchAction } from '../actions';
 import type { ImportedMatch } from '../lib/match-import';
 
@@ -29,8 +29,26 @@ export function MatchScreenshotImporter({ matches }: { matches: MatchOption[] })
 
   return <article className="panel match-importer">
     <div className="section-heading"><div><span>IMPORT</span><h3>Match screenshots</h3></div><Sparkles size={20} /></div>
-    <label className="screenshot-picker"><ImageUp size={20} /><span><strong>{files.length ? `${files.length} screenshot${files.length === 1 ? '' : 's'} selected` : 'Choose 3–4 screenshots'}</strong><small>PNG, JPEG or WebP · 6 MB maximum each</small></span><input type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={(event) => setFiles(Array.from(event.target.files || []).slice(0, 4))} /></label>
-    {files.length > 0 && <ul className="screenshot-file-list">{files.map((file) => <li key={`${file.name}-${file.lastModified}`}>{file.name}</li>)}</ul>}
+    <label className="screenshot-picker"><ImageUp size={20} /><span><strong>{files.length ? `${files.length}/4 screenshots selected` : 'Choose 3–4 screenshots'}</strong><small>{files.length ? 'Pick again to add more, up to 4 total' : 'PNG, JPEG or WebP · 6 MB maximum each'}</small></span><input
+      type="file"
+      accept="image/png,image/jpeg,image/webp"
+      multiple
+      value=""
+      onChange={(event) => {
+        const picked = Array.from(event.target.files || []);
+        setFiles((current) => {
+          const merged = [...current, ...picked].filter((file, index, all) =>
+            all.findIndex((other) => other.name === file.name && other.lastModified === file.lastModified) === index);
+          return merged.slice(0, 4);
+        });
+      }}
+    /></label>
+    {files.length > 0 && <ul className="screenshot-file-list">{files.map((file) => (
+      <li key={`${file.name}-${file.lastModified}`}>
+        <span>{file.name}</span>
+        <button type="button" className="icon-button" aria-label={`Remove ${file.name}`} onClick={() => setFiles((current) => current.filter((entry) => entry !== file))}><X size={13} /></button>
+      </li>
+    ))}</ul>}
     <button type="button" className="primary" disabled={working} onClick={analyse}>{working ? <LoaderCircle className="spin" size={16} /> : <Sparkles size={16} />}{working ? 'Reading screenshots…' : 'Read screenshots'}</button>
     {error && <p className="match-import-error">{error}</p>}
     {match && <form action={saveImportedMatchAction} className="import-review">

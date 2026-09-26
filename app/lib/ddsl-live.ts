@@ -15,6 +15,10 @@ export interface DdslDivisionData {
   error?: string;
 }
 
+function slug(text: string) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
+}
+
 export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Promise<DdslDivisionData> {
   const url = `https://ddsl.ie/league/${leagueId}/`;
   
@@ -41,7 +45,6 @@ export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Prom
     const parsedMatches: MatchRecord[] = [];
     const rowRegex = /<tr class="table-body ([^"]*desktop-view[^"]*)"([^>]*)>/gi;
     let m;
-    let idx = 1;
 
     while ((m = rowRegex.exec(html)) !== null) {
       const attrStr = m[2];
@@ -96,8 +99,15 @@ export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Prom
         const parsedHomeScore = homescore !== '' ? parseInt(homescore, 10) : null;
         const parsedAwayScore = awayscore !== '' ? parseInt(awayscore, 10) : null;
 
+        // A match's id must survive from the moment it's picked in the
+        // screenshot importer to when its result is looked up again later -
+        // it used to be a plain row counter (`ddsl-${leagueId}-${idx++}`),
+        // which reassigns to a different real fixture every time DDSL's
+        // page reorders (new fixture added, a result posted, etc). That
+        // silently detached recorded results/stats from the match they
+        // were actually for. Derive it from the fixture itself instead.
         parsedMatches.push({
-          id: `ddsl-${leagueId}-${idx++}`,
+          id: `ddsl-${leagueId}-${slug(date)}-${slug(hometeam)}-${slug(awayteam)}`,
           opponent: isRvrHome || isRvrAway ? opponent : `${hometeam} vs ${awayteam}`,
           homeTeam: hometeam,
           awayTeam: awayteam,
