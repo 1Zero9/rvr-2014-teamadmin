@@ -97,7 +97,7 @@ export function PortalPage({
           </div>
           <div className="topbar-actions"><EnrolPasskeyButton />{action}<InstallAppButton /></div>
         </header>
-        {children}
+        <div className="content-body">{children}</div>
       </section>
     </main>
   );

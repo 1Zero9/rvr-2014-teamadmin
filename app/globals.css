@@ -902,10 +902,9 @@ a {
     justify-content: center;
     padding-inline: 0;
   }
-  .content {
+  .content-body {
     padding-inline: 24px;
   }
-  
 }
 
 @media (max-width: 600px), (max-height: 500px) and (orientation: landscape) {
@@ -940,7 +939,7 @@ a {
   .sidebar-bottom {
     display: none;
   }
-  .content {
+  .content-body {
     padding: 22px 16px 92px;
   }
   .topbar {
@@ -1869,7 +1868,7 @@ a {
   .app-shell > .sidebar .brand, .app-shell > .sidebar .sidebar-bottom, .app-shell > .sidebar .sidebar-nav-heading { display: none; }
   .app-shell > .sidebar .sidebar-nav-scroll { display: flex; width: 100%; padding: 0; margin: 0; flex-direction: row; overflow: visible; }
   .app-shell > .sidebar .nav-link { display: flex; flex: 1; min-height: 50px; padding: 0; justify-content: center; border-radius: 10px; }
-  .app-shell > .content { padding: 20px 16px calc(90px + env(safe-area-inset-bottom)); }
+  .app-shell > .content-body { padding: 20px 16px calc(90px + env(safe-area-inset-bottom)); }
   .topbar { margin-bottom: 16px; }
   .topbar h1 { font-size: 24px; }
   .metric-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
@@ -1909,7 +1908,7 @@ a {
    deliberately sit after the legacy site CSS so phone controls stay readable
    and comfortably tappable instead of inheriting the old marketing-site scale. */
 @media (max-width: 780px) {
-  .app-shell > .content {
+  .app-shell > .content-body {
     width: 100%;
     padding: 24px 16px calc(98px + env(safe-area-inset-bottom));
   }
@@ -2022,40 +2021,65 @@ a {
 }
 
 /* ==========================================================================
-   HOME SCOREBOARD — confirmed 2026-09-26 against a founder-reviewed proof
-   (three presentation directions; this one was picked over a generic
-   card-per-widget dashboard and a ruled "team sheet" layout). Scoped to the
-   Home screen only — solid colour blocks and condensed display type stand
-   in deliberate contrast to the rest of the app's bordered white panels.
+   APP SHELL — confirmed 2026-09-26 against a founder-reviewed proof, in two
+   rounds: first a full-colour "scoreboard" treatment (rejected as too dark
+   to read at length), then this one — dark navy frame top and bottom,
+   light content in between with a faint grid texture (like a stat sheet),
+   colour pulled back to accent rails and semantic badges. Applies app-wide,
+   not just Home: the topbar and content-area grid are shared chrome.
    ========================================================================== */
+
+.content { padding: 0; }
+.topbar {
+  background: var(--navy);
+  color: #fff;
+  margin: 0;
+  padding: 22px 32px;
+  border-radius: 0;
+}
+.topbar p { color: rgba(255, 255, 255, 0.55); }
+.topbar h1 { color: #fff; }
+.topbar-crest { border: 1px solid rgba(255, 255, 255, 0.25); }
+.install-app-button { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.25); color: #fff; }
+.passkey-enrol .install-app-button { color: #fff; }
+
+.content-body {
+  background-color: var(--canvas);
+  background-image:
+    linear-gradient(rgba(13, 24, 48, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 24, 48, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+  padding: 26px 32px 32px;
+}
 
 .scoreboard-stack { display: grid; gap: 10px; margin-top: 4px; }
 
 .scoreboard-readout {
   display: flex;
-  background: var(--navy);
-  border-radius: 14px;
-  padding: 16px 4px;
-  color: #fff;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 13px 4px;
+  box-shadow: 0 1px 2px rgba(13, 24, 48, 0.04);
 }
-.scoreboard-readout > div { flex: 1; text-align: center; border-right: 1px solid rgba(255, 255, 255, 0.14); }
+.scoreboard-readout > div { flex: 1; text-align: center; border-right: 1px solid var(--line); }
 .scoreboard-readout > div:last-child { border-right: none; }
 .scoreboard-readout span {
   display: block;
   font-family: var(--font-oswald), sans-serif;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.55);
-  margin-bottom: 5px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 4px;
   text-transform: uppercase;
 }
 .scoreboard-readout strong {
   font-family: var(--font-geist), monospace;
   font-variant-numeric: tabular-nums;
-  font-size: 22px;
-  font-weight: 600;
-  text-shadow: 0 0 16px rgba(255, 90, 130, 0.4);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
 }
 .scoreboard-form { display: flex; gap: 3px; justify-content: center; }
 .scoreboard-form i {
@@ -2063,85 +2087,98 @@ a {
   font-family: var(--font-geist), monospace;
   font-size: 10px;
   font-weight: 700;
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   border-radius: 4px;
   display: grid;
   place-items: center;
 }
-.scoreboard-form .sb-w { background: rgba(22, 163, 74, 0.35); color: #86efac; }
-.scoreboard-form .sb-d { background: rgba(217, 119, 6, 0.35); color: #fbbf24; }
-.scoreboard-form .sb-l { background: rgba(220, 38, 38, 0.35); color: #fca5a5; }
+.scoreboard-form .sb-w { background: var(--win-bg, #dcfce7); color: var(--win, #16a34a); }
+.scoreboard-form .sb-d { background: var(--draw-bg, #fef3c7); color: var(--draw, #d97706); }
+.scoreboard-form .sb-l { background: #fee2e2; color: #dc2626; }
 
 .scoreboard-block {
-  background: var(--navy);
-  border-radius: 14px;
-  padding: 18px 20px;
-  color: #fff;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 15px 16px;
+  color: var(--ink);
   text-decoration: none;
   display: block;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(13, 24, 48, 0.04);
 }
-.scoreboard-block.next { background: var(--maroon-deep); }
+.scoreboard-block::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--navy); }
+.scoreboard-block.next::before { background: var(--blue); }
 .scoreboard-block .label {
   font-family: var(--font-oswald), sans-serif;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.1em;
+  color: var(--muted);
   text-transform: uppercase;
 }
 .scoreboard-block h3 {
   font-family: var(--font-bebas), var(--font-oswald), sans-serif;
-  font-size: 30px;
-  line-height: 1.08;
-  letter-spacing: 0.01em;
-  margin: 6px 0 4px;
+  font-size: 27px;
+  line-height: 1.06;
+  letter-spacing: 0.005em;
+  margin: 5px 0 3px;
   font-weight: 400;
+  color: var(--ink);
 }
 .scoreboard-block .meta {
   margin: 0;
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  color: var(--muted);
   font-family: var(--font-geist), monospace;
   font-variant-numeric: tabular-nums;
 }
 .scoreboard-block .score {
   font-family: var(--font-bebas), sans-serif;
-  font-size: 46px;
+  font-size: 40px;
   letter-spacing: 0.02em;
   line-height: 1;
   margin: 4px 0 2px;
+  color: var(--ink);
 }
 
 .scoreboard-standings {
-  background: var(--navy);
-  border-radius: 14px;
-  padding: 14px 18px 6px;
-  color: #fff;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 16px 4px;
+  box-shadow: 0 1px 2px rgba(13, 24, 48, 0.04);
 }
 .scoreboard-standings .label {
   font-family: var(--font-oswald), sans-serif;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.1em;
+  color: var(--muted);
   text-transform: uppercase;
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .scoreboard-standings-row {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) 34px;
-  gap: 10px;
+  grid-template-columns: 20px minmax(0, 1fr) 40px;
+  gap: 8px;
   align-items: center;
-  padding: 8px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
   font-family: var(--font-geist), monospace;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 .scoreboard-standings-row:first-of-type { border-top: none; }
-.scoreboard-standings-row .pos { color: rgba(255, 255, 255, 0.5); font-variant-numeric: tabular-nums; }
-.scoreboard-standings-row .team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scoreboard-standings-row .pos { color: var(--muted-light); font-variant-numeric: tabular-nums; }
+.scoreboard-standings-row .team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
 .scoreboard-standings-row .pts { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
-.scoreboard-standings-row.is-rvr { color: #f4b8cc; }
-.scoreboard-standings-row.is-rvr .pos { color: #f4b8cc; }
+.scoreboard-standings-row.is-rvr { color: var(--blue); font-weight: 700; }
+.scoreboard-standings-row.is-rvr .pos, .scoreboard-standings-row.is-rvr .team { color: var(--blue); }
+
+@media (max-width: 600px), (max-height: 500px) and (orientation: landscape) {
+  .topbar { padding: 14px 16px; border-radius: 0; }
+  .content-body { padding: 18px 16px calc(90px + env(safe-area-inset-bottom)); background-size: 18px 18px; }
+}

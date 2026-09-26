@@ -36,7 +36,7 @@ export default async function PortalDashboardPage() {
         {next && <p className="meta">{next.kickoffTime} · {next.venue} · {next.homeAway === 'home' ? 'Home' : next.homeAway === 'away' ? 'Away' : 'Neutral'}</p>}
       </Link>
 
-      <Link href="/stats" className="scoreboard-block">
+      <Link href="/stats" className="scoreboard-block result">
         <span className="label">{latest ? `Full time · ${latest.matchDate}` : 'Latest result'}</span>
         {latest ? <div className="score">{latest.rvrGoals ?? 0}&ndash;{latest.opponentGoals ?? 0}</div> : <h3>No result listed</h3>}
         {latest && (() => {
