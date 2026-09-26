@@ -1002,15 +1002,7 @@ a {
   border: 1px solid rgba(140, 29, 64, 0.4);
 }
 
-.ticker-venue {
-  display: block;
-  margin-top: 2px;
-  color: #94a3b8;
-  font-size: 11px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 
 /* Compact source state and controls for the private matches screen. */
 .fixtures-toolbar {
@@ -1285,11 +1277,7 @@ a {
   flex-shrink: 0;
 }
 
-.potm-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-}
+
 
 .match-notes-text {
   margin: 0 0 14px;
@@ -1657,7 +1645,7 @@ a {
 
 /* Add Album Form Card */
 
-.album-title-input, .album-submitted-by-input {
+.album-submitted-by-input {
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
