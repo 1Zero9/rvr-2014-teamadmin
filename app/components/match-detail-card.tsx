@@ -44,7 +44,9 @@ export function MatchDetailCard({
             {goals.length === 0 && <li className="match-stats-help">No goal events recorded.</li>}
             {goals.map((goal, index) => (
               <li key={index} className={goal.team === 'opponent' ? 'opponent-goal' : undefined}>
-                {goal.team === 'opponent' ? 'OPP ' : ''}{goal.minute ? `${goal.minute}′ ` : ''}{goal.scorerName}{goal.assistName ? ` (${goal.assistName})` : ''}
+                {goal.team === 'opponent'
+                  ? `Opponent goal${goal.minute ? ` · ${goal.minute}′` : ''}`
+                  : `${goal.minute ? `${goal.minute}′ ` : ''}${goal.scorerName}${goal.assistName ? ` (${goal.assistName})` : ''}`}
               </li>
             ))}
           </ul>

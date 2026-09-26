@@ -83,7 +83,7 @@ export default async function StatsPage() {
         {summaries.length === 0 ? <p className="match-stats-help">Record your first match above to see it here.</p> : (
           summaries.map((summary) => (
             <MatchDetailCard
-              key={summary.matchId}
+              key={`${summary.matchId}-${summary.updatedAt}`}
               matchId={summary.matchId}
               label={matchLabels.get(summary.matchId) || summary.matchId}
               rvrGoals={summary.rvrGoals}

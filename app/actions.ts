@@ -137,10 +137,15 @@ export async function saveImportedMatchAction(formData: FormData) {
   try { imported = JSON.parse(value(formData, 'importedMatch')) as ImportedMatch; } catch { throw new Error('The imported match data is invalid. Please analyse the screenshots again.'); }
   if (!matchId || !Number.isInteger(imported.rvrGoals) || !Number.isInteger(imported.opponentGoals) || imported.rvrGoals < 0 || imported.opponentGoals < 0) throw new Error('Choose a match and confirm the score.');
   const clean = (name: string) => name.trim();
-  const goals = imported.goals.filter((goal) => clean(goal.scorerName));
+  // The DDSL live match centre only ever names RVR's own scorers; an
+  // unidentified opponent scorer comes through as the literal placeholder
+  // "Player". Treat that as an opponent goal regardless of what the model
+  // (or a person editing the form) tagged it as.
+  const isOpponentGoal = (goal: ImportedMatch['goals'][number]) => goal.team === 'opponent' || clean(goal.scorerName).toLowerCase() === 'player';
+  const goals = imported.goals.filter((goal) => clean(goal.scorerName) || goal.team === 'opponent');
   const contributions = new Map<string, { goals: number; assists: number }>();
   for (const goal of goals) {
-    if (goal.team === 'opponent') continue;
+    if (isOpponentGoal(goal)) continue;
     const scorer = clean(goal.scorerName); const assist = clean(goal.assistName || '');
     const scorerRow = contributions.get(scorer) || { goals: 0, assists: 0 }; scorerRow.goals++; contributions.set(scorer, scorerRow);
     if (assist) { const assistRow = contributions.get(assist) || { goals: 0, assists: 0 }; assistRow.assists++; contributions.set(assist, assistRow); }
@@ -156,7 +161,7 @@ export async function saveImportedMatchAction(formData: FormData) {
     await tx.delete(matchGoalEvents).where(eq(matchGoalEvents.matchId, matchId));
     await tx.delete(matchSquadSelections).where(eq(matchSquadSelections.matchId, matchId));
     if (contributions.size) await tx.insert(playerMatchStats).values([...contributions.entries()].map(([playerName, stats]) => ({ id: id(), matchId, playerName, ...stats, createdAt: updatedAt, updatedAt })));
-    if (goals.length) await tx.insert(matchGoalEvents).values(goals.map((goal, sortOrder) => ({ id: id(), matchId, minute: goal.minute, scorerName: clean(goal.scorerName), assistName: clean(goal.assistName || '') || null, team: goal.team === 'opponent' ? 'opponent' as const : 'rvr' as const, sortOrder, createdAt: updatedAt })));
+    if (goals.length) await tx.insert(matchGoalEvents).values(goals.map((goal, sortOrder) => ({ id: id(), matchId, minute: goal.minute, scorerName: clean(goal.scorerName), assistName: clean(goal.assistName || '') || null, team: isOpponentGoal(goal) ? 'opponent' as const : 'rvr' as const, sortOrder, createdAt: updatedAt })));
     if (selected.length) await tx.insert(matchSquadSelections).values(selected.map((player) => ({ id: id(), matchId, playerName: clean(player.playerName), squadNumber: player.squadNumber, selection: player.selection, isCaptain: player.isCaptain, sortOrder: player.sortOrder, createdAt: updatedAt })));
   });
   await audit(member.id, 'import', 'match_performance', matchId, `Imported private match record (${imported.rvrGoals}-${imported.opponentGoals}) from screenshots.`);
@@ -177,12 +182,19 @@ export async function updateMatchPerformanceAction(formData: FormData) {
   const scorers = formData.getAll('goalScorer').map(String);
   const assists = formData.getAll('goalAssist').map(String);
   const teams = formData.getAll('goalTeam').map(String);
-  const goals = scorers.map((scorerName, index) => ({
-    minute: minutes[index]?.trim() ? Number(minutes[index]) : null,
-    scorerName: clean(scorerName),
-    assistName: clean(assists[index] || ''),
-    team: teams[index] === 'opponent' ? 'opponent' as const : 'rvr' as const,
-  })).filter((goal) => goal.scorerName);
+  const goals = scorers.map((scorerName, index) => {
+    const cleanScorer = clean(scorerName);
+    // "Player" is the DDSL live match centre's placeholder for an
+    // unidentified opponent scorer - always treat it as an opponent goal,
+    // whatever the team dropdown was left on.
+    const team = teams[index] === 'opponent' || cleanScorer.toLowerCase() === 'player' ? 'opponent' as const : 'rvr' as const;
+    return {
+      minute: minutes[index]?.trim() ? Number(minutes[index]) : null,
+      scorerName: cleanScorer,
+      assistName: clean(assists[index] || ''),
+      team,
+    };
+  }).filter((goal) => goal.scorerName || goal.team === 'opponent');
 
   const contributions = new Map<string, { goals: number; assists: number }>();
   for (const goal of goals) {

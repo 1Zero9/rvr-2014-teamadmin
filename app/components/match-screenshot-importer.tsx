@@ -37,7 +37,7 @@ export function MatchScreenshotImporter({ matches }: { matches: MatchOption[] })
       <input type="hidden" name="importedMatch" value={JSON.stringify(match)} />
       <label>Save against fixture<select name="matchId" required defaultValue=""><option value="" disabled>Choose the matching fixture</option>{matches.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
       <div className="import-score"><strong>Extracted score</strong><span>RVR {match.rvrGoals} – {match.opponentGoals} opponent</span></div>
-      <div className="import-summary"><strong>{match.goals.length} goals</strong><span>{match.goals.map((goal) => `${goal.team === 'opponent' ? 'OPP ' : ''}${goal.minute ? `${goal.minute}′ ` : ''}${goal.scorerName}${goal.assistName ? ` (${goal.assistName})` : ''}`).join(' · ') || 'No goal events visible'}</span></div>
+      <div className="import-summary"><strong>{match.goals.length} goals</strong><span>{match.goals.map((goal) => goal.team === 'opponent' ? `Opponent goal${goal.minute ? ` · ${goal.minute}′` : ''}` : `${goal.minute ? `${goal.minute}′ ` : ''}${goal.scorerName}${goal.assistName ? ` (${goal.assistName})` : ''}`).join(' · ') || 'No goal events visible'}</span></div>
       <div className="import-summary"><strong>Squad</strong><span>{match.starters.length} starting · {match.bench.length} bench{match.playerOfMatch ? ` · POTM: ${match.playerOfMatch}` : ''}</span></div>
       <button className="primary" type="submit"><Save size={16} /> Save match</button>
     </form>}
