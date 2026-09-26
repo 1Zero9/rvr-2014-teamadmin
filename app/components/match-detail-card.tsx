@@ -7,6 +7,7 @@ import { MatchEditForm } from './match-edit-form';
 export function MatchDetailCard({
   matchId,
   label,
+  opponentName,
   rvrGoals,
   opponentGoals,
   playerOfMatch,
@@ -15,6 +16,7 @@ export function MatchDetailCard({
 }: {
   matchId: string;
   label: string;
+  opponentName: string;
   rvrGoals: number;
   opponentGoals: number;
   playerOfMatch: string | null;
@@ -28,7 +30,7 @@ export function MatchDetailCard({
       <div className="match-detail-header">
         <div>
           <h4>{label}</h4>
-          <strong>RVR {rvrGoals} – {opponentGoals} opponent</strong>
+          <strong>RVR {rvrGoals} – {opponentGoals} {opponentName}</strong>
         </div>
         <button type="button" className="text-button" onClick={() => setEditing((current) => !current)}>
           <Pencil size={13} /> {editing ? 'Cancel' : 'Edit'}
@@ -45,7 +47,7 @@ export function MatchDetailCard({
             {goals.map((goal, index) => (
               <li key={index} className={goal.team === 'opponent' ? 'opponent-goal' : undefined}>
                 {goal.team === 'opponent'
-                  ? `Opponent goal${goal.minute ? ` · ${goal.minute}′` : ''}`
+                  ? `${opponentName} goal${goal.minute ? ` · ${goal.minute}′` : ''}`
                   : `${goal.minute ? `${goal.minute}′ ` : ''}${goal.scorerName}${goal.assistName ? ` (${goal.assistName})` : ''}`}
               </li>
             ))}

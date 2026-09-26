@@ -1,5 +1,6 @@
 import { desc } from 'drizzle-orm';
 import { ExternalLink, Plus } from 'lucide-react';
+import Image from 'next/image';
 import { getDb } from '../../db';
 import { photoAlbums } from '../../db/schema';
 import { addGooglePhotosAlbumAction } from '../actions';
@@ -25,7 +26,7 @@ export default async function AlbumsPage() {
     </div>
     <section className="album-card-grid">
       {albums.map((album) => <a key={album.id} href={album.shareUrl} target="_blank" rel="noreferrer" className="album-link-card">
-        <img src={album.coverUrl} alt="" />
+        <div className="album-cover"><Image src={album.coverUrl} alt="" fill sizes="220px" /></div>
         <div><span>GOOGLE PHOTOS</span><h3>{album.title}</h3><p>Open album <ExternalLink size={14} /></p></div>
       </a>)}
       {!albums.length && <p className="match-stats-help">No albums saved yet. Add your first Google Photos link above.</p>}

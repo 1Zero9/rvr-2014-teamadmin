@@ -7,6 +7,7 @@ import { MatchScreenshotImporter } from '../components/match-screenshot-importer
 import { PortalPage } from '../components/portal-page';
 import { requireApprovedMember } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
+import { getMatchesFromDb } from '../lib/matches';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,7 @@ type Contribution = { playerName: string; goals: number; assists: number };
 
 export default async function StatsPage() {
   const member = await requireApprovedMember();
-  const live = await fetchLiveDdslLeagueData('218148');
+  const [live, cachedMatches] = await Promise.all([fetchLiveDdslLeagueData('218148'), getMatchesFromDb()]);
   let summaries: typeof matchPerformanceSummaries.$inferSelect[] = [];
   let contributions: typeof playerMatchStats.$inferSelect[] = [];
   let goalEvents: typeof matchGoalEvents.$inferSelect[] = [];
@@ -35,10 +36,16 @@ export default async function StatsPage() {
     goalsByMatch.set(goal.matchId, list);
   }
 
-  const matchLabels = new Map(live.rvrMatches.map((match) => [
+  // The live DDSL scrape only lists a rolling window of fixtures, so a
+  // completed match can drop off it over time. Fall back to the app's own
+  // persisted match cache (kept in sync by /api/ddsl/sync) for anything the
+  // live fetch no longer has, so older matches still show their real name.
+  const allKnownMatches = [...cachedMatches, ...live.rvrMatches];
+  const matchLabels = new Map(allKnownMatches.map((match) => [
     match.id,
     `${match.matchDate} · ${match.homeAway === 'home' ? 'RVR v' : 'RVR away to'} ${match.opponent}`,
   ]));
+  const opponentNames = new Map(allKnownMatches.map((match) => [match.id, match.opponent]));
   const totals = new Map<string, Contribution>();
   for (const row of contributions) {
     const current = totals.get(row.playerName) || { playerName: row.playerName, goals: 0, assists: 0 };
@@ -85,7 +92,8 @@ export default async function StatsPage() {
             <MatchDetailCard
               key={`${summary.matchId}-${summary.updatedAt}`}
               matchId={summary.matchId}
-              label={matchLabels.get(summary.matchId) || summary.matchId}
+              label={matchLabels.get(summary.matchId) || 'Recorded match'}
+              opponentName={opponentNames.get(summary.matchId) || 'the opposition'}
               rvrGoals={summary.rvrGoals}
               opponentGoals={summary.opponentGoals}
               playerOfMatch={summary.playerOfMatch}
