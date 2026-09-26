@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { loginAction } from '../actions';
 import { getCurrentMember } from '../lib/authz';
@@ -11,6 +12,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main className="login-wrapper">
       <div className="login-card">
         <div className="login-header">
+          <div className="login-crest-wrap">
+            <Image src="/rvr-crest.png" width={76} height={76} alt="Rivervalley Rangers AFC crest" priority />
+          </div>
           <span className="login-badge">FINN&apos;S TEAM · PRIVATE APP</span>
           <h1>Finn&apos;s Team</h1>
           <p>Enter your private workspace password.</p>

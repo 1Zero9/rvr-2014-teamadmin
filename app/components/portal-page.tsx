@@ -41,9 +41,10 @@ export function PortalPage({
         <Link className="brand" href="/portal">
           <Image
             src="/rvr-white.png"
-            width={48}
-            height={48}
+            width={60}
+            height={60}
             alt="Rivervalley Rangers AFC crest"
+            priority
           />
           <div>
             <strong>Finn&apos;s Team</strong>

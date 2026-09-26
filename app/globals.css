@@ -3,9 +3,10 @@
 :root {
   --navy: #071a33;
   --navy-dark: #040e1c;
-  --blue: #1769e0;
-  --blue-light: #257bf3;
-  --blue-glow: #1769e033;
+  /* Brand accent, sampled from the club crest's maroon (was a generic blue). */
+  --blue: #8c1d40;
+  --blue-light: #b33a5e;
+  --blue-glow: #8c1d4033;
   --emerald: #10b981;
   --amber: #f59e0b;
   --ink: #142033;
@@ -111,8 +112,8 @@ a {
   display: inline-block;
   padding: 2px 7px;
   border-radius: 6px;
-  background: rgba(23, 105, 224, 0.35);
-  border: 1px solid rgba(23, 105, 224, 0.6);
+  background: rgba(140, 29, 64, 0.35);
+  border: 1px solid rgba(140, 29, 64, 0.6);
   color: #93c5fd;
   font-size: 10px;
   font-weight: 700;
@@ -158,19 +159,19 @@ a {
   gap: 8px;
   padding: 9px 16px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #1769e0 0%, #0d4eb0 100%);
+  background: linear-gradient(135deg, #8c1d40 0%, #5c1029 100%);
   color: #ffffff;
   font-size: 12px;
   font-weight: 650;
-  box-shadow: 0 4px 14px rgba(23, 105, 224, 0.35);
+  box-shadow: 0 4px 14px rgba(140, 29, 64, 0.35);
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .portal-cta-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(23, 105, 224, 0.5);
-  background: linear-gradient(135deg, #257bf3 0%, #1769e0 100%);
+  box-shadow: 0 6px 20px rgba(140, 29, 64, 0.5);
+  background: linear-gradient(135deg, #b33a5e 0%, #8c1d40 100%);
 }
 
 .mobile-toggle {
@@ -601,9 +602,9 @@ a {
 }
 
 .hero-pill.squad {
-  background: rgba(37, 123, 243, 0.2);
+  background: rgba(179, 58, 94, 0.2);
   color: #93c5fd;
-  border: 1px solid rgba(37, 123, 243, 0.4);
+  border: 1px solid rgba(179, 58, 94, 0.4);
 }
 
 .hero-title {
@@ -754,7 +755,7 @@ a {
 }
 
 .hero-btn-portal:hover {
-  background: rgba(23, 105, 224, 0.4);
+  background: rgba(140, 29, 64, 0.4);
   color: #ffffff;
   border-color: #ffffff;
   transform: translateY(-2px);
@@ -1996,7 +1997,7 @@ a {
 .tournament-card.selected {
   border-color: var(--blue);
   background: #f0f7ff;
-  box-shadow: 0 8px 20px rgba(23, 105, 224, 0.15);
+  box-shadow: 0 8px 20px rgba(140, 29, 64, 0.15);
 }
 
 .t-card-top {
@@ -2360,7 +2361,7 @@ a {
   width: 64px;
   height: 64px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #1769e0 0%, #0d4eb0 100%);
+  background: linear-gradient(135deg, #8c1d40 0%, #5c1029 100%);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -2538,7 +2539,7 @@ a {
 }
 
 .footer-login-btn:hover {
-  background: #257bf3;
+  background: #b33a5e;
 }
 
 .footer-bottom {
@@ -2808,7 +2809,7 @@ a {
 
 .input-icon-wrap input:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.15);
+  box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.15);
 }
 
 .presets-title {
@@ -2968,7 +2969,7 @@ a {
 .nav-link.active {
   color: #fff;
   background: var(--blue);
-  box-shadow: 0 6px 18px #0346a759;
+  box-shadow: 0 6px 18px #5c102959;
 }
 
 .nav-link em {
@@ -3285,7 +3286,7 @@ a {
   border-radius: 8px;
   background: var(--blue);
   color: #fff;
-  box-shadow: 0 5px 14px #1769e033;
+  box-shadow: 0 5px 14px #8c1d4033;
   font-size: 13px;
   font-weight: 680;
   border: 0;
@@ -3776,7 +3777,7 @@ a {
 
 .field input:focus, .field select:focus, .field textarea:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px #1769e019;
+  box-shadow: 0 0 0 3px #8c1d4019;
 }
 
 .field textarea {
@@ -3822,7 +3823,7 @@ a {
   padding: 4px 8px;
   border-radius: 12px;
   background: #eef4ff;
-  color: #1769e0;
+  color: #8c1d40;
   font-size: 9px;
   font-weight: 700;
 }
@@ -3916,7 +3917,7 @@ a {
 
 .pending-page p {
   margin: 20px 0 7px;
-  color: #1769e0;
+  color: #8c1d40;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -3958,7 +3959,7 @@ a {
 .role-form button {
   padding: 6px 10px;
   border-radius: 6px;
-  background: #1769e0;
+  background: #8c1d40;
   color: #fff;
   font-size: 10px;
 }
@@ -4198,9 +4199,9 @@ a {
 }
 
 .ticker-badge.next {
-  background: rgba(23, 105, 224, 0.2);
+  background: rgba(140, 29, 64, 0.2);
   color: #93c5fd;
-  border: 1px solid rgba(23, 105, 224, 0.4);
+  border: 1px solid rgba(140, 29, 64, 0.4);
 }
 
 .ticker-content {
@@ -4264,7 +4265,7 @@ a {
 }
 
 .ticker-full-btn:hover {
-  background: #257bf3;
+  background: #b33a5e;
 }
 
 /* Compact source state and controls for the private matches screen. */
@@ -4742,7 +4743,7 @@ a {
     text-align: center;
     color: #475569;
   }
-  .rotate-hint svg { color: #1769e0; animation: rotate-hint-spin 1.8s ease-in-out infinite; }
+  .rotate-hint svg { color: #8c1d40; animation: rotate-hint-spin 1.8s ease-in-out infinite; }
   .rotate-hint strong { color: #0f172a; font-size: 15px; }
   .rotate-hint span { font-size: 13px; max-width: 260px; }
   .league-table-card .table-responsive { display: none; }
