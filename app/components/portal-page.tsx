@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BarChart3, CalendarDays, Camera, Home } from 'lucide-react';
 import { type Member } from '../lib/authz';
+import { getAppVersion } from '../lib/version';
 import { InstallAppButton } from './install-app-button';
 import { EnrolPasskeyButton } from './passkey-buttons';
 
@@ -75,6 +76,7 @@ export function PortalPage({
               <small>Private workspace</small>
             </div>
           </div>
+          <p className="app-version">v{getAppVersion()}</p>
         </div>
       </aside>
       <section className="content">

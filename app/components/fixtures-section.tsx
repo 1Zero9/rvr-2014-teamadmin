@@ -6,6 +6,7 @@ import {
   ExternalLink,
   MapPin,
   RefreshCw,
+  RotateCw,
 } from 'lucide-react';
 import { LeagueStanding, MatchRecord } from '../lib/matches-data';
 import { TeamComparisonSection } from './team-comparison-section';
@@ -213,6 +214,11 @@ export function FixturesSection({
               </a>
             </div>
 
+            <div className="rotate-hint">
+              <RotateCw size={22} />
+              <strong>Rotate your phone</strong>
+              <span>The full league table needs landscape to read cleanly.</span>
+            </div>
             <div className="table-responsive">
               <table className="standings-table">
                 <thead>

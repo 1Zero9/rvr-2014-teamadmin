@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { loginAction } from '../actions';
 import { getCurrentMember } from '../lib/authz';
+import { getAppVersion } from '../lib/version';
 import { PasskeyLoginButton } from '../components/passkey-buttons';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -23,6 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <button type="submit" className="login-submit-btn">Open workspace</button>
         </form>
         <div className="passkey-login"><span>or</span><PasskeyLoginButton /></div>
+        <p className="app-version login-version">v{getAppVersion()}</p>
       </div>
     </main>
   );
