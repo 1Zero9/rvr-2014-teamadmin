@@ -46,6 +46,7 @@ export default async function StatsPage() {
     `${match.matchDate} · ${match.homeAway === 'home' ? 'RVR v' : 'RVR away to'} ${match.opponent}`,
   ]));
   const opponentNames = new Map(allKnownMatches.map((match) => [match.id, match.opponent]));
+  const matchDates = new Map(allKnownMatches.map((match) => [match.id, match.matchDate]));
   const totals = new Map<string, Contribution>();
   for (const row of contributions) {
     const current = totals.get(row.playerName) || { playerName: row.playerName, goals: 0, assists: 0 };
@@ -93,6 +94,7 @@ export default async function StatsPage() {
               key={`${summary.matchId}-${summary.updatedAt}`}
               matchId={summary.matchId}
               label={matchLabels.get(summary.matchId) || 'Recorded match'}
+              date={matchDates.get(summary.matchId) || ''}
               opponentName={opponentNames.get(summary.matchId) || 'the opposition'}
               rvrGoals={summary.rvrGoals}
               opponentGoals={summary.opponentGoals}

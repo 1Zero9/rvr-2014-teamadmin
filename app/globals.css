@@ -4656,11 +4656,29 @@ a {
 .match-detail-goals { display: grid; gap: 6px; margin: 6px 0; font-size: 13px; color: #334155; }
 .match-detail-goals li { list-style: none; }
 .match-detail-goals .opponent-goal { color: #94a3b8; }
-.match-detail-card { display: grid; gap: 10px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; }
-.match-detail-card:last-child { margin-bottom: 0; }
-.match-detail-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.match-detail-header h4 { margin: 0; font-size: 14px; }
-.match-detail-header strong { font-size: 15px; }
+
+/* Result card: one glanceable pattern, repeated - a coloured W/D/L badge so
+   the outcome reads before either score does, team rows with bold score,
+   everything else (goals, notes, edit) tucked behind "Details". */
+.result-card { display: grid; gap: 10px; padding: 14px 16px; border-radius: 12px; background: #f8fafc; margin-bottom: 10px; }
+.result-card:last-child { margin-bottom: 0; }
+.result-card-head { display: flex; align-items: center; gap: 10px; }
+.result-badge { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; color: #fff; font-weight: 800; font-size: 12px; flex: 0 0 auto; }
+.result-badge-w { background: #16a34a; }
+.result-badge-d { background: #d97706; }
+.result-badge-l { background: #dc2626; }
+.result-date { color: #64748b; font-size: 12px; font-weight: 650; }
+.result-teams { display: grid; gap: 6px; }
+.result-team { display: flex; align-items: center; gap: 10px; }
+.team-avatar { border-radius: 50%; flex: 0 0 auto; object-fit: contain; background: #fff; border: 1px solid #e2e8f0; }
+.team-avatar-initial { display: grid; place-items: center; width: 28px; height: 28px; background: #e2e8f0; color: #475569; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.team-name { flex: 1; font-size: 14px; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rvr-team-name { font-weight: 750; color: #0f172a; }
+.team-score { font-size: 19px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; min-width: 20px; text-align: right; }
+.result-card-actions { display: flex; align-items: center; gap: 16px; }
+.result-card-actions .chevron-open { transform: rotate(180deg); }
+.result-card-actions svg { transition: transform 0.15s; }
+.result-card-details { padding-top: 10px; border-top: 1px solid #e2e8f0; }
 .icon-button, .text-button { border: 0; background: transparent; color: #2563eb; cursor: pointer; }
 .icon-button { display: grid; place-items: center; padding: 8px; border-radius: 7px; }
 .icon-button:disabled { color: #cbd5e1; cursor: not-allowed; }
