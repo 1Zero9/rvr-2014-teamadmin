@@ -2,6 +2,7 @@ import { desc } from 'drizzle-orm';
 import { Award, Goal } from 'lucide-react';
 import { getDb } from '../../db';
 import { matchGoalEvents, matchPerformanceSummaries, playerMatchStats } from '../../db/schema';
+import { GoalsAssistsLeaderboard } from '../components/goals-assists-leaderboard';
 import { MatchDetailCard } from '../components/match-detail-card';
 import { MatchScreenshotImporter } from '../components/match-screenshot-importer';
 import { PortalPage } from '../components/portal-page';
@@ -70,14 +71,7 @@ export default async function StatsPage() {
         <div className="metric"><span>Contributions logged</span><strong>{contributions.reduce((sum, row) => sum + row.goals + row.assists, 0)}</strong></div>
       </div>
       <MatchScreenshotImporter matches={live.rvrMatches.map((match) => ({ id: match.id, label: matchLabels.get(match.id) || match.id }))} />
-      <article className="panel">
-        <div className="section-heading"><div><span>SEASON TOTALS</span><h3>Goals & assists</h3></div><Goal size={20} /></div>
-        {leaderboard.length === 0 ? <p className="match-stats-help">Record the first match to start the running table.</p> : (
-          <table className="data-table compact-table"><thead><tr><th>Player</th><th>Goals</th><th>Assists</th></tr></thead><tbody>
-            {leaderboard.map((row) => <tr key={row.playerName}><td><strong>{row.playerName}</strong></td><td>{row.goals}</td><td>{row.assists}</td></tr>)}
-          </tbody></table>
-        )}
-      </article>
+      <GoalsAssistsLeaderboard leaderboard={leaderboard} />
       <article className="panel">
         <div className="section-heading"><div><span>PLAYER OF THE MATCH</span><h3>Matchday awards</h3></div><Award size={20} /></div>
         {motmLeaders.length === 0 ? <p className="match-stats-help">Player of the match awards will appear after your first record.</p> : (
