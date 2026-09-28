@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { isAuthenticatedRequest } from '../../../lib/authz';
+import { resolvePlayerName, type ImportedMatch } from '../../../lib/match-import';
 
 export const runtime = 'nodejs';
 
@@ -50,7 +51,20 @@ export async function POST(request: Request) {
   }
   const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
   try {
-    return NextResponse.json({ match: JSON.parse(payload.candidates?.[0]?.content?.parts?.[0]?.text || '') });
+    const match = JSON.parse(payload.candidates?.[0]?.content?.parts?.[0]?.text || '') as ImportedMatch;
+    // The goals/POTM screen only shows a first name + surname initial; the
+    // squad screen shows full names. Resolve the former against the latter
+    // so the saved record uses full names throughout.
+    const fullNames = [...match.starters, ...match.bench].map((player) => player.playerName);
+    if (fullNames.length) {
+      match.playerOfMatch = match.playerOfMatch ? resolvePlayerName(match.playerOfMatch, fullNames) : match.playerOfMatch;
+      match.goals = match.goals.map((goal) => ({
+        ...goal,
+        scorerName: resolvePlayerName(goal.scorerName, fullNames),
+        assistName: goal.assistName ? resolvePlayerName(goal.assistName, fullNames) : goal.assistName,
+      }));
+    }
+    return NextResponse.json({ match });
   } catch {
     return NextResponse.json({ error: 'The screenshot reader returned an invalid result. Please try again.' }, { status: 502 });
   }
