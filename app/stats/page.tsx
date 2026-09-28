@@ -1,5 +1,5 @@
 import { desc } from 'drizzle-orm';
-import { Award, Goal } from 'lucide-react';
+import { Goal } from 'lucide-react';
 import { getDb } from '../../db';
 import { matchGoalEvents, matchPerformanceSummaries, playerMatchStats } from '../../db/schema';
 import { GoalsAssistsLeaderboard } from '../components/goals-assists-leaderboard';
@@ -71,13 +71,10 @@ export default async function StatsPage() {
         <div className="metric"><span>Contributions logged</span><strong>{contributions.reduce((sum, row) => sum + row.goals + row.assists, 0)}</strong></div>
       </div>
       <MatchScreenshotImporter matches={live.rvrMatches.map((match) => ({ id: match.id, label: matchLabels.get(match.id) || match.id }))} />
-      <GoalsAssistsLeaderboard leaderboard={leaderboard} />
-      <article className="panel">
-        <div className="section-heading"><div><span>PLAYER OF THE MATCH</span><h3>Matchday awards</h3></div><Award size={20} /></div>
-        {motmLeaders.length === 0 ? <p className="match-stats-help">Player of the match awards will appear after your first record.</p> : (
-          <div className="motm-list">{motmLeaders.map(([player, awards]) => <div key={player}><strong>{player}</strong><span>{awards} {awards === 1 ? 'award' : 'awards'}</span></div>)}</div>
-        )}
-      </article>
+      <GoalsAssistsLeaderboard
+        leaderboard={leaderboard}
+        motmLeaders={motmLeaders.map(([playerName, awards]) => ({ playerName, awards }))}
+      />
       <article className="panel">
         <div className="section-heading"><div><span>MATCH BY MATCH</span><h3>Per-match record</h3></div><Goal size={20} /></div>
         {summaries.length === 0 ? <p className="match-stats-help">Record your first match above to see it here.</p> : (
