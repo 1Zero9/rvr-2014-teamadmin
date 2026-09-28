@@ -19,9 +19,22 @@ function slug(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
 }
 
+// `export const dynamic = 'force-dynamic'` on every caller (portal,
+// fixtures, stats - needed for the per-request auth cookie check) also
+// forces every `fetch` on the page to bypass Next's Data Cache, so the
+// `next: { revalidate: 300 }` below is silently ignored: each navigation
+// between those three pages re-fetched this ~1.6 MB page fresh from
+// ddsl.ie (~1.3s) instead of reusing a recent copy. This module-level
+// cache is independent of the Data Cache, so it survives force-dynamic.
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const liveDataCache = new Map<string, { data: DdslDivisionData; fetchedAt: number }>();
+
 export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Promise<DdslDivisionData> {
+  const cached = liveDataCache.get(leagueId);
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) return cached.data;
+
   const url = `https://ddsl.ie/league/${leagueId}/`;
-  
+
   try {
     const res = await fetch(url, {
       next: { revalidate: 300 }, // Cache for 5 minutes in Next.js
@@ -255,7 +268,7 @@ export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Prom
       t.pos = i + 1;
     });
 
-    return {
+    const result: DdslDivisionData = {
       leagueName,
       leagueUrl: url,
       leagueId,
@@ -264,6 +277,8 @@ export async function fetchLiveDdslLeagueData(leagueId: string = '218148'): Prom
       allDivisionMatches: parsedMatches,
       standings: standingsArray,
     };
+    liveDataCache.set(leagueId, { data: result, fetchedAt: Date.now() });
+    return result;
   } catch (error) {
     // No fabricated matches or standings on failure - a real youth football
     // result is either the genuine DDSL record or clearly marked as
