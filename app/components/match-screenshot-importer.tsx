@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ImageUp, LoaderCircle, Save, Sparkles, X } from 'lucide-react';
 import { saveImportedMatchAction } from '../actions';
 import type { ImportedMatch } from '../lib/match-import';
@@ -8,6 +8,7 @@ import type { ImportedMatch } from '../lib/match-import';
 type MatchOption = { id: string; label: string };
 
 export function MatchScreenshotImporter({ matches }: { matches: MatchOption[] }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [match, setMatch] = useState<ImportedMatch | null>(null);
   const [error, setError] = useState('');
@@ -27,37 +28,51 @@ export function MatchScreenshotImporter({ matches }: { matches: MatchOption[] })
     finally { setWorking(false); }
   }
 
-  return <article className="panel match-importer">
-    <div className="section-heading"><div><span>IMPORT</span><h3>Match screenshots</h3></div><Sparkles size={20} /></div>
-    <label className="screenshot-picker"><ImageUp size={20} /><span><strong>{files.length ? `${files.length}/4 screenshots selected` : 'Choose 3–4 screenshots'}</strong><small>{files.length ? 'Pick again to add more, up to 4 total' : 'PNG, JPEG or WebP · 6 MB maximum each'}</small></span><input
-      type="file"
-      accept="image/png,image/jpeg,image/webp"
-      multiple
-      value=""
-      onChange={(event) => {
-        const picked = Array.from(event.target.files || []);
-        setFiles((current) => {
-          const merged = [...current, ...picked].filter((file, index, all) =>
-            all.findIndex((other) => other.name === file.name && other.lastModified === file.lastModified) === index);
-          return merged.slice(0, 4);
-        });
-      }}
-    /></label>
-    {files.length > 0 && <ul className="screenshot-file-list">{files.map((file) => (
-      <li key={`${file.name}-${file.lastModified}`}>
-        <span>{file.name}</span>
-        <button type="button" className="icon-button" aria-label={`Remove ${file.name}`} onClick={() => setFiles((current) => current.filter((entry) => entry !== file))}><X size={13} /></button>
-      </li>
-    ))}</ul>}
-    <button type="button" className="primary" disabled={working} onClick={analyse}>{working ? <LoaderCircle className="spin" size={16} /> : <Sparkles size={16} />}{working ? 'Reading screenshots…' : 'Read screenshots'}</button>
-    {error && <p className="match-import-error">{error}</p>}
-    {match && <form action={saveImportedMatchAction} className="import-review">
-      <input type="hidden" name="importedMatch" value={JSON.stringify(match)} />
-      <label>Save against fixture<select name="matchId" required defaultValue=""><option value="" disabled>Choose the matching fixture</option>{matches.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-      <div className="import-score"><strong>Extracted score</strong><span>RVR {match.rvrGoals} – {match.opponentGoals} opponent</span></div>
-      <div className="import-summary"><strong>{match.goals.length} goals</strong><span>{match.goals.map((goal) => goal.team === 'opponent' ? `Opponent goal${goal.minute ? ` · ${goal.minute}′` : ''}` : `${goal.minute ? `${goal.minute}′ ` : ''}${goal.scorerName}${goal.assistName ? ` (${goal.assistName})` : ''}`).join(' · ') || 'No goal events visible'}</span></div>
-      <div className="import-summary"><strong>Squad</strong><span>{match.starters.length} starting · {match.bench.length} bench{match.playerOfMatch ? ` · POTM: ${match.playerOfMatch}` : ''}</span></div>
-      <button className="primary" type="submit"><Save size={16} /> Save match</button>
-    </form>}
-  </article>;
+  function reset() {
+    setFiles([]); setMatch(null); setError(''); setWorking(false);
+  }
+
+  return <>
+    <button type="button" className="import-trigger-btn" onClick={() => dialogRef.current?.showModal()}>
+      <Sparkles size={16} /> Import match screenshots
+    </button>
+    <dialog ref={dialogRef} className="import-dialog" onClose={reset}>
+      <article className="match-importer">
+        <div className="section-heading">
+          <div><span>IMPORT</span><h3>Match screenshots</h3></div>
+          <button type="button" className="icon-button" aria-label="Close" onClick={() => dialogRef.current?.close()}><X size={18} /></button>
+        </div>
+        <label className="screenshot-picker"><ImageUp size={20} /><span><strong>{files.length ? `${files.length}/4 screenshots selected` : 'Choose 3–4 screenshots'}</strong><small>{files.length ? 'Pick again to add more, up to 4 total' : 'PNG, JPEG or WebP · 6 MB maximum each'}</small></span><input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          multiple
+          value=""
+          onChange={(event) => {
+            const picked = Array.from(event.target.files || []);
+            setFiles((current) => {
+              const merged = [...current, ...picked].filter((file, index, all) =>
+                all.findIndex((other) => other.name === file.name && other.lastModified === file.lastModified) === index);
+              return merged.slice(0, 4);
+            });
+          }}
+        /></label>
+        {files.length > 0 && <ul className="screenshot-file-list">{files.map((file) => (
+          <li key={`${file.name}-${file.lastModified}`}>
+            <span>{file.name}</span>
+            <button type="button" className="icon-button" aria-label={`Remove ${file.name}`} onClick={() => setFiles((current) => current.filter((entry) => entry !== file))}><X size={13} /></button>
+          </li>
+        ))}</ul>}
+        <button type="button" className="primary" disabled={working} onClick={analyse}>{working ? <LoaderCircle className="spin" size={16} /> : <Sparkles size={16} />}{working ? 'Reading screenshots…' : 'Read screenshots'}</button>
+        {error && <p className="match-import-error">{error}</p>}
+        {match && <form action={saveImportedMatchAction} className="import-review">
+          <input type="hidden" name="importedMatch" value={JSON.stringify(match)} />
+          <label>Save against fixture<select name="matchId" required defaultValue=""><option value="" disabled>Choose the matching fixture</option>{matches.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+          <div className="import-score"><strong>Extracted score</strong><span>RVR {match.rvrGoals} – {match.opponentGoals} opponent</span></div>
+          <div className="import-summary"><strong>{match.goals.length} goals</strong><span>{match.goals.map((goal) => goal.team === 'opponent' ? `Opponent goal${goal.minute ? ` · ${goal.minute}′` : ''}` : `${goal.minute ? `${goal.minute}′ ` : ''}${goal.scorerName}${goal.assistName ? ` (${goal.assistName})` : ''}`).join(' · ') || 'No goal events visible'}</span></div>
+          <div className="import-summary"><strong>Squad</strong><span>{match.starters.length} starting · {match.bench.length} bench{match.playerOfMatch ? ` · POTM: ${match.playerOfMatch}` : ''}</span></div>
+          <button className="primary" type="submit"><Save size={16} /> Save match</button>
+        </form>}
+      </article>
+    </dialog>
+  </>;
 }
