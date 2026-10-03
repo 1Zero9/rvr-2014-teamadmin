@@ -5,12 +5,16 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '../db';
-import { auditLog, matchGoalEvents, matchPerformanceSummaries, matchSquadSelections, photoAlbums, playerMatchStats } from '../db/schema';
-import type { ImportedMatch } from './lib/match-import';
+import { auditLog, matchCards, matchGoalEvents, matchPerformanceSummaries, matchPotmAwards, matchSquadSelections, photoAlbums, playerMatchStats } from '../db/schema';
+import { splitPlayerNames, type CompetitionType, type ImportedMatch } from './lib/match-import';
 import { AUTH_COOKIE_NAME, createSessionValue, requireApprovedMember, timingSafeStringEqual } from './lib/authz';
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? '').trim();
+}
+
+function competitionTypeOf(raw: string): CompetitionType {
+  return raw === 'cup' || raw === 'tournament' ? raw : 'league';
 }
 
 function id() {
@@ -60,6 +64,9 @@ export async function saveImportedMatchAction(formData: FormData) {
   try { imported = JSON.parse(value(formData, 'importedMatch')) as ImportedMatch; } catch { throw new Error('The imported match data is invalid. Please analyse the screenshots again.'); }
   if (!matchId || !Number.isInteger(imported.rvrGoals) || !Number.isInteger(imported.opponentGoals) || imported.rvrGoals < 0 || imported.opponentGoals < 0) throw new Error('Choose a match and confirm the score.');
   const clean = (name: string) => name.trim();
+  const competitionType = competitionTypeOf(value(formData, 'competitionType'));
+  const potmNames = [...new Set((imported.playersOfMatch || []).flatMap(splitPlayerNames))];
+  const cards = (imported.cards || []).filter((card) => clean(card.playerName) && (card.card === 'yellow' || card.card === 'red'));
   // The DDSL live match centre only ever names RVR's own scorers; an
   // unidentified opponent scorer comes through as the literal placeholder
   // "Player". Treat that as an opponent goal regardless of what the model
@@ -79,7 +86,12 @@ export async function saveImportedMatchAction(formData: FormData) {
   ].filter((player) => clean(player.playerName));
   const updatedAt = now(); const db = getDb();
   await db.transaction(async (tx) => {
-    await tx.insert(matchPerformanceSummaries).values({ matchId, rvrGoals: imported.rvrGoals, opponentGoals: imported.opponentGoals, playerOfMatch: imported.playerOfMatch || null, notes: imported.notes || null, updatedAt }).onConflictDoUpdate({ target: matchPerformanceSummaries.matchId, set: { rvrGoals: imported.rvrGoals, opponentGoals: imported.opponentGoals, playerOfMatch: imported.playerOfMatch || null, notes: imported.notes || null, updatedAt } });
+    const playerOfMatch = potmNames.join(', ') || null;
+    await tx.insert(matchPerformanceSummaries).values({ matchId, rvrGoals: imported.rvrGoals, opponentGoals: imported.opponentGoals, playerOfMatch, competitionType, notes: imported.notes || null, updatedAt }).onConflictDoUpdate({ target: matchPerformanceSummaries.matchId, set: { rvrGoals: imported.rvrGoals, opponentGoals: imported.opponentGoals, playerOfMatch, competitionType, notes: imported.notes || null, updatedAt } });
+    await tx.delete(matchPotmAwards).where(eq(matchPotmAwards.matchId, matchId));
+    await tx.delete(matchCards).where(eq(matchCards.matchId, matchId));
+    if (potmNames.length) await tx.insert(matchPotmAwards).values(potmNames.map((playerName) => ({ id: id(), matchId, playerName, createdAt: updatedAt })));
+    if (cards.length) await tx.insert(matchCards).values(cards.map((card, sortOrder) => ({ id: id(), matchId, playerName: clean(card.playerName), card: card.card, minute: card.minute, sortOrder, createdAt: updatedAt })));
     await tx.delete(playerMatchStats).where(eq(playerMatchStats.matchId, matchId));
     await tx.delete(matchGoalEvents).where(eq(matchGoalEvents.matchId, matchId));
     await tx.delete(matchSquadSelections).where(eq(matchSquadSelections.matchId, matchId));
@@ -97,7 +109,17 @@ export async function updateMatchPerformanceAction(formData: FormData) {
   const rvrGoals = Number(value(formData, 'rvrGoals'));
   const opponentGoals = Number(value(formData, 'opponentGoals'));
   if (!matchId || !Number.isInteger(rvrGoals) || !Number.isInteger(opponentGoals) || rvrGoals < 0 || opponentGoals < 0) throw new Error('Choose a match and confirm the score.');
-  const playerOfMatch = value(formData, 'playerOfMatch') || null;
+  const potmNames = [...new Set(splitPlayerNames(value(formData, 'playerOfMatch')))];
+  const playerOfMatch = potmNames.join(', ') || null;
+  const competitionType = competitionTypeOf(value(formData, 'competitionType'));
+  const cardPlayers = formData.getAll('cardPlayer').map(String);
+  const cardKinds = formData.getAll('cardKind').map(String);
+  const cardMinutes = formData.getAll('cardMinute').map(String);
+  const cards = cardPlayers.map((playerName, index) => ({
+    playerName: playerName.trim(),
+    card: cardKinds[index] === 'red' ? 'red' as const : 'yellow' as const,
+    minute: cardMinutes[index]?.trim() ? Number(cardMinutes[index]) : null,
+  })).filter((card) => card.playerName);
   const notes = value(formData, 'notes') || null;
 
   const clean = (name: string) => name.trim();
@@ -128,7 +150,11 @@ export async function updateMatchPerformanceAction(formData: FormData) {
 
   const updatedAt = now(); const db = getDb();
   await db.transaction(async (tx) => {
-    await tx.insert(matchPerformanceSummaries).values({ matchId, rvrGoals, opponentGoals, playerOfMatch, notes, updatedAt }).onConflictDoUpdate({ target: matchPerformanceSummaries.matchId, set: { rvrGoals, opponentGoals, playerOfMatch, notes, updatedAt } });
+    await tx.insert(matchPerformanceSummaries).values({ matchId, rvrGoals, opponentGoals, playerOfMatch, competitionType, notes, updatedAt }).onConflictDoUpdate({ target: matchPerformanceSummaries.matchId, set: { rvrGoals, opponentGoals, playerOfMatch, competitionType, notes, updatedAt } });
+    await tx.delete(matchPotmAwards).where(eq(matchPotmAwards.matchId, matchId));
+    await tx.delete(matchCards).where(eq(matchCards.matchId, matchId));
+    if (potmNames.length) await tx.insert(matchPotmAwards).values(potmNames.map((playerName) => ({ id: id(), matchId, playerName, createdAt: updatedAt })));
+    if (cards.length) await tx.insert(matchCards).values(cards.map((card, sortOrder) => ({ id: id(), matchId, playerName: card.playerName, card: card.card, minute: card.minute, sortOrder, createdAt: updatedAt })));
     await tx.delete(playerMatchStats).where(eq(playerMatchStats.matchId, matchId));
     await tx.delete(matchGoalEvents).where(eq(matchGoalEvents.matchId, matchId));
     if (contributions.size) await tx.insert(playerMatchStats).values([...contributions.entries()].map(([playerName, stats]) => ({ id: id(), matchId, playerName, ...stats, createdAt: updatedAt, updatedAt })));

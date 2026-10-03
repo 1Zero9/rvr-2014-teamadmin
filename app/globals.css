@@ -2194,3 +2194,19 @@ a {
   .topbar { padding: 14px 16px; border-radius: 0; }
   .content-body { padding: 18px 16px calc(90px + env(safe-area-inset-bottom)); background-size: 18px 18px; }
 }
+
+.import-success { display: flex; align-items: center; gap: 8px; color: #15803d; font-weight: 750; margin: 0; }
+.import-type { display: flex; gap: 6px; }
+.import-type button { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #334155; font-weight: 750; cursor: pointer; }
+.import-type button.active { background: #1e3a5f; border-color: #1e3a5f; color: white; }
+.type-badge { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 11px; font-weight: 750; text-transform: uppercase; }
+.type-badge-cup { background: #fef3c7; color: #92400e; }
+.type-badge-tournament { background: #ede9fe; color: #5b21b6; }
+.type-filter { display: flex; gap: 6px; flex-wrap: wrap; }
+.type-filter a { padding: 6px 14px; border-radius: 999px; border: 1px solid #cbd5e1; color: #334155; font-size: 13px; font-weight: 750; text-decoration: none; }
+.type-filter a.active { background: #1e3a5f; border-color: #1e3a5f; color: white; }
+.card-tile { display: inline-block; width: 11px; height: 15px; border-radius: 2px; vertical-align: -2px; margin-right: 4px; }
+.card-tile-yellow { background: #facc15; } .card-tile-red { background: #dc2626; }
+.cards-list { display: grid; gap: 8px; }
+.cards-list > div { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+.cards-list span { display: flex; gap: 14px; color: #475569; font-size: 14px; }

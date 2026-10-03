@@ -4,7 +4,9 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronDown, Pencil } from 'lucide-react';
 import { MatchEditForm } from './match-edit-form';
+import type { CompetitionType } from '../lib/match-import';
 
+type CardEntry = { playerName: string; card: 'yellow' | 'red'; minute: number | null };
 type Goal = { minute: number | null; scorerName: string; assistName: string | null; team: 'rvr' | 'opponent' };
 
 function outcome(rvrGoals: number, opponentGoals: number) {
@@ -20,7 +22,9 @@ export function MatchDetailCard({
   opponentName,
   rvrGoals,
   opponentGoals,
-  playerOfMatch,
+  playersOfMatch,
+  competitionType,
+  cards,
   notes,
   goals,
 }: {
@@ -30,7 +34,9 @@ export function MatchDetailCard({
   opponentName: string;
   rvrGoals: number;
   opponentGoals: number;
-  playerOfMatch: string | null;
+  playersOfMatch: string[];
+  competitionType: CompetitionType;
+  cards: CardEntry[];
   notes: string | null;
   goals: Goal[];
 }) {
@@ -42,7 +48,7 @@ export function MatchDetailCard({
     <div className="result-card">
       <div className="result-card-head">
         <span className={`result-badge result-badge-${result.code.toLowerCase()}`} title={result.label}>{result.code}</span>
-        <span className="result-date">{date || label}</span>
+        <span className="result-date">{date || label}<span className={`type-badge type-badge-${competitionType}`}>{competitionType}</span></span>
       </div>
 
       <div className="result-teams">
@@ -68,10 +74,11 @@ export function MatchDetailCard({
       </div>
 
       {expanded && (editing ? (
-        <MatchEditForm matchId={matchId} rvrGoals={rvrGoals} opponentGoals={opponentGoals} playerOfMatch={playerOfMatch} notes={notes} goals={goals} />
+        <MatchEditForm matchId={matchId} rvrGoals={rvrGoals} opponentGoals={opponentGoals} playersOfMatch={playersOfMatch} competitionType={competitionType} cards={cards} notes={notes} goals={goals} />
       ) : (
         <div className="result-card-details">
-          {playerOfMatch && <p className="match-stats-help"><strong>Player of the match:</strong> {playerOfMatch}</p>}
+          {playersOfMatch.length > 0 && <p className="match-stats-help"><strong>Player of the match:</strong> {playersOfMatch.join(', ')}</p>}
+          {cards.length > 0 && <p className="match-stats-help"><strong>Cards:</strong> {cards.map((card, index) => <span key={index} style={{ marginRight: 10 }}><i className={`card-tile card-tile-${card.card}`} />{card.playerName}{card.minute ? ` ${card.minute}′` : ''}</span>)}</p>}
           <ul className="match-detail-goals">
             {goals.length === 0 && <li className="match-stats-help">No goal events recorded.</li>}
             {goals.map((goal, index) => (

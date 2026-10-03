@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { PortalPage } from '../components/portal-page';
 import { requireApprovedMember } from '../lib/authz';
 import { fetchLiveDdslLeagueData } from '../lib/ddsl-live';
+import { parseDdslDate } from '../lib/match-import';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +10,8 @@ export default async function PortalDashboardPage() {
   const member = await requireApprovedMember();
   const live = await fetchLiveDdslLeagueData('218148');
   const next = live.rvrMatches.find((match) => match.status === 'upcoming');
-  const latest = [...live.rvrMatches].reverse().find((match) => match.status === 'completed');
+  // DDSL lists results newest-first, so pick by date rather than list position.
+  const latest = live.rvrMatches.filter((match) => match.status === 'completed').sort((a, b) => parseDdslDate(b.matchDate) - parseDdslDate(a.matchDate))[0];
   const rvr = live.standings.find((team) => team.isRvr);
   const form = rvr?.form.slice(-5) ?? [];
 

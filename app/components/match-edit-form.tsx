@@ -3,21 +3,27 @@
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { updateMatchPerformanceAction } from '../actions';
+import { COMPETITION_TYPES, type CompetitionType } from '../lib/match-import';
 
+type CardRow = { playerName: string; card: 'yellow' | 'red'; minute: string };
 type GoalRow = { minute: string; scorerName: string; assistName: string; team: 'rvr' | 'opponent' };
 
 export function MatchEditForm({
   matchId,
   rvrGoals,
   opponentGoals,
-  playerOfMatch,
+  playersOfMatch,
+  competitionType,
+  cards,
   notes,
   goals,
 }: {
   matchId: string;
   rvrGoals: number;
   opponentGoals: number;
-  playerOfMatch: string | null;
+  playersOfMatch: string[];
+  competitionType: CompetitionType;
+  cards: { playerName: string; card: 'yellow' | 'red'; minute: number | null }[];
   notes: string | null;
   goals: { minute: number | null; scorerName: string; assistName: string | null; team: 'rvr' | 'opponent' }[];
 }) {
@@ -26,6 +32,8 @@ export function MatchEditForm({
       ? goals.map((goal) => ({ minute: goal.minute?.toString() ?? '', scorerName: goal.scorerName, assistName: goal.assistName ?? '', team: goal.team }))
       : [{ minute: '', scorerName: '', assistName: '', team: 'rvr' }],
   );
+
+  const [cardRows, setCardRows] = useState<CardRow[]>(cards.map((card) => ({ playerName: card.playerName, card: card.card, minute: card.minute?.toString() ?? '' })));
 
   function updateRow(index: number, patch: Partial<GoalRow>) {
     setRows((current) => current.map((row, i) => (i === index ? { ...row, ...patch } : row)));
@@ -38,8 +46,9 @@ export function MatchEditForm({
         <label>RVR goals<input type="number" name="rvrGoals" min={0} defaultValue={rvrGoals} required /></label>
         <span>–</span>
         <label>Opponent goals<input type="number" name="opponentGoals" min={0} defaultValue={opponentGoals} required /></label>
-        <label className="potm-input">Player of the match<input type="text" name="playerOfMatch" defaultValue={playerOfMatch ?? ''} /></label>
+        <label className="potm-input">Players of the match (separate with commas)<input type="text" name="playerOfMatch" defaultValue={playersOfMatch.join(', ')} /></label>
       </div>
+      <label>Competition<select name="competitionType" defaultValue={competitionType}>{COMPETITION_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}</select></label>
       <label>Notes<textarea name="notes" rows={2} defaultValue={notes ?? ''} /></label>
 
       <div className="contribution-heading">
@@ -64,6 +73,24 @@ export function MatchEditForm({
       </div>
       <button type="button" className="text-button" onClick={() => setRows((current) => [...current, { minute: '', scorerName: '', assistName: '', team: 'rvr' }])}>
         <Plus size={14} /> Add goal
+      </button>
+
+      <div className="contribution-heading"><strong>Cards</strong></div>
+      <div className="contribution-rows">
+        {cardRows.map((row, index) => (
+          <div className="contribution-row goal-edit-row" key={index}>
+            <input type="text" name="cardPlayer" placeholder="Player" value={row.playerName} onChange={(event) => setCardRows((current) => current.map((entry, i) => (i === index ? { ...entry, playerName: event.target.value } : entry)))} />
+            <select name="cardKind" value={row.card} onChange={(event) => setCardRows((current) => current.map((entry, i) => (i === index ? { ...entry, card: event.target.value as CardRow['card'] } : entry)))}>
+              <option value="yellow">Yellow</option>
+              <option value="red">Red</option>
+            </select>
+            <input type="number" name="cardMinute" placeholder="Min" min={0} value={row.minute} onChange={(event) => setCardRows((current) => current.map((entry, i) => (i === index ? { ...entry, minute: event.target.value } : entry)))} />
+            <button type="button" className="icon-button" onClick={() => setCardRows((current) => current.filter((_, i) => i !== index))} aria-label="Remove card"><Trash2 size={15} /></button>
+          </div>
+        ))}
+      </div>
+      <button type="button" className="text-button" onClick={() => setCardRows((current) => [...current, { playerName: '', card: 'yellow', minute: '' }])}>
+        <Plus size={14} /> Add card
       </button>
 
       <button className="primary" type="submit">Save changes</button>

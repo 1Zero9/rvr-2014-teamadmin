@@ -91,6 +91,7 @@ export const matchPerformanceSummaries = pgTable('match_performance_summaries', 
   rvrGoals: integer('rvr_goals').notNull(),
   opponentGoals: integer('opponent_goals').notNull(),
   playerOfMatch: text('player_of_match'),
+  competitionType: text('competition_type', { enum: ['league', 'cup', 'tournament'] }).notNull().default('league'),
   notes: text('notes'),
   updatedAt: text('updated_at').notNull(),
 });
@@ -120,6 +121,25 @@ export const matchGoalEvents = pgTable('match_goal_events', {
   sortOrder: integer('sort_order').notNull(),
   createdAt: text('created_at').notNull(),
 }, (table) => [index('idx_match_goal_events_match').on(table.matchId)]);
+
+/** One row per player of the match, so a match can have more than one. */
+export const matchPotmAwards = pgTable('match_potm_awards', {
+  id: text('id').primaryKey(),
+  matchId: text('match_id').notNull(),
+  playerName: text('player_name').notNull(),
+  createdAt: text('created_at').notNull(),
+}, (table) => [index('idx_match_potm_awards_match').on(table.matchId)]);
+
+/** Yellow and red cards shown to RVR players. */
+export const matchCards = pgTable('match_cards', {
+  id: text('id').primaryKey(),
+  matchId: text('match_id').notNull(),
+  playerName: text('player_name').notNull(),
+  card: text('card', { enum: ['yellow', 'red'] }).notNull(),
+  minute: integer('minute'),
+  sortOrder: integer('sort_order').notNull(),
+  createdAt: text('created_at').notNull(),
+}, (table) => [index('idx_match_cards_match').on(table.matchId)]);
 
 /** Starting and bench selection as shown in the private match app. */
 export const matchSquadSelections = pgTable('match_squad_selections', {
