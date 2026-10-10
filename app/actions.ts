@@ -193,7 +193,13 @@ export async function updateGooglePhotosAlbumAction(formData: FormData) {
   if (!albumId || !title || url.protocol !== 'https:' || !/(^|\.)photos\.app\.goo\.gl$|(^|\.)photos\.google\.com$/i.test(url.hostname)) {
     throw new Error('Enter an album title and a valid HTTPS Google Photos link.');
   }
-  const customCover = value(formData, 'coverUrl');
+  let customCover = value(formData, 'coverUrl');
+  // A pasted Google Photos page link (not an image address) is resolved to that photo's image.
+  if (/^https:\/\/(photos\.app\.goo\.gl|photos\.google\.com)\//i.test(customCover)) {
+    const resolved = await fetchAlbumCover(customCover);
+    if (!resolved) throw new Error('Could not read a photo from that Google Photos link. Try “Copy image address” on the photo instead.');
+    customCover = resolved;
+  }
   if (customCover && !/^(https:\/\/|\/)/.test(customCover)) throw new Error('Cover image must be an https:// image address.');
   const coverUrl = customCover || (await fetchAlbumCover(shareUrl)) || PLACEHOLDER_COVER;
   await getDb().update(photoAlbums).set({ title, shareUrl, coverUrl }).where(eq(photoAlbums.id, albumId));
