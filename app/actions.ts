@@ -203,6 +203,10 @@ export async function updateGooglePhotosAlbumAction(formData: FormData) {
     customCover = resolved;
   }
   if (customCover && !coverData && !/^(https:\/\/|\/)/.test(customCover)) redirect('/albums?error=' + encodeURIComponent('Cover image must be an https:// image address.'));
+  if (customCover.startsWith('https://') && !coverData) {
+    const ok = await fetch(customCover, { redirect: 'manual', signal: AbortSignal.timeout(8000) }).then((r) => r.status === 200).catch(() => false);
+    if (!ok) redirect('/albums?error=' + encodeURIComponent('Google only shows that photo address to you while you are signed in, so the site cannot display it. Save the photo to your device and use “Choose file” instead.'));
+  }
   const coverUrl = customCover || (await fetchAlbumCover(shareUrl)) || PLACEHOLDER_COVER;
   await getDb().update(photoAlbums).set({ title, shareUrl, coverUrl }).where(eq(photoAlbums.id, albumId));
   await audit(member.id, 'update', 'photo_album', albumId, `Updated Google Photos album: ${title}`);
