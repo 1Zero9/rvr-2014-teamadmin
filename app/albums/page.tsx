@@ -21,6 +21,7 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
         <form action={addGooglePhotosAlbumAction} className="match-stats-form">
           <label>Album title<input name="title" required maxLength={120} placeholder="e.g. Castlenock away · Sept 2026" /></label>
           <label>Google Photos share link<input name="shareUrl" type="url" required placeholder="https://photos.app.goo.gl/..." /></label>
+          <label>Shared from<select name="sharedBy" defaultValue=""><option value="">Not set</option><option value="Brian">Brian</option><option value="Igor">Igor</option></select></label>
           <button className="primary" type="submit"><Plus size={16} /> Add album</button>
         </form>
       </article>
@@ -31,7 +32,7 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
       {albums.map((album) => <div key={album.id} className="album-link-card">
         <a href={album.shareUrl} target="_blank" rel="noreferrer">
           <div className="album-cover"><img src={album.coverUrl} alt="" referrerPolicy="no-referrer" loading="lazy" /></div>
-          <div><span>GOOGLE PHOTOS</span><h3>{album.title}</h3><p>Open album <ExternalLink size={14} /></p></div>
+          <div><span>GOOGLE PHOTOS{['Brian', 'Igor'].includes(album.photographer) ? ` · SHARED BY ${album.photographer.toUpperCase()}` : ''}</span><h3>{album.title}</h3><p>Open album <ExternalLink size={14} /></p></div>
         </a>
         <details className="album-edit">
           <summary><Pencil size={13} /> Edit</summary>
@@ -39,6 +40,7 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
             <input type="hidden" name="id" value={album.id} />
             <label>Album title<input name="title" required maxLength={120} defaultValue={album.title} /></label>
             <label>Google Photos share link<input name="shareUrl" type="url" required defaultValue={album.shareUrl} /></label>
+            <label>Shared from<select name="sharedBy" defaultValue={album.photographer}><option value="">Not set</option><option value="Brian">Brian</option><option value="Igor">Igor</option></select></label>
             <CoverUpload />
             <label>Cover image address<input name="coverUrl" defaultValue={album.coverUrl.startsWith('data:') ? '' : album.coverUrl} placeholder="Leave empty to use Google's cover" /></label>
             <p className="match-stats-help">Easiest: save the photo from Google Photos to your device, then use “Choose file” above. Leave both cover fields empty to use Google's cover.</p>

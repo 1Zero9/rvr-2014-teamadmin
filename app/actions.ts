@@ -18,6 +18,11 @@ function competitionTypeOf(raw: string): CompetitionType {
   return raw === 'cup' || raw === 'tournament' ? raw : 'league';
 }
 
+const SHARERS = ['Brian', 'Igor'];
+function sharerOf(raw: string) {
+  return SHARERS.includes(raw) ? raw : null;
+}
+
 function id() {
   return crypto.randomUUID();
 }
@@ -177,7 +182,7 @@ export async function addGooglePhotosAlbumAction(formData: FormData) {
   const albumId = id();
   await getDb().insert(photoAlbums).values({
     id: albumId, title, shareUrl, coverUrl: (await fetchAlbumCover(shareUrl)) ?? PLACEHOLDER_COVER, photoCount: 0,
-    albumDate: new Date().toISOString().slice(0, 10), photographer: 'Private album', samplePhotos: [], createdAt: now(),
+    albumDate: new Date().toISOString().slice(0, 10), photographer: sharerOf(value(formData, 'sharedBy')) ?? 'Private album', samplePhotos: [], createdAt: now(),
   });
   await audit(member.id, 'create', 'photo_album', albumId, `Added Google Photos album: ${title}`);
   revalidatePath('/albums');
@@ -208,7 +213,7 @@ export async function updateGooglePhotosAlbumAction(formData: FormData) {
     if (!ok) redirect('/albums?error=' + encodeURIComponent('Google only shows that photo address to you while you are signed in, so the site cannot display it. Save the photo to your device and use “Choose file” instead.'));
   }
   const coverUrl = customCover || (await fetchAlbumCover(shareUrl)) || PLACEHOLDER_COVER;
-  await getDb().update(photoAlbums).set({ title, shareUrl, coverUrl }).where(eq(photoAlbums.id, albumId));
+  await getDb().update(photoAlbums).set({ title, shareUrl, coverUrl, photographer: sharerOf(value(formData, 'sharedBy')) ?? 'Private album' }).where(eq(photoAlbums.id, albumId));
   await audit(member.id, 'update', 'photo_album', albumId, `Updated Google Photos album: ${title}`);
   revalidatePath('/albums');
   redirect('/albums?saved=1');
