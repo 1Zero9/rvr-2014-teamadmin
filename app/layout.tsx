@@ -5,7 +5,7 @@ import { PwaRegistration } from './components/pwa-registration';
 
 const geist = Geist({ variable: '--font-geist', subsets: ['latin'] });
 // Scoreboard/broadcast-style display type, used on the Home match-day screen.
-const oswald = Oswald({ variable: '--font-oswald', subsets: ['latin'], weight: ['500', '600', '700'] });
+const oswald = Oswald({ variable: '--font-oswald', subsets: ['latin'] });
 const bebasNeue = Bebas_Neue({ variable: '--font-bebas', subsets: ['latin'], weight: '400' });
 export const metadata: Metadata = {
   metadataBase: new URL('https://finns-football.vercel.app'),
