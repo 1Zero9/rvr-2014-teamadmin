@@ -1,9 +1,8 @@
 import { desc } from 'drizzle-orm';
-import { ExternalLink, Plus } from 'lucide-react';
-import Image from 'next/image';
+import { ExternalLink, Pencil, Plus } from 'lucide-react';
 import { getDb } from '../../db';
 import { photoAlbums } from '../../db/schema';
-import { addGooglePhotosAlbumAction } from '../actions';
+import { addGooglePhotosAlbumAction, updateGooglePhotosAlbumAction } from '../actions';
 import { PortalPage } from '../components/portal-page';
 import { requireApprovedMember } from '../lib/authz';
 
@@ -25,10 +24,21 @@ export default async function AlbumsPage() {
       </article>
     </div>
     <section className="album-card-grid">
-      {albums.map((album) => <a key={album.id} href={album.shareUrl} target="_blank" rel="noreferrer" className="album-link-card">
-        <div className="album-cover"><Image src={album.coverUrl} alt="" fill sizes="220px" /></div>
-        <div><span>GOOGLE PHOTOS</span><h3>{album.title}</h3><p>Open album <ExternalLink size={14} /></p></div>
-      </a>)}
+      {albums.map((album) => <div key={album.id} className="album-link-card">
+        <a href={album.shareUrl} target="_blank" rel="noreferrer">
+          <div className="album-cover"><img src={album.coverUrl} alt="" referrerPolicy="no-referrer" loading="lazy" /></div>
+          <div><span>GOOGLE PHOTOS</span><h3>{album.title}</h3><p>Open album <ExternalLink size={14} /></p></div>
+        </a>
+        <details className="album-edit">
+          <summary><Pencil size={13} /> Edit</summary>
+          <form action={updateGooglePhotosAlbumAction} className="match-stats-form">
+            <input type="hidden" name="id" value={album.id} />
+            <label>Album title<input name="title" required maxLength={120} defaultValue={album.title} /></label>
+            <label>Google Photos share link<input name="shareUrl" type="url" required defaultValue={album.shareUrl} /></label>
+            <button className="primary" type="submit">Save &amp; refresh cover</button>
+          </form>
+        </details>
+      </div>)}
       {!albums.length && <p className="match-stats-help">No albums saved yet. Add your first Google Photos link above.</p>}
     </section>
   </PortalPage>;

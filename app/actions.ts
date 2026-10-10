@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { getDb } from '../db';
 import { auditLog, matchCards, matchGoalEvents, matchPerformanceSummaries, matchPotmAwards, matchSquadSelections, photoAlbums, playerMatchStats } from '../db/schema';
 import { splitPlayerNames, type CompetitionType, type ImportedMatch } from './lib/match-import';
+import { fetchAlbumCover, PLACEHOLDER_COVER } from './lib/album-cover';
 import { AUTH_COOKIE_NAME, createSessionValue, requireApprovedMember, timingSafeStringEqual } from './lib/authz';
 
 function value(formData: FormData, key: string) {
@@ -175,9 +176,25 @@ export async function addGooglePhotosAlbumAction(formData: FormData) {
   }
   const albumId = id();
   await getDb().insert(photoAlbums).values({
-    id: albumId, title, shareUrl, coverUrl: '/hero-squad.jpg', photoCount: 0,
+    id: albumId, title, shareUrl, coverUrl: (await fetchAlbumCover(shareUrl)) ?? PLACEHOLDER_COVER, photoCount: 0,
     albumDate: new Date().toISOString().slice(0, 10), photographer: 'Private album', samplePhotos: [], createdAt: now(),
   });
   await audit(member.id, 'create', 'photo_album', albumId, `Added Google Photos album: ${title}`);
+  revalidatePath('/albums');
+}
+
+export async function updateGooglePhotosAlbumAction(formData: FormData) {
+  const member = await requireApprovedMember();
+  const albumId = value(formData, 'id');
+  const title = value(formData, 'title');
+  const shareUrl = value(formData, 'shareUrl');
+  let url: URL;
+  try { url = new URL(shareUrl); } catch { throw new Error('Enter a valid Google Photos album link.'); }
+  if (!albumId || !title || url.protocol !== 'https:' || !/(^|\.)photos\.app\.goo\.gl$|(^|\.)photos\.google\.com$/i.test(url.hostname)) {
+    throw new Error('Enter an album title and a valid HTTPS Google Photos link.');
+  }
+  const coverUrl = (await fetchAlbumCover(shareUrl)) ?? PLACEHOLDER_COVER;
+  await getDb().update(photoAlbums).set({ title, shareUrl, coverUrl }).where(eq(photoAlbums.id, albumId));
+  await audit(member.id, 'update', 'photo_album', albumId, `Updated Google Photos album: ${title}`);
   revalidatePath('/albums');
 }
