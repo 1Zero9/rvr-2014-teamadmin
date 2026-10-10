@@ -8,8 +8,8 @@ import { requireApprovedMember } from '../lib/authz';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AlbumsPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
-  const { saved } = await searchParams;
+export default async function AlbumsPage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
+  const { saved, error } = await searchParams;
   const member = await requireApprovedMember();
   let albums: typeof photoAlbums.$inferSelect[] = [];
   try { albums = await getDb().select().from(photoAlbums).orderBy(desc(photoAlbums.createdAt)); } catch (error) { console.error('Unable to load albums:', error); }
@@ -24,6 +24,7 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
         </form>
       </article>
     </div>
+    {error && <p className="match-stats-help" role="alert" style={{ color: '#b91c1c' }}>✗ {error}</p>}
     {saved && <p className="match-stats-help" role="status">✓ Album saved.</p>}
     <section className="album-card-grid">
       {albums.map((album) => <div key={album.id} className="album-link-card">
