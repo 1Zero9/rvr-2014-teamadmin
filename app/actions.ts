@@ -193,14 +193,16 @@ export async function updateGooglePhotosAlbumAction(formData: FormData) {
   if (!albumId || !title || url.protocol !== 'https:' || !/(^|\.)photos\.app\.goo\.gl$|(^|\.)photos\.google\.com$/i.test(url.hostname)) {
     redirect('/albums?error=' + encodeURIComponent('Enter an album title and a valid HTTPS Google Photos link.'));
   }
-  let customCover = value(formData, 'coverUrl');
+  const coverData = value(formData, 'coverData');
+  if (coverData && (!/^data:image\/jpeg;base64,/.test(coverData) || coverData.length > 600_000)) redirect('/albums?error=' + encodeURIComponent('That photo could not be used. Try a different one.'));
+  let customCover = coverData || value(formData, 'coverUrl');
   // A pasted Google Photos page link (not an image address) is resolved to that photo's image.
   if (/^https:\/\/(photos\.app\.goo\.gl|photos\.google\.com)\//i.test(customCover)) {
     const resolved = await fetchAlbumCover(customCover);
     if (!resolved) redirect('/albums?error=' + encodeURIComponent('Could not read a photo from that link. Right-click the photo and use “Copy image address” instead.'));
     customCover = resolved;
   }
-  if (customCover && !/^(https:\/\/|\/)/.test(customCover)) redirect('/albums?error=' + encodeURIComponent('Cover image must be an https:// image address.'));
+  if (customCover && !coverData && !/^(https:\/\/|\/)/.test(customCover)) redirect('/albums?error=' + encodeURIComponent('Cover image must be an https:// image address.'));
   const coverUrl = customCover || (await fetchAlbumCover(shareUrl)) || PLACEHOLDER_COVER;
   await getDb().update(photoAlbums).set({ title, shareUrl, coverUrl }).where(eq(photoAlbums.id, albumId));
   await audit(member.id, 'update', 'photo_album', albumId, `Updated Google Photos album: ${title}`);

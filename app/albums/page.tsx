@@ -3,6 +3,7 @@ import { ExternalLink, Pencil, Plus } from 'lucide-react';
 import { getDb } from '../../db';
 import { photoAlbums } from '../../db/schema';
 import { addGooglePhotosAlbumAction, updateGooglePhotosAlbumAction } from '../actions';
+import { CoverUpload } from './cover-upload';
 import { PortalPage } from '../components/portal-page';
 import { requireApprovedMember } from '../lib/authz';
 
@@ -38,8 +39,9 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
             <input type="hidden" name="id" value={album.id} />
             <label>Album title<input name="title" required maxLength={120} defaultValue={album.title} /></label>
             <label>Google Photos share link<input name="shareUrl" type="url" required defaultValue={album.shareUrl} /></label>
-            <label>Cover image address<input name="coverUrl" defaultValue={album.coverUrl} placeholder="Leave empty to use Google's cover" /></label>
-            <p className="match-stats-help">To pick a different cover: open the album, right-click the photo you want, choose “Copy image address”, and paste it here.</p>
+            <CoverUpload />
+            <label>Cover image address<input name="coverUrl" defaultValue={album.coverUrl.startsWith('data:') ? '' : album.coverUrl} placeholder="Leave empty to use Google's cover" /></label>
+            <p className="match-stats-help">Easiest: save the photo from Google Photos to your device, then use “Choose file” above. Leave both cover fields empty to use Google's cover.</p>
             <button className="primary" type="submit">Save</button>
           </form>
         </details>
