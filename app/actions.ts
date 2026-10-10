@@ -193,8 +193,11 @@ export async function updateGooglePhotosAlbumAction(formData: FormData) {
   if (!albumId || !title || url.protocol !== 'https:' || !/(^|\.)photos\.app\.goo\.gl$|(^|\.)photos\.google\.com$/i.test(url.hostname)) {
     throw new Error('Enter an album title and a valid HTTPS Google Photos link.');
   }
-  const coverUrl = (await fetchAlbumCover(shareUrl)) ?? PLACEHOLDER_COVER;
+  const customCover = value(formData, 'coverUrl');
+  if (customCover && !/^(https:\/\/|\/)/.test(customCover)) throw new Error('Cover image must be an https:// image address.');
+  const coverUrl = customCover || (await fetchAlbumCover(shareUrl)) || PLACEHOLDER_COVER;
   await getDb().update(photoAlbums).set({ title, shareUrl, coverUrl }).where(eq(photoAlbums.id, albumId));
   await audit(member.id, 'update', 'photo_album', albumId, `Updated Google Photos album: ${title}`);
   revalidatePath('/albums');
+  redirect('/albums?saved=1');
 }

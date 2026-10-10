@@ -8,7 +8,8 @@ import { requireApprovedMember } from '../lib/authz';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AlbumsPage() {
+export default async function AlbumsPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const member = await requireApprovedMember();
   let albums: typeof photoAlbums.$inferSelect[] = [];
   try { albums = await getDb().select().from(photoAlbums).orderBy(desc(photoAlbums.createdAt)); } catch (error) { console.error('Unable to load albums:', error); }
@@ -23,6 +24,7 @@ export default async function AlbumsPage() {
         </form>
       </article>
     </div>
+    {saved && <p className="match-stats-help" role="status">✓ Album saved.</p>}
     <section className="album-card-grid">
       {albums.map((album) => <div key={album.id} className="album-link-card">
         <a href={album.shareUrl} target="_blank" rel="noreferrer">
@@ -35,7 +37,9 @@ export default async function AlbumsPage() {
             <input type="hidden" name="id" value={album.id} />
             <label>Album title<input name="title" required maxLength={120} defaultValue={album.title} /></label>
             <label>Google Photos share link<input name="shareUrl" type="url" required defaultValue={album.shareUrl} /></label>
-            <button className="primary" type="submit">Save &amp; refresh cover</button>
+            <label>Cover image address<input name="coverUrl" defaultValue={album.coverUrl} placeholder="Leave empty to use Google's cover" /></label>
+            <p className="match-stats-help">To pick a different cover: open the album, right-click the photo you want, choose “Copy image address”, and paste it here.</p>
+            <button className="primary" type="submit">Save</button>
           </form>
         </details>
       </div>)}
